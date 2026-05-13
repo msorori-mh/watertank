@@ -32,12 +32,13 @@ export function AdminShell({ children, title }: { children: React.ReactNode; tit
 
   if (!ready) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
-  const tabs: { to: "/admin" | "/admin/orders" | "/admin/drivers" | "/admin/customers" | "/admin/cities" | "/admin/finance" | "/admin/reports"; label: string; icon: any; exact?: boolean }[] = [
+  const tabs: { to: "/admin" | "/admin/orders" | "/admin/drivers" | "/admin/customers" | "/admin/cities" | "/admin/commissions" | "/admin/finance" | "/admin/reports"; label: string; icon: any; exact?: boolean }[] = [
     { to: "/admin", label: "اللوحة", icon: LayoutDashboard, exact: true },
     { to: "/admin/orders", label: "الطلبات", icon: ClipboardList },
     { to: "/admin/drivers", label: "السائقون", icon: Truck },
     { to: "/admin/customers", label: "العملاء", icon: Users },
     { to: "/admin/cities", label: "المدن والأسعار", icon: MapPin },
+    { to: "/admin/commissions", label: "العمولات", icon: Percent },
     { to: "/admin/finance", label: "المالية", icon: Wallet },
     { to: "/admin/reports", label: "التقارير", icon: BarChart3 },
   ];
