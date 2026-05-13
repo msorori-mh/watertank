@@ -32,12 +32,12 @@ export function AdminShell({ children, title }: { children: React.ReactNode; tit
 
   if (!ready) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
-  const tabs = [
+  const tabs: { to: "/admin" | "/admin/orders" | "/admin/drivers" | "/admin/cities"; label: string; icon: any; exact?: boolean }[] = [
     { to: "/admin", label: "اللوحة", icon: LayoutDashboard, exact: true },
     { to: "/admin/orders", label: "الطلبات", icon: ClipboardList },
     { to: "/admin/drivers", label: "السائقون", icon: Truck },
     { to: "/admin/cities", label: "المدن والأسعار", icon: MapPin },
-  ] as const;
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
