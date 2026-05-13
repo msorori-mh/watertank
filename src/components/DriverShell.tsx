@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import { LayoutDashboard, ListOrdered, LogOut, Loader2, Truck } from "lucide-react";
+import { NotificationsCenter } from "@/components/NotificationsCenter";
 
 export type DriverInfo = {
   id: string;
@@ -49,9 +50,12 @@ export function DriverShell({
               <p className="font-display font-bold">{driver.name}</p>
             </div>
           </div>
-          <button onClick={out} className="rounded-full p-2 bg-white/15 hover:bg-white/25">
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationsCenter userId={driver.user_id} variant="dark" />
+            <button onClick={out} className="rounded-full p-2 bg-white/15 hover:bg-white/25">
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
         <h1 className="font-display font-bold text-xl mt-5">{title}</h1>
       </header>
