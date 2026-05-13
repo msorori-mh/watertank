@@ -8,9 +8,10 @@ export const Route = createFileRoute("/driver/")({
   component: DriverHome,
 });
 
-const ACTIVE_STATUSES = ["assigned", "on_the_way", "arrived", "delivering"];
+const ACTIVE_STATUSES = ["assigned", "on_the_way", "arrived", "delivering"] as const;
+type OrderStatus = "pending" | "approved" | "assigned" | "on_the_way" | "arrived" | "delivering" | "completed" | "cancelled";
 
-const NEXT_STATUS: Record<string, { next: string; label: string }> = {
+const NEXT_STATUS: Record<string, { next: OrderStatus; label: string }> = {
   assigned: { next: "on_the_way", label: "بدأت التحرك" },
   on_the_way: { next: "arrived", label: "وصلت للموقع" },
   arrived: { next: "delivering", label: "بدأت الصب" },
