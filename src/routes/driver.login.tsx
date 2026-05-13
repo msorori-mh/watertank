@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronRight, Phone, KeyRound, Loader2 } from "lucide-react";
 import { sendOtp, verifyOtpAndLogin, DEMO_OTP_CODE } from "@/lib/wayet-auth";
+import { signInWithGoogle } from "@/lib/google-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/driver/login")({
