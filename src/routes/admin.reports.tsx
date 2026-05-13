@@ -148,6 +148,8 @@ function AdminReports() {
                 <th className="text-right p-3">السائق</th>
                 <th className="text-right p-3">عدد الطلبات</th>
                 <th className="text-right p-3">إجمالي الإيرادات</th>
+                <th className="text-right p-3">عمولات التطبيق</th>
+                <th className="text-right p-3">عمولات غير مسددة</th>
               </tr>
             </thead>
             <tbody>
@@ -156,11 +158,67 @@ function AdminReports() {
                   <td className="p-3 font-medium">{s.name}</td>
                   <td className="p-3">{s.count}</td>
                   <td className="p-3 font-semibold">{s.revenue.toLocaleString("ar-EG")} ر.ي</td>
+                  <td className="p-3 font-semibold text-emerald-700">{s.commission.toLocaleString("ar-EG")} ر.ي</td>
+                  <td className="p-3 font-semibold text-rose-600">{s.unpaidCommission.toLocaleString("ar-EG")} ر.ي</td>
                 </tr>
               ))}
-              {Object.keys(drvStats).length === 0 && <tr><td colSpan={3} className="p-6 text-center text-muted-foreground text-sm">لا يوجد سائقون</td></tr>}
+              {Object.keys(drvStats).length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">لا يوجد سائقون</td></tr>}
             </tbody>
           </table>
+        </div>
+
+        {/* Commissions overview */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
+            <p className="text-xs text-muted-foreground">إجمالي عمولات التطبيق</p>
+            <p className="font-display font-bold text-xl mt-1">{totalCommission.toLocaleString("ar-EG")} ر.ي</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
+            <p className="text-xs text-muted-foreground">عمولات غير مسددة</p>
+            <p className="font-display font-bold text-xl mt-1 text-rose-600">{totalUnpaidCommission.toLocaleString("ar-EG")} ر.ي</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
+            <p className="text-xs text-muted-foreground">طلبات مكتملة بعمولة صفرية</p>
+            <p className="font-display font-bold text-xl mt-1">{zeroCommissionCount}</p>
+          </div>
+        </div>
+
+        {/* Commissions per day & per city */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
+            <div className="p-4 border-b border-border"><h2 className="font-display font-bold">عمولات التطبيق اليومية</h2></div>
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs text-muted-foreground">
+                <tr><th className="text-right p-3">التاريخ</th><th className="text-right p-3">العمولة</th></tr>
+              </thead>
+              <tbody>
+                {Object.entries(commissionDays).map(([k, v]) => (
+                  <tr key={k} className="border-t border-border">
+                    <td className="p-3">{new Date(k).toLocaleDateString("ar-EG", { weekday: "short", day: "numeric", month: "short" })}</td>
+                    <td className="p-3 font-semibold">{v.toLocaleString("ar-EG")} ر.ي</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
+            <div className="p-4 border-b border-border"><h2 className="font-display font-bold">عمولات التطبيق حسب المدينة</h2></div>
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs text-muted-foreground">
+                <tr><th className="text-right p-3">المدينة</th><th className="text-right p-3">الإجمالي</th><th className="text-right p-3">غير مسدد</th></tr>
+              </thead>
+              <tbody>
+                {Object.entries(commissionCities).sort((a, b) => b[1].total - a[1].total).map(([city, v]) => (
+                  <tr key={city} className="border-t border-border">
+                    <td className="p-3 font-medium">{city}</td>
+                    <td className="p-3 font-semibold">{v.total.toLocaleString("ar-EG")} ر.ي</td>
+                    <td className="p-3 text-rose-600">{v.unpaid.toLocaleString("ar-EG")} ر.ي</td>
+                  </tr>
+                ))}
+                {Object.keys(commissionCities).length === 0 && <tr><td colSpan={3} className="p-6 text-center text-muted-foreground text-sm">لا توجد بيانات</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Cancelled */}
