@@ -32,7 +32,7 @@ function DriverHome() {
     (async () => {
       const todayIso = new Date(); todayIso.setHours(0, 0, 0, 0);
       const [{ data: act }, { data: my }] = await Promise.all([
-        supabase.from("orders").select("*").eq("driver_id", driver.id).in("status", ACTIVE_STATUSES).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("orders").select("*").eq("driver_id", driver.id).in("status", ACTIVE_STATUSES as any).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("orders").select("price,status,created_at").eq("driver_id", driver.id).eq("status", "completed").gte("created_at", todayIso.toISOString()),
       ]);
       setActive(act);
