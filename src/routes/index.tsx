@@ -28,14 +28,23 @@ type TankerSize = {
 };
 
 const TANKERS: TankerSize[] = [
-  { id: "s", name: "وايت صغير", liters: "٤٠٠٠ لتر", desc: "مناسب للمنازل الصغيرة", price: 150 },
-  { id: "m", name: "وايت متوسط", liters: "٨٠٠٠ لتر", desc: "الخيار الأمثل للعائلات", price: 280, popular: true },
-  { id: "l", name: "وايت جامبو", liters: "١٢٠٠٠ لتر", desc: "للمنشآت والقصور", price: 400 },
+  { id: "xs", name: "وايت صغير", liters: "١٠٠٠ لتر", desc: "للاستخدام اليومي البسيط", price: 4000 },
+  { id: "s", name: "وايت متوسط", liters: "٣٠٠٠ لتر", desc: "مناسب للمنازل الصغيرة", price: 9000 },
+  { id: "m", name: "وايت كبير", liters: "٥٠٠٠ لتر", desc: "الخيار الأمثل للعائلات", price: 14000, popular: true },
+  { id: "l", name: "وايت جامبو", liters: "١٠٠٠٠ لتر", desc: "للمنشآت والمزارع", price: 26000 },
+];
+
+const WATER_TYPES = [
+  { id: "sweet", name: "ماء حلو" },
+  { id: "desalinated", name: "ماء محلاة" },
+  { id: "well", name: "ماء آبار" },
 ];
 
 function Index() {
   const [selected, setSelected] = useState("m");
+  const [waterType, setWaterType] = useState("sweet");
   const current = TANKERS.find((t) => t.id === selected)!;
+  const fmt = (n: number) => n.toLocaleString("ar-EG");
 
   return (
     <div className="min-h-screen bg-background font-body text-deep selection:bg-accent/30">
@@ -47,7 +56,7 @@ function Index() {
               توصيل إلى
             </span>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm">حي الملقا، الرياض</span>
+              <span className="font-bold text-sm">حي الروضة، مأرب</span>
               <span className="size-1.5 rounded-full bg-primary" />
             </div>
           </div>
@@ -132,11 +141,34 @@ function Index() {
                       </div>
                       <div className="text-left">
                         <span className="block font-display font-extrabold text-primary text-lg">
-                          {t.price}
+                          {fmt(t.price)}
                         </span>
-                        <span className="text-[10px] text-muted-foreground font-bold">ر.س</span>
+                        <span className="text-[10px] text-muted-foreground font-bold">ريال يمني</span>
                       </div>
                     </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Water type */}
+          <section className="mt-8 px-6">
+            <h2 className="font-display font-bold text-lg mb-3">نوع الماء</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {WATER_TYPES.map((w) => {
+                const active = waterType === w.id;
+                return (
+                  <button
+                    key={w.id}
+                    onClick={() => setWaterType(w.id)}
+                    className={`py-3 px-2 rounded-xl text-xs font-bold border-2 transition ${
+                      active
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-surface text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    {w.name}
                   </button>
                 );
               })}
@@ -154,7 +186,7 @@ function Index() {
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
                   موقع التوصيل
                 </p>
-                <p className="text-sm font-bold mt-0.5">شارع الأمير محمد بن سلمان</p>
+                <p className="text-sm font-bold mt-0.5">شارع الستين، بجوار جامع النور</p>
               </div>
               <ChevronLeft className="size-4 text-muted-foreground" />
             </button>
@@ -201,9 +233,9 @@ function Index() {
                   أ
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold">أحمد الشمري</p>
+                  <p className="text-sm font-bold">أحمد المرادي</p>
                   <p className="text-[11px] text-primary-foreground/50 mt-0.5">
-                    مرسيدس أكتروس • أ ط د ٥٥٤
+                    وايت إيسوزو ٥٠٠٠ لتر • م ر ب ٤٢٧
                   </p>
                 </div>
                 <button
@@ -221,8 +253,8 @@ function Index() {
             <h2 className="font-display font-bold text-lg mb-3">الطلبات السابقة</h2>
             <div className="bg-surface rounded-2xl border border-border divide-y divide-border">
               {[
-                { name: "وايت كبير", liters: "١٢٠٠٠ لتر", date: "١٢ مايو", price: 400 },
-                { name: "وايت صغير", liters: "٤٠٠٠ لتر", date: "٢٨ أبريل", price: 150 },
+                { name: "وايت جامبو", liters: "١٠٠٠٠ لتر", date: "١٢ شعبان", price: 26000 },
+                { name: "وايت صغير", liters: "١٠٠٠ لتر", date: "٢٨ رجب", price: 4000 },
               ].map((o, i) => (
                 <div key={i} className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -232,7 +264,7 @@ function Index() {
                     <div>
                       <p className="text-sm font-bold">{o.name}</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {o.liters} • {o.date} • {o.price} ر.س
+                        {o.liters} • {o.date} • {fmt(o.price)} ر.ي
                       </p>
                     </div>
                   </div>
@@ -248,9 +280,9 @@ function Index() {
         {/* Sticky CTA */}
         <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-40 pointer-events-none">
           <button className="pointer-events-auto w-full bg-primary text-primary-foreground py-4 rounded-2xl font-display font-extrabold text-base shadow-glow flex items-center justify-center gap-3 active:scale-[0.98] hover:brightness-110 transition-all">
-            <span>تأكيد طلب الوايت</span>
+            <span>تأكيد الطلب • دفع نقداً</span>
             <span className="size-1 bg-primary-foreground/40 rounded-full" />
-            <span>{current.price} ر.س</span>
+            <span>{fmt(current.price)} ر.ي</span>
           </button>
         </div>
 
