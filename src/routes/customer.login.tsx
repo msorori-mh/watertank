@@ -30,8 +30,8 @@ function CustomerLogin() {
   const handleVerify = async () => {
     setError(""); setLoading(true);
     try {
-      await verifyOtpAndLogin(phone, code.trim());
-      nav({ to: "/customer" });
+      const res = await verifyOtpAndLogin(phone, code.trim());
+      nav({ to: res.isAdmin ? "/admin" : "/customer" });
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
   };
