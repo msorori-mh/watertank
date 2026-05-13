@@ -92,7 +92,9 @@ function AuthCallback() {
           .maybeSingle();
         nav({ to: drv ? "/driver" : "/driver/register" });
       } else {
-        nav({ to: "/customer" });
+        const { data: prof } = await supabase.from("profiles")
+          .select("city").eq("id", userId).maybeSingle();
+        nav({ to: prof?.city ? "/customer" : "/customer/profile/complete" });
       }
     };
 
