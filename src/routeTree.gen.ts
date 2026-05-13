@@ -18,6 +18,7 @@ import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
 import { Route as DriverLoginRouteImport } from './routes/driver.login'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -72,6 +73,11 @@ const CustomerLoginRoute = CustomerLoginRouteImport.update({
   path: '/customer/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
   id: '/admin/reports',
   path: '/admin/reports',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/driver/login': typeof DriverLoginRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/driver/login': typeof DriverLoginRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/driver/login': typeof DriverLoginRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/orders'
     | '/admin/reports'
+    | '/auth/callback'
     | '/customer/login'
     | '/customer/order'
     | '/driver/login'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/orders'
     | '/admin/reports'
+    | '/auth/callback'
     | '/customer/login'
     | '/customer/order'
     | '/driver/login'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/orders'
     | '/admin/reports'
+    | '/auth/callback'
     | '/customer/login'
     | '/customer/order'
     | '/driver/login'
@@ -240,6 +252,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminReportsRoute: typeof AdminReportsRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
   DriverLoginRoute: typeof DriverLoginRoute
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/reports': {
       id: '/admin/reports'
       path: '/admin/reports'
@@ -384,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminReportsRoute: AdminReportsRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
   DriverLoginRoute: DriverLoginRoute,
