@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { MapPin, Loader2, Truck } from "lucide-react";
+import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
 
 export const Route = createFileRoute("/driver/orders")({
   component: DriverAvailableOrders,
@@ -50,8 +51,12 @@ function DriverAvailableOrders() {
 
   const accept = async (id: string) => {
     setAccepting(id);
-    // status becomes "accepted" when driver claims the approved order
+    const order = orders.find((o) => o.id === id);
     await supabase.from("orders").update({ driver_id: driver.id, status: "accepted" }).eq("id", id);
+    if (order?.customer_id) {
+      const msg = ORDER_EVENT_MESSAGES.order_accepted;
+      await notifyUser(order.customer_id, id, "order_accepted", msg.title, msg.body(shortId(id)));
+    }
     setAccepting(null);
     nav({ to: "/driver" });
   };
