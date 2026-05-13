@@ -76,10 +76,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "اطلب وايت ماء عذب يصلك إلى باب منزلك في أقل من ٦٠ دقيقة. أحجام متعددة وأسعار شفافة." },
       { name: "author", content: "Wayet Maa" },
       { property: "og:title", content: "وايت ماء — توصيل صهاريج المياه العذبة" },
-      { property: "og:description", content: "اطلب وايت ماء عذب يصلك إلى باب منزلك في أقل من ٦٠ دقيقة." },
+      { property: "og:description", content: "اطلب وايت ماء عذب يصلك إلى باب منزلك في أقل من ٦٠ دقيقة. أحجام متعددة وأسعار شفافة." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "وايت ماء — توصيل صهاريج المياه العذبة" },
+      { name: "twitter:description", content: "اطلب وايت ماء عذب يصلك إلى باب منزلك في أقل من ٦٠ دقيقة. أحجام متعددة وأسعار شفافة." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b318be53-8255-487c-8afd-9cab87b5ebb9/id-preview-1eb7898c--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app-1778709756217.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b318be53-8255-487c-8afd-9cab87b5ebb9/id-preview-1eb7898c--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app-1778709756217.png" },
     ],
     links: [
       {
