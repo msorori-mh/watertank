@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, MapPin, Truck, CheckCircle2, Clock, X, Loader2, Phone } from "lucide-react";
+import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
 
 export const Route = createFileRoute("/customer/orders/$id")({
   component: OrderDetail,
