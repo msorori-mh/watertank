@@ -152,6 +152,29 @@ function Index() {
             </div>
           </section>
 
+          {/* Water type */}
+          <section className="mt-8 px-6">
+            <h2 className="font-display font-bold text-lg mb-3">نوع الماء</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {WATER_TYPES.map((w) => {
+                const active = waterType === w.id;
+                return (
+                  <button
+                    key={w.id}
+                    onClick={() => setWaterType(w.id)}
+                    className={`py-3 px-2 rounded-xl text-xs font-bold border-2 transition ${
+                      active
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-surface text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    {w.name}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           {/* Address & time */}
           <section className="mt-8 px-6 space-y-3">
             <h2 className="font-display font-bold text-lg mb-2">تفاصيل التوصيل</h2>
