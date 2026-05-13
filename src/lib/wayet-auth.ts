@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { isAdminPhone } from "@/lib/admin-phones";
 
 const DEMO_OTP = "1234";
 const ADMIN_SETUP_CODE = "WAYET2025";
@@ -22,38 +21,22 @@ export const sendOtp = async (phone: string) => {
 export const verifyOtpAndLogin = async (phone: string, code: string) => {
   if (code !== DEMO_OTP) throw new Error("الرمز غير صحيح. الرمز التجريبي: 1234");
   const { email, password } = phoneToCreds(phone);
-  const adminPhone = isAdminPhone(phone);
-  const initialType = adminPhone ? "admin" : "customer";
-  const initialRole = adminPhone ? "admin" : "customer";
-
   // Try sign in, else sign up
-  let session = await supabase.auth.signInWithPassword({ email, password });
-  if (session.error) {
-    const signUp = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { phone, type: initialType, role: initialRole },
-        emailRedirectTo: `${window.location.origin}/${adminPhone ? "admin" : "customer"}`,
-      },
-    });
-    if (signUp.error) throw signUp.error;
-    session = await supabase.auth.signInWithPassword({ email, password });
-    if (session.error) throw session.error;
-  }
-
-  // Promote to admin if phone is in admin list (covers users who already
-  // signed up earlier as customer).
-  if (adminPhone && session.data.user) {
-    const uid = session.data.user.id;
-    await supabase.from("user_roles").upsert(
-      { user_id: uid, role: "admin" } as any,
-      { onConflict: "user_id,role" } as any,
-    );
-    await supabase.from("profiles").update({ type: "admin" } as any).eq("id", uid);
-  }
-
-  return { ...session.data, isAdmin: adminPhone };
+  const signIn = await supabase.auth.signInWithPassword({ email, password });
+  if (!signIn.error) return signIn.data;
+  const signUp = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { phone, type: "customer", role: "customer" },
+      emailRedirectTo: `${window.location.origin}/customer`,
+    },
+  });
+  if (signUp.error) throw signUp.error;
+  // Auto-confirm is on, but session may not exist; sign in again
+  const retry = await supabase.auth.signInWithPassword({ email, password });
+  if (retry.error) throw retry.error;
+  return retry.data;
 };
 
 export const adminLogin = async (email: string, password: string) => {
