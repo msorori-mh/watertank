@@ -51,6 +51,13 @@ function OrderDetail() {
     if (!confirm("هل تريد إلغاء الطلب؟")) return;
     setCancelling(true);
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", id);
+    const msg = ORDER_EVENT_MESSAGES.order_cancelled!;
+    if (order?.customer_id) {
+      await notifyUser(order.customer_id, id, "order_cancelled", msg.title, msg.body(shortId(id)));
+    }
+    if (driver?.user_id) {
+      await notifyUser(driver.user_id, id, "order_cancelled", msg.title, msg.body(shortId(id)));
+    }
     setCancelling(false);
     load();
   };
