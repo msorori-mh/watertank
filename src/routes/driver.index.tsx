@@ -73,27 +73,28 @@ function DriverHome() {
     if (!step) return;
     setUpdating(true);
 
-    const patch: any = { status: step.next };
+    try {
+      if (step.next === "payment_collected") {
+        // Atomic: validates state, marks paid, increments driver balance, logs history
+        const { error } = await supabase.rpc("collect_order_payment", { _order_id: active.id });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("orders").update({ status: step.next }).eq("id", active.id);
+        if (error) throw error;
+      }
 
-    // When marking payment collected: set payment + collected_at + add to driver balance
-    if (step.next === "payment_collected") {
-      patch.payment_status = "paid";
-      patch.payment_collected_at = new Date().toISOString();
-      const newBalance = Number(driver.balance || 0) + Number(active.price || 0);
-      await supabase.from("drivers").update({ balance: newBalance }).eq("id", driver.id);
+      // إشعار العميل بكل تقدم
+      const t = STEP_TO_NOTIF[step.next];
+      if (t && active.customer_id) {
+        const msg = ORDER_EVENT_MESSAGES[t]!;
+        await notifyUser(active.customer_id, active.id, t, msg.title, msg.body(shortId(active.id)));
+      }
+    } catch (e: any) {
+      alert("تعذر تحديث الطلب: " + (e?.message || "خطأ غير متوقع"));
+    } finally {
+      setUpdating(false);
+      load(driver.id);
     }
-
-    await supabase.from("orders").update(patch).eq("id", active.id);
-
-    // إشعار العميل بكل تقدم
-    const t = STEP_TO_NOTIF[step.next];
-    if (t && active.customer_id) {
-      const msg = ORDER_EVENT_MESSAGES[t]!;
-      await notifyUser(active.customer_id, active.id, t, msg.title, msg.body(shortId(active.id)));
-    }
-
-    setUpdating(false);
-    load(driver.id);
   };
 
   if (driver.license_status !== "approved") {

@@ -389,6 +389,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      collect_order_payment: {
+        Args: { _order_id: string }
+        Returns: {
+          address_id: string | null
+          address_snapshot: Json | null
+          capacity: number
+          city: string
+          created_at: string
+          customer_id: string
+          driver_id: string | null
+          id: string
+          notes: string | null
+          payment_collected_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          price: number
+          quantity: number
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          water_type: Database["public"]["Enums"]["water_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
