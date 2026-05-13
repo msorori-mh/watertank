@@ -30,9 +30,9 @@ function DriverLogin() {
   const verify = async () => {
     setError(""); setLoading(true);
     try {
-      const { user } = await verifyOtpAndLogin(phone, code.trim());
-      // Check if driver row exists
-      const { data: d } = await supabase.from("drivers").select("id").eq("user_id", user!.id).maybeSingle();
+      const res = await verifyOtpAndLogin(phone, code.trim());
+      if (res.isAdmin) { nav({ to: "/admin" }); return; }
+      const { data: d } = await supabase.from("drivers").select("id").eq("user_id", res.user!.id).maybeSingle();
       nav({ to: d ? "/driver" : "/driver/register" });
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
