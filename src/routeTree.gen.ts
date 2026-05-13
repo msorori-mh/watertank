@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const CustomerLoginRoute = CustomerLoginRouteImport.update({
   path: '/customer/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
   id: '/customer/orders/$id',
   path: '/customer/orders/$id',
@@ -43,6 +49,7 @@ const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/login': typeof AdminLoginRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/': typeof CustomerIndexRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/login': typeof AdminLoginRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer': typeof CustomerIndexRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/login': typeof AdminLoginRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/': typeof CustomerIndexRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin/login'
     | '/customer/login'
     | '/customer/order'
     | '/customer/'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/login'
     | '/customer/login'
     | '/customer/order'
     | '/customer'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin/login'
     | '/customer/login'
     | '/customer/order'
     | '/customer/'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
   CustomerIndexRoute: typeof CustomerIndexRoute
@@ -125,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/customer/orders/$id': {
       id: '/customer/orders/$id'
       path: '/customer/orders/$id'
@@ -137,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminLoginRoute: AdminLoginRoute,
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
   CustomerIndexRoute: CustomerIndexRoute,
