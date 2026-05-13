@@ -42,7 +42,9 @@ const WATER_TYPES = [
 
 function Index() {
   const [selected, setSelected] = useState("m");
+  const [waterType, setWaterType] = useState("sweet");
   const current = TANKERS.find((t) => t.id === selected)!;
+  const fmt = (n: number) => n.toLocaleString("ar-EG");
 
   return (
     <div className="min-h-screen bg-background font-body text-deep selection:bg-accent/30">
