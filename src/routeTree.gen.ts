@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as DriverRegisterRouteImport } from './routes/driver.register'
 import { Route as DriverLoginRouteImport } from './routes/driver.login'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
@@ -34,6 +35,11 @@ const CustomerIndexRoute = CustomerIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverRegisterRoute = DriverRegisterRouteImport.update({
+  id: '/driver/register',
+  path: '/driver/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DriverLoginRoute = DriverLoginRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/driver/login': typeof DriverLoginRoute
+  '/driver/register': typeof DriverRegisterRoute
   '/admin/': typeof AdminIndexRoute
   '/customer/': typeof CustomerIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/driver/login': typeof DriverLoginRoute
+  '/driver/register': typeof DriverRegisterRoute
   '/admin': typeof AdminIndexRoute
   '/customer': typeof CustomerIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/driver/login': typeof DriverLoginRoute
+  '/driver/register': typeof DriverRegisterRoute
   '/admin/': typeof AdminIndexRoute
   '/customer/': typeof CustomerIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/driver/login'
+    | '/driver/register'
     | '/admin/'
     | '/customer/'
     | '/customer/orders/$id'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/driver/login'
+    | '/driver/register'
     | '/admin'
     | '/customer'
     | '/customer/orders/$id'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/driver/login'
+    | '/driver/register'
     | '/admin/'
     | '/customer/'
     | '/customer/orders/$id'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
   DriverLoginRoute: typeof DriverLoginRoute
+  DriverRegisterRoute: typeof DriverRegisterRoute
   AdminIndexRoute: typeof AdminIndexRoute
   CustomerIndexRoute: typeof CustomerIndexRoute
   CustomerOrdersIdRoute: typeof CustomerOrdersIdRoute
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/register': {
+      id: '/driver/register'
+      path: '/driver/register'
+      fullPath: '/driver/register'
+      preLoaderRoute: typeof DriverRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/driver/login': {
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
   DriverLoginRoute: DriverLoginRoute,
+  DriverRegisterRoute: DriverRegisterRoute,
   AdminIndexRoute: AdminIndexRoute,
   CustomerIndexRoute: CustomerIndexRoute,
   CustomerOrdersIdRoute: CustomerOrdersIdRoute,
