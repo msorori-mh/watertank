@@ -28,9 +28,16 @@ type TankerSize = {
 };
 
 const TANKERS: TankerSize[] = [
-  { id: "s", name: "وايت صغير", liters: "٤٠٠٠ لتر", desc: "مناسب للمنازل الصغيرة", price: 150 },
-  { id: "m", name: "وايت متوسط", liters: "٨٠٠٠ لتر", desc: "الخيار الأمثل للعائلات", price: 280, popular: true },
-  { id: "l", name: "وايت جامبو", liters: "١٢٠٠٠ لتر", desc: "للمنشآت والقصور", price: 400 },
+  { id: "xs", name: "وايت صغير", liters: "١٠٠٠ لتر", desc: "للاستخدام اليومي البسيط", price: 4000 },
+  { id: "s", name: "وايت متوسط", liters: "٣٠٠٠ لتر", desc: "مناسب للمنازل الصغيرة", price: 9000 },
+  { id: "m", name: "وايت كبير", liters: "٥٠٠٠ لتر", desc: "الخيار الأمثل للعائلات", price: 14000, popular: true },
+  { id: "l", name: "وايت جامبو", liters: "١٠٠٠٠ لتر", desc: "للمنشآت والمزارع", price: 26000 },
+];
+
+const WATER_TYPES = [
+  { id: "sweet", name: "ماء حلو" },
+  { id: "desalinated", name: "ماء محلاة" },
+  { id: "well", name: "ماء آبار" },
 ];
 
 function Index() {
