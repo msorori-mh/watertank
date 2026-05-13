@@ -119,6 +119,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          order_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          order_id?: string | null
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          order_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_status_history: {
         Row: {
           created_at: string
@@ -334,6 +367,17 @@ export type Database = {
       driver_availability: "available" | "busy" | "offline"
       driver_status: "active" | "inactive" | "busy"
       license_status: "pending" | "approved" | "rejected"
+      notification_type:
+        | "order_approved"
+        | "order_rejected"
+        | "order_accepted"
+        | "order_on_way"
+        | "order_arrived"
+        | "order_unloading"
+        | "order_payment_collected"
+        | "order_completed"
+        | "order_cancelled"
+        | "general"
       order_status:
         | "pending"
         | "approved"
@@ -481,6 +525,18 @@ export const Constants = {
       driver_availability: ["available", "busy", "offline"],
       driver_status: ["active", "inactive", "busy"],
       license_status: ["pending", "approved", "rejected"],
+      notification_type: [
+        "order_approved",
+        "order_rejected",
+        "order_accepted",
+        "order_on_way",
+        "order_arrived",
+        "order_unloading",
+        "order_payment_collected",
+        "order_completed",
+        "order_cancelled",
+        "general",
+      ],
       order_status: [
         "pending",
         "approved",

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, MapPin, Truck, CheckCircle2, Clock, X, Loader2, Phone } from "lucide-react";
+import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
 
 export const Route = createFileRoute("/customer/orders/$id")({
   component: OrderDetail,
@@ -50,6 +51,13 @@ function OrderDetail() {
     if (!confirm("هل تريد إلغاء الطلب؟")) return;
     setCancelling(true);
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", id);
+    const msg = ORDER_EVENT_MESSAGES.order_cancelled!;
+    if (order?.customer_id) {
+      await notifyUser(order.customer_id, id, "order_cancelled", msg.title, msg.body(shortId(id)));
+    }
+    if (driver?.user_id) {
+      await notifyUser(driver.user_id, id, "order_cancelled", msg.title, msg.body(shortId(id)));
+    }
     setCancelling(false);
     load();
   };

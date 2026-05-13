@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { CheckCircle2, Clock, Truck, Wallet, Star, MapPin, Loader2, BadgeDollarSign } from "lucide-react";
+import { notifyUser, ORDER_EVENT_MESSAGES, shortId, type NotificationType } from "@/lib/notifications";
+
+const STEP_TO_NOTIF: Record<string, NotificationType | undefined> = {
+  on_the_way: "order_on_way",
+  arrived: "order_arrived",
+  delivering: "order_unloading",
+  payment_collected: "order_payment_collected",
+  completed: "order_completed",
+};
 
 export const Route = createFileRoute("/driver/")({
   component: DriverHome,
@@ -75,6 +84,14 @@ function DriverHome() {
     }
 
     await supabase.from("orders").update(patch).eq("id", active.id);
+
+    // إشعار العميل بكل تقدم
+    const t = STEP_TO_NOTIF[step.next];
+    if (t && active.customer_id) {
+      const msg = ORDER_EVENT_MESSAGES[t]!;
+      await notifyUser(active.customer_id, active.id, t, msg.title, msg.body(shortId(active.id)));
+    }
+
     setUpdating(false);
     load(driver.id);
   };

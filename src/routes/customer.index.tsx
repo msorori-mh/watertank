@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import { Plus, Truck, Clock, CheckCircle2, MapPin, LogOut, ChevronLeft, Droplets } from "lucide-react";
+import { NotificationsCenter } from "@/components/NotificationsCenter";
 
 export const Route = createFileRoute("/customer/")({
   component: CustomerHome,
@@ -72,9 +73,12 @@ function CustomerHome() {
             <p className="text-xs opacity-80">أهلاً بك</p>
             <h1 className="font-display text-xl font-bold">{profile?.phone || profile?.email || "عميل"}</h1>
           </div>
-          <button onClick={handleSignOut} className="rounded-full p-2 bg-white/15 hover:bg-white/25">
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {user && <NotificationsCenter userId={user.id} variant="dark" />}
+            <button onClick={handleSignOut} className="rounded-full p-2 bg-white/15 hover:bg-white/25">
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
         <Link
           to="/customer/order"
