@@ -25,6 +25,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminCommissionsRouteImport } from './routes/admin.commissions'
 import { Route as AdminCitiesRouteImport } from './routes/admin.cities'
 import { Route as CustomerProfileCompleteRouteImport } from './routes/customer.profile.complete'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
@@ -109,6 +110,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/admin/customers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCommissionsRoute = AdminCommissionsRouteImport.update({
+  id: '/admin/commissions',
+  path: '/admin/commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCitiesRoute = AdminCitiesRouteImport.update({
   id: '/admin/cities',
   path: '/admin/cities',
@@ -128,6 +134,7 @@ const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin/cities': typeof AdminCitiesRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/finance': typeof AdminFinanceRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/cities': typeof AdminCitiesRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/finance': typeof AdminFinanceRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin/cities': typeof AdminCitiesRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/finance': typeof AdminFinanceRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin/cities'
+    | '/admin/commissions'
     | '/admin/customers'
     | '/admin/drivers'
     | '/admin/finance'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/cities'
+    | '/admin/commissions'
     | '/admin/customers'
     | '/admin/drivers'
     | '/admin/finance'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin/cities'
+    | '/admin/commissions'
     | '/admin/customers'
     | '/admin/drivers'
     | '/admin/finance'
@@ -258,6 +270,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminCitiesRoute: typeof AdminCitiesRoute
+  AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDriversRoute: typeof AdminDriversRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/commissions': {
+      id: '/admin/commissions'
+      path: '/admin/commissions'
+      fullPath: '/admin/commissions'
+      preLoaderRoute: typeof AdminCommissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/cities': {
       id: '/admin/cities'
       path: '/admin/cities'
@@ -418,6 +438,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminCitiesRoute: AdminCitiesRoute,
+  AdminCommissionsRoute: AdminCommissionsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDriversRoute: AdminDriversRoute,
   AdminFinanceRoute: AdminFinanceRoute,

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { Loader2, Wallet, Banknote, Truck, AlertCircle, HandCoins } from "lucide-react";
+import { Loader2, Wallet, Banknote, Truck, AlertCircle, HandCoins, Percent } from "lucide-react";
 
 export const Route = createFileRoute("/admin/finance")({
   component: AdminFinance,
