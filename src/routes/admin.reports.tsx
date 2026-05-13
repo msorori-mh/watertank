@@ -15,7 +15,7 @@ function AdminReports() {
   useEffect(() => {
     (async () => {
       const [{ data: orders }, { data: drivers }] = await Promise.all([
-        supabase.from("orders").select("id,city,status,price,driver_id,created_at").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("orders").select("id,city,status,price,app_commission,commission_status,driver_id,created_at").order("created_at", { ascending: false }).limit(1000),
         supabase.from("drivers").select("id,name"),
       ]);
       setData({ orders: orders || [], drivers: drivers || [] });
