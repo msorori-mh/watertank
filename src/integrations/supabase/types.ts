@@ -106,6 +106,42 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_settings: {
+        Row: {
+          capacity: number | null
+          city: string | null
+          commission_type: string
+          commission_value: number
+          created_at: string
+          free_until: string | null
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          city?: string | null
+          commission_type?: string
+          commission_value?: number
+          created_at?: string
+          free_until?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          city?: string | null
+          commission_type?: string
+          commission_value?: number
+          created_at?: string
+          free_until?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       drivers: {
         Row: {
           availability: Database["public"]["Enums"]["driver_availability"]
@@ -223,8 +259,11 @@ export type Database = {
         Row: {
           address_id: string | null
           address_snapshot: Json | null
+          app_commission: number
           capacity: number
           city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
           created_at: string
           customer_id: string
           driver_id: string | null
@@ -243,8 +282,11 @@ export type Database = {
         Insert: {
           address_id?: string | null
           address_snapshot?: Json | null
+          app_commission?: number
           capacity: number
           city: string
+          commission_rule_snapshot?: Json | null
+          commission_status?: string
           created_at?: string
           customer_id: string
           driver_id?: string | null
@@ -263,8 +305,11 @@ export type Database = {
         Update: {
           address_id?: string | null
           address_snapshot?: Json | null
+          app_commission?: number
           capacity?: number
           city?: string
+          commission_rule_snapshot?: Json | null
+          commission_status?: string
           created_at?: string
           customer_id?: string
           driver_id?: string | null
@@ -392,13 +437,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_app_commission: {
+        Args: { _capacity: number; _city: string; _price: number }
+        Returns: Record<string, unknown>
+      }
       collect_order_payment: {
         Args: { _order_id: string }
         Returns: {
           address_id: string | null
           address_snapshot: Json | null
+          app_commission: number
           capacity: number
           city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
           created_at: string
           customer_id: string
           driver_id: string | null

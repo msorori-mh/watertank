@@ -15,7 +15,7 @@ function AdminReports() {
   useEffect(() => {
     (async () => {
       const [{ data: orders }, { data: drivers }] = await Promise.all([
-        supabase.from("orders").select("id,city,status,price,driver_id,created_at").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("orders").select("id,city,status,price,app_commission,commission_status,driver_id,created_at").order("created_at", { ascending: false }).limit(1000),
         supabase.from("drivers").select("id,name"),
       ]);
       setData({ orders: orders || [], drivers: drivers || [] });
@@ -52,18 +52,37 @@ function AdminReports() {
     if (o.status === "cancelled" || o.status === "rejected") c.cancelled++;
   });
 
-  // Driver performance
-  const drvStats: Record<string, { count: number; revenue: number; name: string }> = {};
-  drivers.forEach(d => { drvStats[d.id] = { count: 0, revenue: 0, name: d.name }; });
+  // Driver performance + commissions
+  const drvStats: Record<string, { count: number; revenue: number; commission: number; unpaidCommission: number; name: string }> = {};
+  drivers.forEach(d => { drvStats[d.id] = { count: 0, revenue: 0, commission: 0, unpaidCommission: 0, name: d.name }; });
   orders.forEach((o: any) => {
     if (!o.driver_id) return;
     const s = drvStats[o.driver_id]; if (!s) return;
     s.count++;
     if (o.status === "completed") s.revenue += Number(o.price);
+    s.commission += Number(o.app_commission || 0);
+    if (o.commission_status === "unpaid") s.unpaidCommission += Number(o.app_commission || 0);
   });
 
   const cancelled = orders.filter((o: any) => o.status === "cancelled" || o.status === "rejected");
   const totalRevenue = orders.filter((o: any) => o.status === "completed").reduce((a: number, o: any) => a + Number(o.price), 0);
+
+  // Commission daily / per city
+  const commissionDays: Record<string, number> = {};
+  Object.keys(days).forEach(k => { commissionDays[k] = 0; });
+  const commissionCities: Record<string, { total: number; unpaid: number }> = {};
+  let zeroCommissionCount = 0;
+  orders.forEach((o: any) => {
+    const c = Number(o.app_commission || 0);
+    const k = new Date(o.created_at).toISOString().slice(0, 10);
+    if (commissionDays[k] !== undefined) commissionDays[k] += c;
+    const cc = commissionCities[o.city] || (commissionCities[o.city] = { total: 0, unpaid: 0 });
+    cc.total += c;
+    if (o.commission_status === "unpaid") cc.unpaid += c;
+    if (c === 0 && o.status === "completed") zeroCommissionCount++;
+  });
+  const totalCommission = orders.reduce((a: number, o: any) => a + Number(o.app_commission || 0), 0);
+  const totalUnpaidCommission = orders.filter((o: any) => o.commission_status === "unpaid").reduce((a: number, o: any) => a + Number(o.app_commission || 0), 0);
 
   return (
     <AdminShell title="التقارير">
@@ -129,6 +148,8 @@ function AdminReports() {
                 <th className="text-right p-3">السائق</th>
                 <th className="text-right p-3">عدد الطلبات</th>
                 <th className="text-right p-3">إجمالي الإيرادات</th>
+                <th className="text-right p-3">عمولات التطبيق</th>
+                <th className="text-right p-3">عمولات غير مسددة</th>
               </tr>
             </thead>
             <tbody>
@@ -137,11 +158,67 @@ function AdminReports() {
                   <td className="p-3 font-medium">{s.name}</td>
                   <td className="p-3">{s.count}</td>
                   <td className="p-3 font-semibold">{s.revenue.toLocaleString("ar-EG")} ر.ي</td>
+                  <td className="p-3 font-semibold text-emerald-700">{s.commission.toLocaleString("ar-EG")} ر.ي</td>
+                  <td className="p-3 font-semibold text-rose-600">{s.unpaidCommission.toLocaleString("ar-EG")} ر.ي</td>
                 </tr>
               ))}
-              {Object.keys(drvStats).length === 0 && <tr><td colSpan={3} className="p-6 text-center text-muted-foreground text-sm">لا يوجد سائقون</td></tr>}
+              {Object.keys(drvStats).length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">لا يوجد سائقون</td></tr>}
             </tbody>
           </table>
+        </div>
+
+        {/* Commissions overview */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
+            <p className="text-xs text-muted-foreground">إجمالي عمولات التطبيق</p>
+            <p className="font-display font-bold text-xl mt-1">{totalCommission.toLocaleString("ar-EG")} ر.ي</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
+            <p className="text-xs text-muted-foreground">عمولات غير مسددة</p>
+            <p className="font-display font-bold text-xl mt-1 text-rose-600">{totalUnpaidCommission.toLocaleString("ar-EG")} ر.ي</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
+            <p className="text-xs text-muted-foreground">طلبات مكتملة بعمولة صفرية</p>
+            <p className="font-display font-bold text-xl mt-1">{zeroCommissionCount}</p>
+          </div>
+        </div>
+
+        {/* Commissions per day & per city */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
+            <div className="p-4 border-b border-border"><h2 className="font-display font-bold">عمولات التطبيق اليومية</h2></div>
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs text-muted-foreground">
+                <tr><th className="text-right p-3">التاريخ</th><th className="text-right p-3">العمولة</th></tr>
+              </thead>
+              <tbody>
+                {Object.entries(commissionDays).map(([k, v]) => (
+                  <tr key={k} className="border-t border-border">
+                    <td className="p-3">{new Date(k).toLocaleDateString("ar-EG", { weekday: "short", day: "numeric", month: "short" })}</td>
+                    <td className="p-3 font-semibold">{v.toLocaleString("ar-EG")} ر.ي</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
+            <div className="p-4 border-b border-border"><h2 className="font-display font-bold">عمولات التطبيق حسب المدينة</h2></div>
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs text-muted-foreground">
+                <tr><th className="text-right p-3">المدينة</th><th className="text-right p-3">الإجمالي</th><th className="text-right p-3">غير مسدد</th></tr>
+              </thead>
+              <tbody>
+                {Object.entries(commissionCities).sort((a, b) => b[1].total - a[1].total).map(([city, v]) => (
+                  <tr key={city} className="border-t border-border">
+                    <td className="p-3 font-medium">{city}</td>
+                    <td className="p-3 font-semibold">{v.total.toLocaleString("ar-EG")} ر.ي</td>
+                    <td className="p-3 text-rose-600">{v.unpaid.toLocaleString("ar-EG")} ر.ي</td>
+                  </tr>
+                ))}
+                {Object.keys(commissionCities).length === 0 && <tr><td colSpan={3} className="p-6 text-center text-muted-foreground text-sm">لا توجد بيانات</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Cancelled */}

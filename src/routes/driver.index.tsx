@@ -146,7 +146,7 @@ function DriverHome() {
         </div>
         <div className="rounded-2xl bg-white shadow-[var(--shadow-soft)] p-3 text-center">
           <Wallet className="h-4 w-4 mx-auto text-primary" />
-          <p className="text-xs text-muted-foreground mt-1">العهدة</p>
+          <p className="text-xs text-muted-foreground mt-1">عمولة مستحقة</p>
           <p className="font-display font-bold text-sm">{Number(driver.balance || 0).toLocaleString("ar-EG")} ر.ي</p>
         </div>
         <div className="rounded-2xl bg-white shadow-[var(--shadow-soft)] p-3 text-center">
@@ -179,8 +179,16 @@ function DriverHome() {
               </div>
               <div className="text-left">
                 <p className="font-display font-bold text-lg">{Number(active.price).toLocaleString("ar-EG")}</p>
-                <p className="text-xs text-muted-foreground">ر.ي • نقداً</p>
+                <p className="text-xs text-muted-foreground">ر.ي • تستلمها كاملة</p>
+                {Number(active.app_commission || 0) > 0 && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-semibold">
+                    عمولة التطبيق: {Number(active.app_commission).toLocaleString("ar-EG")} ر.ي
+                  </p>
+                )}
               </div>
+            </div>
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-900 leading-5">
+              قيمة الطلب يستلمها السائق نقداً من العميل، وعمولة التطبيق تُسجَّل كمستحق على السائق ويتم تسديدها لاحقاً للإدارة.
             </div>
             <div className="rounded-lg bg-primary/5 px-3 py-2 text-xs font-semibold text-primary">
               الحالة: {active.status}

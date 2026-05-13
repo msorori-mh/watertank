@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { Loader2, Wallet, Banknote, Truck, AlertCircle, HandCoins } from "lucide-react";
+import { Loader2, Wallet, Banknote, Truck, AlertCircle, HandCoins, Percent } from "lucide-react";
 
 export const Route = createFileRoute("/admin/finance")({
   component: AdminFinance,
@@ -16,7 +16,7 @@ function AdminFinance() {
 
   const load = async () => {
     const [{ data: orders }, { data: drivers }, { data: handovers }] = await Promise.all([
-      supabase.from("orders").select("id,price,status,payment_status,payment_collected_at,driver_id,city,created_at").order("created_at", { ascending: false }).limit(500),
+      supabase.from("orders").select("id,price,app_commission,commission_status,status,payment_status,payment_collected_at,driver_id,city,created_at").order("created_at", { ascending: false }).limit(500),
       supabase.from("drivers").select("id,name,balance,phone"),
       supabase.from("cash_handovers").select("id,driver_id,amount,received_by,notes,created_at").order("created_at", { ascending: false }).limit(200),
     ]);
@@ -34,12 +34,17 @@ function AdminFinance() {
 
   if (loading || !data) return <AdminShell title="المالية والتحصيل"><div className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-primary" /></div></AdminShell>;
 
-  const completed = data.orders.filter((o: any) => o.status === "completed");
-  const totalRevenue = completed.reduce((a: number, o: any) => a + Number(o.price), 0);
-  const collected = data.orders.filter((o: any) => o.payment_status === "paid");
-  const totalCollected = collected.reduce((a: number, o: any) => a + Number(o.price), 0);
-  const unpaid = data.orders.filter((o: any) => o.payment_status !== "paid" && ["delivering", "payment_collected", "completed"].includes(o.status));
-  const unpaidTotal = unpaid.reduce((a: number, o: any) => a + Number(o.price), 0);
+  // قيمة الطلبات التي حصّلها السائقون من العملاء (نقدية بالكامل تذهب للسائق)
+  const collectedOrders = data.orders.filter((o: any) => o.payment_status === "paid");
+  const totalOrdersValue = collectedOrders.reduce((a: number, o: any) => a + Number(o.price), 0);
+
+  // عمولات التطبيق
+  const totalCommissionsDue = data.orders
+    .filter((o: any) => Number(o.app_commission || 0) > 0)
+    .reduce((a: number, o: any) => a + Number(o.app_commission), 0);
+  const unpaidCommissions = data.orders
+    .filter((o: any) => o.commission_status === "unpaid" && Number(o.app_commission || 0) > 0)
+    .reduce((a: number, o: any) => a + Number(o.app_commission), 0);
   const driverBalances = data.drivers.reduce((a: number, d: any) => a + Number(d.balance || 0), 0);
   const totalHandovers = data.handovers.reduce((a: number, h: any) => a + Number(h.amount || 0), 0);
 
@@ -54,8 +59,8 @@ function AdminFinance() {
     const f = form[driver.id] || { amount: "", notes: "", open: false };
     const amount = Number(f.amount);
     if (!amount || amount <= 0) { alert("المبلغ يجب أن يكون أكبر من صفر"); return; }
-    if (amount > Number(driver.balance || 0)) { alert("المبلغ أكبر من رصيد عهدة السائق"); return; }
-    if (!confirm(`تأكيد تسجيل تسليم ${amount.toLocaleString("ar-EG")} ر.ي من ${driver.name}؟`)) return;
+    if (amount > Number(driver.balance || 0)) { alert("المبلغ أكبر من العمولات المستحقة على السائق"); return; }
+    if (!confirm(`تأكيد تسديد ${amount.toLocaleString("ar-EG")} ر.ي عمولة من ${driver.name}؟`)) return;
     setSubmitting(driver.id);
     const { error } = await supabase.rpc("record_cash_handover", {
       _driver_id: driver.id,
@@ -63,18 +68,18 @@ function AdminFinance() {
       _notes: f.notes || undefined,
     });
     setSubmitting(null);
-    if (error) { alert("تعذر تسجيل التسليم: " + error.message); return; }
+    if (error) { alert("تعذر تسجيل التسديد: " + error.message); return; }
     setForm((s) => ({ ...s, [driver.id]: { amount: "", notes: "", open: false } }));
     load();
   };
 
   const cards = [
-    { label: "إجمالي الإيرادات", value: totalRevenue, icon: Wallet, color: "bg-primary/10 text-primary" },
-    { label: "محصّل نقداً", value: totalCollected, icon: Banknote, color: "bg-emerald-50 text-emerald-700" },
-    { label: "عهدة السائقين", value: driverBalances, icon: Truck, color: "bg-blue-50 text-blue-700" },
-    { label: "غير مدفوع", value: unpaidTotal, icon: AlertCircle, color: "bg-rose-50 text-rose-700" },
-    { label: "إجمالي ما تم تسليمه", value: totalHandovers, icon: HandCoins, color: "bg-violet-50 text-violet-700" },
-    { label: "تسليمات اليوم", value: todayHandoversTotal, icon: HandCoins, color: "bg-amber-50 text-amber-700" },
+    { label: "قيمة الطلبات (لدى السائقين)", value: totalOrdersValue, icon: Wallet, color: "bg-primary/10 text-primary" },
+    { label: "إجمالي عمولات التطبيق", value: totalCommissionsDue, icon: Percent, color: "bg-emerald-50 text-emerald-700" },
+    { label: "عمولات غير مسددة", value: unpaidCommissions, icon: AlertCircle, color: "bg-rose-50 text-rose-700" },
+    { label: "أرصدة العمولة على السائقين", value: driverBalances, icon: Truck, color: "bg-blue-50 text-blue-700" },
+    { label: "إجمالي عمولات مسددة", value: totalHandovers, icon: HandCoins, color: "bg-violet-50 text-violet-700" },
+    { label: "تسديدات اليوم", value: todayHandoversTotal, icon: Banknote, color: "bg-amber-50 text-amber-700" },
   ];
 
   return (
@@ -97,15 +102,15 @@ function AdminFinance() {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
           <div className="p-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-display font-bold">عهد السائقين</h2>
-            <span className="text-xs text-muted-foreground">المتبقي على كل سائق</span>
+            <h2 className="font-display font-bold">عمولات التطبيق المستحقة على السائقين</h2>
+            <span className="text-xs text-muted-foreground">عمولة فقط — لا تشمل قيمة الطلبات</span>
           </div>
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-xs text-muted-foreground">
               <tr>
                 <th className="text-right p-3">السائق</th>
                 <th className="text-right p-3">الهاتف</th>
-                <th className="text-right p-3">العهدة</th>
+                <th className="text-right p-3">عمولات مستحقة</th>
                 <th className="text-right p-3">إجراء</th>
               </tr>
             </thead>
@@ -122,9 +127,9 @@ function AdminFinance() {
                         {Number(d.balance || 0) > 0 ? (
                           <button onClick={() => setForm((s) => ({ ...s, [d.id]: { ...f, open: !f.open } }))}
                             className="rounded-lg bg-emerald-100 text-emerald-700 px-2 py-1 text-xs font-semibold hover:bg-emerald-200">
-                            {f.open ? "إخفاء" : "تسجيل تسليم مبلغ"}
+                            {f.open ? "إخفاء" : "تسديد عمولة التطبيق"}
                           </button>
-                        ) : <span className="text-xs text-muted-foreground">لا توجد عهدة</span>}
+                        ) : <span className="text-xs text-muted-foreground">لا توجد عمولات</span>}
                       </td>
                     </tr>
                     {f.open && (
@@ -152,7 +157,7 @@ function AdminFinance() {
                               onClick={() => submitHandover(d)}
                               className="rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-semibold disabled:opacity-60"
                             >
-                              {submitting === d.id ? "..." : "تأكيد التسليم"}
+                              {submitting === d.id ? "..." : "تأكيد التسديد"}
                             </button>
                           </div>
                         </td>
@@ -167,7 +172,7 @@ function AdminFinance() {
 
         <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
           <div className="p-4 border-b border-border">
-            <h2 className="font-display font-bold">سجل تسليم العهد</h2>
+            <h2 className="font-display font-bold">سجل تسديد العمولات</h2>
           </div>
           <div className="max-h-[480px] overflow-auto">
             <table className="w-full text-sm">
@@ -191,7 +196,7 @@ function AdminFinance() {
                   </tr>
                 ))}
                 {data.handovers.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">لا توجد تسليمات بعد</td></tr>
+                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">لا توجد تسديدات بعد</td></tr>
                 )}
               </tbody>
             </table>
