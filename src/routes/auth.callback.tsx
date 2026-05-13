@@ -52,7 +52,7 @@ function AuthCallback() {
 
       const { data: existingProfile } = await supabase
         .from("profiles")
-        .select("id, name")
+        .select("id, name, avatar_url")
         .eq("id", userId)
         .maybeSingle();
 
@@ -63,9 +63,15 @@ function AuthCallback() {
           name: fullName,
           type: intended,
           phone: null,
+          avatar_url: avatar,
         } as any);
-      } else if (!existingProfile.name && fullName) {
-        await supabase.from("profiles").update({ name: fullName } as any).eq("id", userId);
+      } else {
+        const patch: any = {};
+        if (!existingProfile.name && fullName) patch.name = fullName;
+        if (!existingProfile.avatar_url && avatar) patch.avatar_url = avatar;
+        if (Object.keys(patch).length) {
+          await supabase.from("profiles").update(patch).eq("id", userId);
+        }
       }
 
       // Assign role if not yet present
@@ -74,11 +80,6 @@ function AuthCallback() {
           user_id: userId,
           role: intended,
         } as any);
-      }
-
-      // Stash avatar locally (no avatar column in profiles)
-      if (avatar) {
-        try { localStorage.setItem("wayet_avatar_" + userId, avatar); } catch {}
       }
 
       clearPendingRole();
@@ -91,7 +92,9 @@ function AuthCallback() {
           .maybeSingle();
         nav({ to: drv ? "/driver" : "/driver/register" });
       } else {
-        nav({ to: "/customer" });
+        const { data: prof } = await supabase.from("profiles")
+          .select("city").eq("id", userId).maybeSingle();
+        nav({ to: prof?.city ? "/customer" : "/customer/profile/complete" });
       }
     };
 

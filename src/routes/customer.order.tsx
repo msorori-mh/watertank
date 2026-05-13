@@ -29,9 +29,12 @@ function NewOrder() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) nav({ to: "/customer/login" });
-      else setUser(data.session.user);
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session) { nav({ to: "/customer/login" }); return; }
+      setUser(data.session.user);
+      const { data: prof } = await supabase.from("profiles")
+        .select("city").eq("id", data.session.user.id).maybeSingle();
+      if (!prof?.city) { nav({ to: "/customer/profile/complete" }); return; }
     });
   }, [nav]);
 
