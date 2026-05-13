@@ -1,39 +1,50 @@
-## إنشاء الحسابات التجريبية
+## جعل التطبيق قابلاً للتثبيت كأيقونة على الجوال
 
-سأقوم بإنشاء الحسابات مباشرة في قاعدة البيانات عبر migration SQL، بحيث:
+سأضيف **Web App Manifest فقط** بدون Service Worker — هذا يكفي لظهور خيار "إضافة إلى الشاشة الرئيسية / تثبيت التطبيق" في Chrome و Safari وبقية المتصفحات، بدون أي مخاطر على المعاينة في Lovable أو على بياناتك المخزنة (لا cache، لا offline، لا تضارب مع OAuth أو Realtime).
 
-- يستخدم السائق/العميل **نفس آلية الهاتف الحالية** (OTP=1234) — الإيميل الداخلي `phone-{number}@wayet.local` وكلمة المرور `wayet-pwd-{number}-secure` كما في `src/lib/wayet-auth.ts`.
-- يتم تشغيل الـ trigger `handle_new_user` تلقائياً لإنشاء `profiles` و `user_roles`.
-- بالنسبة للسائقين سيتم إضافة صف في `drivers` مع `license_status='approved'` ليظهروا فوراً كسائقين معتمدين.
-- بالنسبة للأدمن سيتم إنشاء حساب بالإيميل وكلمة المرور المحددين، ثم إعطاؤه دور `admin` في `user_roles`.
+### ما سأنفذه
 
-### الحسابات
+1. **`public/manifest.webmanifest`** — يحتوي:
+   - `name`: "وايت ماء"
+   - `short_name`: "وايت"
+   - `start_url`: `/`
+   - `scope`: `/`
+   - `display`: `standalone` (يفتح بدون شريط المتصفح)
+   - `orientation`: `portrait`
+   - `theme_color`: `#1a5276` (نفس لون السائق header)
+   - `background_color`: `#ffffff`
+   - `lang`: `ar`, `dir`: `rtl`
+   - `icons`: مجموعة أيقونات (192×192، 512×512، و maskable للأندرويد)
 
-| النوع | الاسم | الهاتف / الإيميل | بيانات الدخول |
-|---|---|---|---|
-| سائق | عيسى حسين | 777333777 | OTP: 1234 |
-| سائق | مروان حسين | 777444777 | OTP: 1234 |
-| عميل | صدام حسين | 777111777 | OTP: 1234 |
-| عميل | محمد حسين | 777222777 | OTP: 1234 |
-| أدمن | — | mosrori201201@gmail.com | Login@692022 |
+2. **توليد الأيقونات** عبر `imagegen` بشعار قطرة ماء على خلفية بلون العلامة، وحفظها في `public/icons/`:
+   - `icon-192.png`
+   - `icon-512.png`
+   - `icon-maskable-512.png`
+   - `apple-touch-icon-180.png` (لـ iOS)
 
-### المدينة الافتراضية للسائقين
-سأستخدم أول مدينة نشطة موجودة في `cities`. إذا أردت مدينة محددة (مثلاً صنعاء) أخبرني.
+3. **تعديل `src/routes/__root.tsx`** لإضافة في الـ `<head>`:
+   - `<link rel="manifest" href="/manifest.webmanifest">`
+   - `<meta name="theme-color" content="#1a5276">`
+   - `<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png">`
+   - `<meta name="apple-mobile-web-app-capable" content="yes">`
+   - `<meta name="apple-mobile-web-app-status-bar-style" content="default">`
+   - `<meta name="apple-mobile-web-app-title" content="وايت">`
 
-### بيانات المركبة للسائقين (افتراضية قابلة للتعديل لاحقاً)
-- `vehicle_plate`: `DRV-777333` و `DRV-777444`
-- `vehicle_capacity`: 5000 لتر
-- `availability`: `available`
+### ما لن أفعله (حسب أفضل الممارسات في Lovable)
 
-### التنفيذ
-سأنفذ ذلك عبر **migration واحدة** تحتوي على:
-1. `INSERT` في `auth.users` مع `encrypted_password = crypt(...)` وحقول `raw_user_meta_data` المناسبة (phone/name/type/role) — هذا يطلق trigger `handle_new_user` فيُنشئ `profiles` و `user_roles` تلقائياً.
-2. تأكيد الإيميل (`email_confirmed_at = now()`) حتى يعمل تسجيل الدخول مباشرة.
-3. `INSERT` في `drivers` للسائقَين بـ `license_status='approved'`.
-4. للأدمن: ضمان وجود `user_roles.role='admin'` (الـ trigger يقرأها من meta).
+- ❌ لن أضيف `vite-plugin-pwa` ولا Service Worker — يسبب cache stale ويكسر معاينة المحرر و OAuth.
+- ❌ لن أضيف دعم offline — التطبيق يعتمد على Realtime والقاعدة.
+- ❌ لن ألمس منطق الدخول أو الطلبات أو RLS.
 
-### ملاحظات
-- إذا كان أحد الأرقام/الإيميلات مسجلاً مسبقاً ستُستخدم `ON CONFLICT DO NOTHING` لتجنب الفشل.
-- لا تغيير على المنطق أو الواجهات.
+### كيف يعمل للمستخدم
 
-اضغط Implement plan لتنفيذها.
+- **أندرويد (Chrome)**: بعد فتح التطبيق المنشور، يظهر تلقائياً banner "تثبيت التطبيق" أو من قائمة المتصفح ⋮ → "إضافة إلى الشاشة الرئيسية".
+- **iOS (Safari)**: زر المشاركة → "إضافة إلى الشاشة الرئيسية".
+- بعد التثبيت يفتح التطبيق ملء الشاشة بدون شريط العنوان وبأيقونة وايت.
+
+### ملاحظة مهمة
+
+- يعمل فقط على **الرابط المنشور** (`splash-magic-suite.lovable.app` أو دومين مخصص) — لا يعمل في معاينة المحرر داخل iframe.
+- بعد التنفيذ يجب الضغط على **Update** في زر Publish لتفعيل التغييرات على الرابط العام.
+
+اضغط Implement لتنفيذ الخطوات.
