@@ -34,12 +34,17 @@ function AdminFinance() {
 
   if (loading || !data) return <AdminShell title="المالية والتحصيل"><div className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-primary" /></div></AdminShell>;
 
-  const completed = data.orders.filter((o: any) => o.status === "completed");
-  const totalRevenue = completed.reduce((a: number, o: any) => a + Number(o.price), 0);
-  const collected = data.orders.filter((o: any) => o.payment_status === "paid");
-  const totalCollected = collected.reduce((a: number, o: any) => a + Number(o.price), 0);
-  const unpaid = data.orders.filter((o: any) => o.payment_status !== "paid" && ["delivering", "payment_collected", "completed"].includes(o.status));
-  const unpaidTotal = unpaid.reduce((a: number, o: any) => a + Number(o.price), 0);
+  // قيمة الطلبات التي حصّلها السائقون من العملاء (نقدية بالكامل تذهب للسائق)
+  const collectedOrders = data.orders.filter((o: any) => o.payment_status === "paid");
+  const totalOrdersValue = collectedOrders.reduce((a: number, o: any) => a + Number(o.price), 0);
+
+  // عمولات التطبيق
+  const totalCommissionsDue = data.orders
+    .filter((o: any) => Number(o.app_commission || 0) > 0)
+    .reduce((a: number, o: any) => a + Number(o.app_commission), 0);
+  const unpaidCommissions = data.orders
+    .filter((o: any) => o.commission_status === "unpaid" && Number(o.app_commission || 0) > 0)
+    .reduce((a: number, o: any) => a + Number(o.app_commission), 0);
   const driverBalances = data.drivers.reduce((a: number, d: any) => a + Number(d.balance || 0), 0);
   const totalHandovers = data.handovers.reduce((a: number, h: any) => a + Number(h.amount || 0), 0);
 
@@ -54,8 +59,8 @@ function AdminFinance() {
     const f = form[driver.id] || { amount: "", notes: "", open: false };
     const amount = Number(f.amount);
     if (!amount || amount <= 0) { alert("المبلغ يجب أن يكون أكبر من صفر"); return; }
-    if (amount > Number(driver.balance || 0)) { alert("المبلغ أكبر من رصيد عهدة السائق"); return; }
-    if (!confirm(`تأكيد تسجيل تسليم ${amount.toLocaleString("ar-EG")} ر.ي من ${driver.name}؟`)) return;
+    if (amount > Number(driver.balance || 0)) { alert("المبلغ أكبر من العمولات المستحقة على السائق"); return; }
+    if (!confirm(`تأكيد تسديد ${amount.toLocaleString("ar-EG")} ر.ي عمولة من ${driver.name}؟`)) return;
     setSubmitting(driver.id);
     const { error } = await supabase.rpc("record_cash_handover", {
       _driver_id: driver.id,
@@ -63,18 +68,18 @@ function AdminFinance() {
       _notes: f.notes || undefined,
     });
     setSubmitting(null);
-    if (error) { alert("تعذر تسجيل التسليم: " + error.message); return; }
+    if (error) { alert("تعذر تسجيل التسديد: " + error.message); return; }
     setForm((s) => ({ ...s, [driver.id]: { amount: "", notes: "", open: false } }));
     load();
   };
 
   const cards = [
-    { label: "إجمالي الإيرادات", value: totalRevenue, icon: Wallet, color: "bg-primary/10 text-primary" },
-    { label: "محصّل نقداً", value: totalCollected, icon: Banknote, color: "bg-emerald-50 text-emerald-700" },
-    { label: "عهدة السائقين", value: driverBalances, icon: Truck, color: "bg-blue-50 text-blue-700" },
-    { label: "غير مدفوع", value: unpaidTotal, icon: AlertCircle, color: "bg-rose-50 text-rose-700" },
-    { label: "إجمالي ما تم تسليمه", value: totalHandovers, icon: HandCoins, color: "bg-violet-50 text-violet-700" },
-    { label: "تسليمات اليوم", value: todayHandoversTotal, icon: HandCoins, color: "bg-amber-50 text-amber-700" },
+    { label: "قيمة الطلبات (لدى السائقين)", value: totalOrdersValue, icon: Wallet, color: "bg-primary/10 text-primary" },
+    { label: "إجمالي عمولات التطبيق", value: totalCommissionsDue, icon: Percent, color: "bg-emerald-50 text-emerald-700" },
+    { label: "عمولات غير مسددة", value: unpaidCommissions, icon: AlertCircle, color: "bg-rose-50 text-rose-700" },
+    { label: "أرصدة العمولة على السائقين", value: driverBalances, icon: Truck, color: "bg-blue-50 text-blue-700" },
+    { label: "إجمالي عمولات مسددة", value: totalHandovers, icon: HandCoins, color: "bg-violet-50 text-violet-700" },
+    { label: "تسديدات اليوم", value: todayHandoversTotal, icon: Banknote, color: "bg-amber-50 text-amber-700" },
   ];
 
   return (
