@@ -80,12 +80,12 @@ function AdminFinance() {
                   <td className="p-3">
                     {Number(d.balance || 0) > 0 && (
                       <button onClick={async () => {
-                        if (!confirm(`تأكيد استلام ${Number(d.balance).toLocaleString("ar-EG")} ر.ي من ${d.name}؟`)) return;
+                        if (!confirm(`تأكيد تسجيل تسليم ${Number(d.balance).toLocaleString("ar-EG")} ر.ي من ${d.name} للإدارة؟`)) return;
                         await supabase.from("drivers").update({ balance: 0 }).eq("id", d.id);
                         load();
                       }}
                         className="rounded-lg bg-emerald-100 text-emerald-700 px-2 py-1 text-xs font-semibold hover:bg-emerald-200">
-                        تصفير العهدة
+                        تسجيل تسليم العهدة
                       </button>
                     )}
                   </td>
