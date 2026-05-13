@@ -56,7 +56,7 @@ function Index() {
               توصيل إلى
             </span>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm">حي الملقا، الرياض</span>
+              <span className="font-bold text-sm">حي الروضة، مأرب</span>
               <span className="size-1.5 rounded-full bg-primary" />
             </div>
           </div>
@@ -141,9 +141,9 @@ function Index() {
                       </div>
                       <div className="text-left">
                         <span className="block font-display font-extrabold text-primary text-lg">
-                          {t.price}
+                          {fmt(t.price)}
                         </span>
-                        <span className="text-[10px] text-muted-foreground font-bold">ر.س</span>
+                        <span className="text-[10px] text-muted-foreground font-bold">ريال يمني</span>
                       </div>
                     </div>
                   </button>
@@ -163,7 +163,7 @@ function Index() {
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
                   موقع التوصيل
                 </p>
-                <p className="text-sm font-bold mt-0.5">شارع الأمير محمد بن سلمان</p>
+                <p className="text-sm font-bold mt-0.5">شارع الستين، بجوار جامع النور</p>
               </div>
               <ChevronLeft className="size-4 text-muted-foreground" />
             </button>
@@ -210,9 +210,9 @@ function Index() {
                   أ
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold">أحمد الشمري</p>
+                  <p className="text-sm font-bold">أحمد المرادي</p>
                   <p className="text-[11px] text-primary-foreground/50 mt-0.5">
-                    مرسيدس أكتروس • أ ط د ٥٥٤
+                    وايت إيسوزو ٥٠٠٠ لتر • م ر ب ٤٢٧
                   </p>
                 </div>
                 <button
@@ -230,8 +230,8 @@ function Index() {
             <h2 className="font-display font-bold text-lg mb-3">الطلبات السابقة</h2>
             <div className="bg-surface rounded-2xl border border-border divide-y divide-border">
               {[
-                { name: "وايت كبير", liters: "١٢٠٠٠ لتر", date: "١٢ مايو", price: 400 },
-                { name: "وايت صغير", liters: "٤٠٠٠ لتر", date: "٢٨ أبريل", price: 150 },
+                { name: "وايت جامبو", liters: "١٠٠٠٠ لتر", date: "١٢ شعبان", price: 26000 },
+                { name: "وايت صغير", liters: "١٠٠٠ لتر", date: "٢٨ رجب", price: 4000 },
               ].map((o, i) => (
                 <div key={i} className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -241,7 +241,7 @@ function Index() {
                     <div>
                       <p className="text-sm font-bold">{o.name}</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {o.liters} • {o.date} • {o.price} ر.س
+                        {o.liters} • {o.date} • {fmt(o.price)} ر.ي
                       </p>
                     </div>
                   </div>
@@ -257,9 +257,9 @@ function Index() {
         {/* Sticky CTA */}
         <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-40 pointer-events-none">
           <button className="pointer-events-auto w-full bg-primary text-primary-foreground py-4 rounded-2xl font-display font-extrabold text-base shadow-glow flex items-center justify-center gap-3 active:scale-[0.98] hover:brightness-110 transition-all">
-            <span>تأكيد طلب الوايت</span>
+            <span>تأكيد الطلب • دفع نقداً</span>
             <span className="size-1 bg-primary-foreground/40 rounded-full" />
-            <span>{current.price} ر.س</span>
+            <span>{fmt(current.price)} ر.ي</span>
           </button>
         </div>
 
