@@ -20,10 +20,12 @@ type Order = {
 
 const STATUS_LABEL: Record<string, { text: string; color: string; icon: any }> = {
   pending: { text: "قيد المراجعة", color: "bg-amber-100 text-amber-700", icon: Clock },
-  accepted: { text: "تم القبول", color: "bg-blue-100 text-blue-700", icon: CheckCircle2 },
+  approved: { text: "تم القبول", color: "bg-blue-100 text-blue-700", icon: CheckCircle2 },
   assigned: { text: "تم تعيين سائق", color: "bg-blue-100 text-blue-700", icon: Truck },
   on_the_way: { text: "في الطريق", color: "bg-primary/15 text-primary", icon: Truck },
-  delivered: { text: "تم التسليم", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
+  arrived: { text: "وصل الموقع", color: "bg-primary/15 text-primary", icon: MapPin },
+  delivering: { text: "بدأ الصب", color: "bg-primary/15 text-primary", icon: Droplets },
+  completed: { text: "تم التسليم", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
   cancelled: { text: "ملغى", color: "bg-rose-100 text-rose-700", icon: Clock },
 };
 
