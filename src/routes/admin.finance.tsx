@@ -16,7 +16,7 @@ function AdminFinance() {
 
   const load = async () => {
     const [{ data: orders }, { data: drivers }, { data: handovers }] = await Promise.all([
-      supabase.from("orders").select("id,price,status,payment_status,payment_collected_at,driver_id,city,created_at").order("created_at", { ascending: false }).limit(500),
+      supabase.from("orders").select("id,price,app_commission,commission_status,status,payment_status,payment_collected_at,driver_id,city,created_at").order("created_at", { ascending: false }).limit(500),
       supabase.from("drivers").select("id,name,balance,phone"),
       supabase.from("cash_handovers").select("id,driver_id,amount,received_by,notes,created_at").order("created_at", { ascending: false }).limit(200),
     ]);
