@@ -196,7 +196,7 @@ function AdminFinance() {
                   </tr>
                 ))}
                 {data.handovers.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">لا توجد تسليمات بعد</td></tr>
+                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">لا توجد تسديدات بعد</td></tr>
                 )}
               </tbody>
             </table>
