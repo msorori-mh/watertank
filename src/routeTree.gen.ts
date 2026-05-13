@@ -26,6 +26,7 @@ import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCitiesRouteImport } from './routes/admin.cities'
+import { Route as CustomerProfileCompleteRouteImport } from './routes/customer.profile.complete'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -113,6 +114,11 @@ const AdminCitiesRoute = AdminCitiesRouteImport.update({
   path: '/admin/cities',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CustomerProfileCompleteRoute = CustomerProfileCompleteRouteImport.update({
+  id: '/customer/profile/complete',
+  path: '/customer/profile/complete',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
   id: '/customer/orders/$id',
   path: '/customer/orders/$id',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/customer/': typeof CustomerIndexRoute
   '/driver/': typeof DriverIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
+  '/customer/profile/complete': typeof CustomerProfileCompleteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/customer': typeof CustomerIndexRoute
   '/driver': typeof DriverIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
+  '/customer/profile/complete': typeof CustomerProfileCompleteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/customer/': typeof CustomerIndexRoute
   '/driver/': typeof DriverIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
+  '/customer/profile/complete': typeof CustomerProfileCompleteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/customer/'
     | '/driver/'
     | '/customer/orders/$id'
+    | '/customer/profile/complete'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/customer'
     | '/driver'
     | '/customer/orders/$id'
+    | '/customer/profile/complete'
   id:
     | '__root__'
     | '/'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/customer/'
     | '/driver/'
     | '/customer/orders/$id'
+    | '/customer/profile/complete'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   CustomerIndexRoute: typeof CustomerIndexRoute
   DriverIndexRoute: typeof DriverIndexRoute
   CustomerOrdersIdRoute: typeof CustomerOrdersIdRoute
+  CustomerProfileCompleteRoute: typeof CustomerProfileCompleteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -385,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/customer/profile/complete': {
+      id: '/customer/profile/complete'
+      path: '/customer/profile/complete'
+      fullPath: '/customer/profile/complete'
+      preLoaderRoute: typeof CustomerProfileCompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/customer/orders/$id': {
       id: '/customer/orders/$id'
       path: '/customer/orders/$id'
@@ -414,7 +434,18 @@ const rootRouteChildren: RootRouteChildren = {
   CustomerIndexRoute: CustomerIndexRoute,
   DriverIndexRoute: DriverIndexRoute,
   CustomerOrdersIdRoute: CustomerOrdersIdRoute,
+  CustomerProfileCompleteRoute: CustomerProfileCompleteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
