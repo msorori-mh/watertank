@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
+import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const CustomerIndexRoute = CustomerIndexRouteImport.update({
   path: '/customer/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CustomerOrderRoute = CustomerOrderRouteImport.update({
+  id: '/customer/order',
+  path: '/customer/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CustomerLoginRoute = CustomerLoginRouteImport.update({
   id: '/customer/login',
   path: '/customer/login',
@@ -32,30 +38,34 @@ const CustomerLoginRoute = CustomerLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/customer/login': typeof CustomerLoginRoute
+  '/customer/order': typeof CustomerOrderRoute
   '/customer/': typeof CustomerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/customer/login': typeof CustomerLoginRoute
+  '/customer/order': typeof CustomerOrderRoute
   '/customer': typeof CustomerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/customer/login': typeof CustomerLoginRoute
+  '/customer/order': typeof CustomerOrderRoute
   '/customer/': typeof CustomerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/customer/login' | '/customer/'
+  fullPaths: '/' | '/customer/login' | '/customer/order' | '/customer/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/customer/login' | '/customer'
-  id: '__root__' | '/' | '/customer/login' | '/customer/'
+  to: '/' | '/customer/login' | '/customer/order' | '/customer'
+  id: '__root__' | '/' | '/customer/login' | '/customer/order' | '/customer/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CustomerLoginRoute: typeof CustomerLoginRoute
+  CustomerOrderRoute: typeof CustomerOrderRoute
   CustomerIndexRoute: typeof CustomerIndexRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/customer/order': {
+      id: '/customer/order'
+      path: '/customer/order'
+      fullPath: '/customer/order'
+      preLoaderRoute: typeof CustomerOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/customer/login': {
       id: '/customer/login'
       path: '/customer/login'
@@ -88,8 +105,19 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CustomerLoginRoute: CustomerLoginRoute,
+  CustomerOrderRoute: CustomerOrderRoute,
   CustomerIndexRoute: CustomerIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
