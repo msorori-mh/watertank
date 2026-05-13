@@ -50,6 +50,41 @@ export type Database = {
         }
         Relationships: []
       }
+      cash_handovers: {
+        Row: {
+          amount: number
+          created_at: string
+          driver_id: string
+          id: string
+          notes: string | null
+          received_by: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          driver_id: string
+          id?: string
+          notes?: string | null
+          received_by: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          driver_id?: string
+          id?: string
+          notes?: string | null
+          received_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_handovers_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           created_at: string
@@ -360,6 +395,23 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      record_cash_handover: {
+        Args: { _amount: number; _driver_id: string; _notes?: string }
+        Returns: {
+          amount: number
+          created_at: string
+          driver_id: string
+          id: string
+          notes: string | null
+          received_by: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cash_handovers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
