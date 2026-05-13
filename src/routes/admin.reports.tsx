@@ -52,18 +52,37 @@ function AdminReports() {
     if (o.status === "cancelled" || o.status === "rejected") c.cancelled++;
   });
 
-  // Driver performance
-  const drvStats: Record<string, { count: number; revenue: number; name: string }> = {};
-  drivers.forEach(d => { drvStats[d.id] = { count: 0, revenue: 0, name: d.name }; });
+  // Driver performance + commissions
+  const drvStats: Record<string, { count: number; revenue: number; commission: number; unpaidCommission: number; name: string }> = {};
+  drivers.forEach(d => { drvStats[d.id] = { count: 0, revenue: 0, commission: 0, unpaidCommission: 0, name: d.name }; });
   orders.forEach((o: any) => {
     if (!o.driver_id) return;
     const s = drvStats[o.driver_id]; if (!s) return;
     s.count++;
     if (o.status === "completed") s.revenue += Number(o.price);
+    s.commission += Number(o.app_commission || 0);
+    if (o.commission_status === "unpaid") s.unpaidCommission += Number(o.app_commission || 0);
   });
 
   const cancelled = orders.filter((o: any) => o.status === "cancelled" || o.status === "rejected");
   const totalRevenue = orders.filter((o: any) => o.status === "completed").reduce((a: number, o: any) => a + Number(o.price), 0);
+
+  // Commission daily / per city
+  const commissionDays: Record<string, number> = {};
+  Object.keys(days).forEach(k => { commissionDays[k] = 0; });
+  const commissionCities: Record<string, { total: number; unpaid: number }> = {};
+  let zeroCommissionCount = 0;
+  orders.forEach((o: any) => {
+    const c = Number(o.app_commission || 0);
+    const k = new Date(o.created_at).toISOString().slice(0, 10);
+    if (commissionDays[k] !== undefined) commissionDays[k] += c;
+    const cc = commissionCities[o.city] || (commissionCities[o.city] = { total: 0, unpaid: 0 });
+    cc.total += c;
+    if (o.commission_status === "unpaid") cc.unpaid += c;
+    if (c === 0 && o.status === "completed") zeroCommissionCount++;
+  });
+  const totalCommission = orders.reduce((a: number, o: any) => a + Number(o.app_commission || 0), 0);
+  const totalUnpaidCommission = orders.filter((o: any) => o.commission_status === "unpaid").reduce((a: number, o: any) => a + Number(o.app_commission || 0), 0);
 
   return (
     <AdminShell title="التقارير">
