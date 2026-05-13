@@ -13,21 +13,27 @@ function AdminDashboard() {
   const [recent, setRecent] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const load = async () => {
+    const todayIso = new Date(); todayIso.setHours(0, 0, 0, 0);
+    const [{ data: orders }, { data: drivers }] = await Promise.all([
+      supabase.from("orders").select("id,price,status,created_at,city,capacity").order("created_at", { ascending: false }).limit(200),
+      supabase.from("drivers").select("id,availability,license_status"),
+    ]);
+    const today = (orders || []).filter(o => new Date(o.created_at) >= todayIso);
+    const pending = (orders || []).filter(o => o.status === "pending").length;
+    const revenue = today.filter(o => o.status === "completed").reduce((a, o) => a + Number(o.price), 0);
+    const activeDrivers = (drivers || []).filter(d => d.availability === "available" && d.license_status === "approved").length;
+    setStats({ today: today.length, pending, drivers: activeDrivers, revenue });
+    setRecent((orders || []).slice(0, 8));
+    setLoading(false);
+  };
+
   useEffect(() => {
-    (async () => {
-      const todayIso = new Date(); todayIso.setHours(0, 0, 0, 0);
-      const [{ data: orders }, { data: drivers }] = await Promise.all([
-        supabase.from("orders").select("id,price,status,created_at,city,capacity").order("created_at", { ascending: false }).limit(200),
-        supabase.from("drivers").select("id,availability,license_status"),
-      ]);
-      const today = (orders || []).filter(o => new Date(o.created_at) >= todayIso);
-      const pending = (orders || []).filter(o => o.status === "pending").length;
-      const revenue = today.filter(o => o.status === "completed").reduce((a, o) => a + Number(o.price), 0);
-      const activeDrivers = (drivers || []).filter(d => d.availability === "available" && d.license_status === "approved").length;
-      setStats({ today: today.length, pending, drivers: activeDrivers, revenue });
-      setRecent((orders || []).slice(0, 8));
-      setLoading(false);
-    })();
+    load();
+    const ch = supabase.channel("admin-dashboard")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, []);
 
   const cards = [

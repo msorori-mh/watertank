@@ -8,13 +8,15 @@ export const Route = createFileRoute("/customer/orders/$id")({
 });
 
 const STEPS = [
-  { id: "pending", label: "تم الاستلام" },
-  { id: "approved", label: "قُبل الطلب" },
+  { id: "pending", label: "بانتظار الاعتماد" },
+  { id: "approved", label: "اعتُمد الطلب" },
   { id: "assigned", label: "تعيين سائق" },
+  { id: "accepted", label: "قبله السائق" },
   { id: "on_the_way", label: "في الطريق" },
   { id: "arrived", label: "وصل الموقع" },
-  { id: "delivering", label: "بدأ الصب" },
-  { id: "completed", label: "تم التسليم" },
+  { id: "delivering", label: "يصب الماء" },
+  { id: "payment_collected", label: "تم الدفع" },
+  { id: "completed", label: "اكتمل" },
 ];
 
 function OrderDetail() {

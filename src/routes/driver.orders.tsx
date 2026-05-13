@@ -15,17 +15,24 @@ function DriverAvailableOrders() {
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState<string | null>(null);
 
+  const load = async () => {
+    // RLS already restricts to approved + same city + license_status approved
+    const { data } = await supabase.from("orders").select("*")
+      .eq("status", "approved")
+      .is("driver_id", null)
+      .order("created_at", { ascending: false });
+    setOrders(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (gate.loading) return;
     if (!gate.driver) { nav({ to: "/driver/register" }); return; }
-    (async () => {
-      const { data } = await supabase.from("orders").select("*")
-        .in("status", ["pending", "approved"])
-        .is("driver_id", null)
-        .order("created_at", { ascending: false });
-      setOrders(data || []);
-      setLoading(false);
-    })();
+    load();
+    const ch = supabase.channel("driver-available-orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [gate, nav]);
 
   if (gate.loading || !gate.driver) return <DriverLoading />;
@@ -35,7 +42,7 @@ function DriverAvailableOrders() {
     return (
       <DriverShell title="الطلبات المتاحة" driver={driver}>
         <div className="rounded-2xl bg-white shadow-[var(--shadow-soft)] p-6 mt-4 text-center text-sm text-muted-foreground">
-          سيتم عرض الطلبات بعد الموافقة على حسابك
+          سيتم عرض الطلبات بعد موافقة الإدارة على حسابك
         </div>
       </DriverShell>
     );
@@ -43,7 +50,8 @@ function DriverAvailableOrders() {
 
   const accept = async (id: string) => {
     setAccepting(id);
-    await supabase.from("orders").update({ driver_id: driver.id, status: "assigned" }).eq("id", id);
+    // status becomes "accepted" when driver claims the approved order
+    await supabase.from("orders").update({ driver_id: driver.id, status: "accepted" }).eq("id", id);
     setAccepting(null);
     nav({ to: "/driver" });
   };
@@ -56,7 +64,8 @@ function DriverAvailableOrders() {
         ) : orders.length === 0 ? (
           <div className="rounded-2xl bg-white shadow-[var(--shadow-soft)] p-6 text-center">
             <Truck className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-            <p className="text-sm text-muted-foreground mt-3">لا توجد طلبات متاحة حالياً</p>
+            <p className="text-sm text-muted-foreground mt-3">لا توجد طلبات معتمدة حالياً</p>
+            <p className="text-xs text-muted-foreground mt-1">تظهر الطلبات هنا فور اعتماد الإدارة لها</p>
           </div>
         ) : orders.map(o => (
           <div key={o.id} className="rounded-2xl bg-white shadow-[var(--shadow-soft)] p-4">
@@ -73,6 +82,13 @@ function DriverAvailableOrders() {
                 <p className="text-xs text-muted-foreground">ر.ي • نقداً</p>
               </div>
             </div>
+            {o.address_snapshot && (
+              <a href={`https://www.google.com/maps?q=${(o.address_snapshot as any).lat},${(o.address_snapshot as any).lng}`}
+                target="_blank" rel="noreferrer"
+                className="block text-center mt-2 rounded-xl border border-primary/30 py-2 text-xs font-semibold text-primary">
+                <MapPin className="h-3 w-3 inline" /> الموقع على الخريطة
+              </a>
+            )}
             <button onClick={() => accept(o.id)} disabled={accepting === o.id}
               className="mt-3 w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-60 flex items-center justify-center gap-2">
               {accepting === o.id && <Loader2 className="h-4 w-4 animate-spin" />}

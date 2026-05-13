@@ -162,6 +162,7 @@ export type Database = {
           driver_id: string | null
           id: string
           notes: string | null
+          payment_collected_at: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           price: number
@@ -181,6 +182,7 @@ export type Database = {
           driver_id?: string | null
           id?: string
           notes?: string | null
+          payment_collected_at?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           price: number
@@ -200,6 +202,7 @@ export type Database = {
           driver_id?: string | null
           id?: string
           notes?: string | null
+          payment_collected_at?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           price?: number
@@ -256,6 +259,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          is_active: boolean
           lat: number | null
           lng: number | null
           name: string | null
@@ -268,6 +272,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id: string
+          is_active?: boolean
           lat?: number | null
           lng?: number | null
           name?: string | null
@@ -280,6 +285,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_active?: boolean
           lat?: number | null
           lng?: number | null
           name?: string | null
@@ -332,11 +338,14 @@ export type Database = {
         | "pending"
         | "approved"
         | "assigned"
+        | "accepted"
         | "on_the_way"
         | "arrived"
         | "delivering"
+        | "payment_collected"
         | "completed"
         | "cancelled"
+        | "rejected"
       payment_method: "cash" | "wallet"
       payment_status: "pending" | "paid" | "failed"
       user_type: "customer" | "driver" | "admin"
@@ -476,11 +485,14 @@ export const Constants = {
         "pending",
         "approved",
         "assigned",
+        "accepted",
         "on_the_way",
         "arrived",
         "delivering",
+        "payment_collected",
         "completed",
         "cancelled",
+        "rejected",
       ],
       payment_method: ["cash", "wallet"],
       payment_status: ["pending", "paid", "failed"],

@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Truck, Shield, Settings, Droplets } from "lucide-react";
+import { Truck, Shield, Droplets } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "وايت ماء — منصة توصيل المياه في اليمن" },
-      { name: "description", content: "منصة وايت ماء: مياه عذبة تصلك في أقل من ساعة. عميل، سائق، ولوحة إدارة." },
+      { title: "وايت ماء — توصيل المياه في اليمن" },
+      { name: "description", content: "اطلب وايت ماء في أقل من ساعة. سجّل الدخول كعميل أو سائق." },
     ],
   }),
   component: Landing,
@@ -33,16 +33,6 @@ function Landing() {
       iconWrap: "bg-white/15 text-white",
       ctaCls: "text-white",
     },
-    {
-      to: "/admin/login" as const,
-      title: "مدير",
-      desc: "لوحة الإدارة: متابعة الطلبات، السائقين، المدن والأسعار.",
-      cta: "دخول المدير",
-      icon: Settings,
-      style: "bg-slate-100 border-2 border-slate-200 text-slate-800",
-      iconWrap: "bg-slate-200 text-slate-700",
-      ctaCls: "text-slate-800",
-    },
   ];
 
   return (
@@ -57,12 +47,12 @@ function Landing() {
           <span className="text-primary">في أقل من ساعة</span>
         </h1>
         <p className="mt-4 text-sm text-muted-foreground md:text-base">
-          اختر بوابتك للدخول إلى المنصة
+          اختر بوابتك للدخول
         </p>
       </header>
 
       <main className="flex-1 px-6 pb-12">
-        <div className="w-full max-w-5xl mx-auto grid gap-5 md:grid-cols-3">
+        <div className="w-full max-w-3xl mx-auto grid gap-5 md:grid-cols-2">
           {cards.map((c) => {
             const Icon = c.icon;
             return (
