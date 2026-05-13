@@ -2,14 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/admin/orders")({
   component: AdminOrders,
 });
 
-const STATUSES = ["pending", "approved", "assigned", "on_the_way", "arrived", "delivering", "completed", "cancelled"] as const;
+const STATUSES = ["pending", "approved", "assigned", "accepted", "on_the_way", "arrived", "delivering", "payment_collected", "completed", "cancelled", "rejected"] as const;
 type Status = typeof STATUSES[number];
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "بانتظار الاعتماد", approved: "معتمد", assigned: "مُعيَّن",
+  accepted: "قبله السائق", on_the_way: "في الطريق", arrived: "وصل",
+  delivering: "يصب الماء", payment_collected: "تم التحصيل",
+  completed: "مكتمل", cancelled: "ملغي", rejected: "مرفوض",
+};
 
 function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -26,7 +33,13 @@ function AdminOrders() {
     setOrders(o || []); setDrivers(d || []); setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("admin-orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
 
   const update = async (id: string, patch: any) => {
     setUpdating(id);
@@ -45,7 +58,7 @@ function AdminOrders() {
         </button>
         {STATUSES.map(s => (
           <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${filter === s ? "bg-primary text-primary-foreground" : "bg-white border border-border"}`}>
-            {s} ({orders.filter(o => o.status === s).length})
+            {STATUS_LABELS[s]} ({orders.filter(o => o.status === s).length})
           </button>
         ))}
       </div>
@@ -54,16 +67,17 @@ function AdminOrders() {
         {loading ? (
           <div className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-primary" /></div>
         ) : (
-          <table className="w-full text-sm min-w-[800px]">
+          <table className="w-full text-sm min-w-[900px]">
             <thead className="bg-slate-50 text-xs text-muted-foreground">
               <tr>
                 <th className="text-right p-3">الرقم</th>
                 <th className="text-right p-3">المدينة</th>
                 <th className="text-right p-3">الحجم</th>
                 <th className="text-right p-3">السعر</th>
+                <th className="text-right p-3">الدفع</th>
                 <th className="text-right p-3">السائق</th>
                 <th className="text-right p-3">الحالة</th>
-                <th className="text-right p-3">إجراءات</th>
+                <th className="text-right p-3">إجراءات سريعة</th>
               </tr>
             </thead>
             <tbody>
@@ -76,10 +90,16 @@ function AdminOrders() {
                     <td className="p-3">{o.capacity.toLocaleString("ar-EG")} لتر</td>
                     <td className="p-3 font-semibold">{Number(o.price).toLocaleString("ar-EG")} ر.ي</td>
                     <td className="p-3">
+                      <span className={`text-xs rounded-full px-2 py-0.5 ${o.payment_status === "paid" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                        {o.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
+                      </span>
+                    </td>
+                    <td className="p-3">
                       <select
                         value={o.driver_id || ""}
                         onChange={(e) => update(o.id, { driver_id: e.target.value || null, status: e.target.value ? "assigned" : o.status })}
                         className="rounded border border-border px-2 py-1 text-xs"
+                        disabled={o.status === "pending" || o.status === "rejected" || o.status === "cancelled"}
                       >
                         <option value="">— غير مُعيَّن —</option>
                         {cityDrivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -91,17 +111,31 @@ function AdminOrders() {
                         onChange={(e) => update(o.id, { status: e.target.value })}
                         className="rounded border border-border px-2 py-1 text-xs"
                       >
-                        {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
                       </select>
                     </td>
                     <td className="p-3">
-                      {updating === o.id && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                      <div className="flex gap-1 items-center">
+                        {o.status === "pending" && (
+                          <>
+                            <button onClick={() => update(o.id, { status: "approved" })}
+                              className="rounded-lg bg-emerald-100 text-emerald-700 px-2 py-1 text-xs font-semibold hover:bg-emerald-200">
+                              <CheckCircle2 className="h-3 w-3 inline" /> اعتماد
+                            </button>
+                            <button onClick={() => update(o.id, { status: "rejected" })}
+                              className="rounded-lg bg-rose-100 text-rose-700 px-2 py-1 text-xs font-semibold hover:bg-rose-200">
+                              <XCircle className="h-3 w-3 inline" /> رفض
+                            </button>
+                          </>
+                        )}
+                        {updating === o.id && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                      </div>
                     </td>
                   </tr>
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="p-8 text-center text-muted-foreground text-sm">لا توجد طلبات</td></tr>
+                <tr><td colSpan={8} className="p-8 text-center text-muted-foreground text-sm">لا توجد طلبات</td></tr>
               )}
             </tbody>
           </table>
