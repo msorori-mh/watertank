@@ -146,7 +146,7 @@ function DriverHome() {
         </div>
         <div className="rounded-2xl bg-white shadow-[var(--shadow-soft)] p-3 text-center">
           <Wallet className="h-4 w-4 mx-auto text-primary" />
-          <p className="text-xs text-muted-foreground mt-1">العهدة</p>
+          <p className="text-xs text-muted-foreground mt-1">عمولة مستحقة</p>
           <p className="font-display font-bold text-sm">{Number(driver.balance || 0).toLocaleString("ar-EG")} ر.ي</p>
         </div>
         <div className="rounded-2xl bg-white shadow-[var(--shadow-soft)] p-3 text-center">
