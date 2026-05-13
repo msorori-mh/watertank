@@ -73,9 +73,12 @@ export type Database = {
       }
       drivers: {
         Row: {
+          availability: Database["public"]["Enums"]["driver_availability"]
+          balance: number
           city: string | null
           created_at: string
           id: string
+          license_status: Database["public"]["Enums"]["license_status"]
           name: string
           phone: string
           rating: number
@@ -85,9 +88,12 @@ export type Database = {
           vehicle_plate: string
         }
         Insert: {
+          availability?: Database["public"]["Enums"]["driver_availability"]
+          balance?: number
           city?: string | null
           created_at?: string
           id?: string
+          license_status?: Database["public"]["Enums"]["license_status"]
           name: string
           phone: string
           rating?: number
@@ -97,9 +103,12 @@ export type Database = {
           vehicle_plate: string
         }
         Update: {
+          availability?: Database["public"]["Enums"]["driver_availability"]
+          balance?: number
           city?: string | null
           created_at?: string
           id?: string
+          license_status?: Database["public"]["Enums"]["license_status"]
           name?: string
           phone?: string
           rating?: number
@@ -316,7 +325,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "customer" | "driver"
+      driver_availability: "available" | "busy" | "offline"
       driver_status: "active" | "inactive" | "busy"
+      license_status: "pending" | "approved" | "rejected"
       order_status:
         | "pending"
         | "approved"
@@ -458,7 +469,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "customer", "driver"],
+      driver_availability: ["available", "busy", "offline"],
       driver_status: ["active", "inactive", "busy"],
+      license_status: ["pending", "approved", "rejected"],
       order_status: [
         "pending",
         "approved",

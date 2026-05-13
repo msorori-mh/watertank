@@ -10,10 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DriverIndexRouteImport } from './routes/driver.index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as DriverRegisterRouteImport } from './routes/driver.register'
+import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
+import { Route as DriverLoginRouteImport } from './routes/driver.login'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
+import { Route as AdminCitiesRouteImport } from './routes/admin.cities'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -21,9 +29,34 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DriverIndexRoute = DriverIndexRouteImport.update({
+  id: '/driver/',
+  path: '/driver/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CustomerIndexRoute = CustomerIndexRouteImport.update({
   id: '/customer/',
   path: '/customer/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverRegisterRoute = DriverRegisterRouteImport.update({
+  id: '/driver/register',
+  path: '/driver/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverOrdersRoute = DriverOrdersRouteImport.update({
+  id: '/driver/orders',
+  path: '/driver/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverLoginRoute = DriverLoginRouteImport.update({
+  id: '/driver/login',
+  path: '/driver/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomerOrderRoute = CustomerOrderRouteImport.update({
@@ -36,10 +69,25 @@ const CustomerLoginRoute = CustomerLoginRouteImport.update({
   path: '/customer/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDriversRoute = AdminDriversRouteImport.update({
+  id: '/admin/drivers',
+  path: '/admin/drivers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCitiesRoute = AdminCitiesRouteImport.update({
+  id: '/admin/cities',
+  path: '/admin/cities',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
   id: '/customer/orders/$id',
@@ -49,61 +97,118 @@ const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/cities': typeof AdminCitiesRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
+  '/driver/login': typeof DriverLoginRoute
+  '/driver/orders': typeof DriverOrdersRoute
+  '/driver/register': typeof DriverRegisterRoute
+  '/admin/': typeof AdminIndexRoute
   '/customer/': typeof CustomerIndexRoute
+  '/driver/': typeof DriverIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/cities': typeof AdminCitiesRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
+  '/driver/login': typeof DriverLoginRoute
+  '/driver/orders': typeof DriverOrdersRoute
+  '/driver/register': typeof DriverRegisterRoute
+  '/admin': typeof AdminIndexRoute
   '/customer': typeof CustomerIndexRoute
+  '/driver': typeof DriverIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/cities': typeof AdminCitiesRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
+  '/driver/login': typeof DriverLoginRoute
+  '/driver/orders': typeof DriverOrdersRoute
+  '/driver/register': typeof DriverRegisterRoute
+  '/admin/': typeof AdminIndexRoute
   '/customer/': typeof CustomerIndexRoute
+  '/driver/': typeof DriverIndexRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin/cities'
+    | '/admin/drivers'
     | '/admin/login'
+    | '/admin/orders'
     | '/customer/login'
     | '/customer/order'
+    | '/driver/login'
+    | '/driver/orders'
+    | '/driver/register'
+    | '/admin/'
     | '/customer/'
+    | '/driver/'
     | '/customer/orders/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/cities'
+    | '/admin/drivers'
     | '/admin/login'
+    | '/admin/orders'
     | '/customer/login'
     | '/customer/order'
+    | '/driver/login'
+    | '/driver/orders'
+    | '/driver/register'
+    | '/admin'
     | '/customer'
+    | '/driver'
     | '/customer/orders/$id'
   id:
     | '__root__'
     | '/'
+    | '/admin/cities'
+    | '/admin/drivers'
     | '/admin/login'
+    | '/admin/orders'
     | '/customer/login'
     | '/customer/order'
+    | '/driver/login'
+    | '/driver/orders'
+    | '/driver/register'
+    | '/admin/'
     | '/customer/'
+    | '/driver/'
     | '/customer/orders/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminCitiesRoute: typeof AdminCitiesRoute
+  AdminDriversRoute: typeof AdminDriversRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
+  DriverLoginRoute: typeof DriverLoginRoute
+  DriverOrdersRoute: typeof DriverOrdersRoute
+  DriverRegisterRoute: typeof DriverRegisterRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   CustomerIndexRoute: typeof CustomerIndexRoute
+  DriverIndexRoute: typeof DriverIndexRoute
   CustomerOrdersIdRoute: typeof CustomerOrdersIdRoute
 }
 
@@ -116,11 +221,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/driver/': {
+      id: '/driver/'
+      path: '/driver'
+      fullPath: '/driver/'
+      preLoaderRoute: typeof DriverIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/customer/': {
       id: '/customer/'
       path: '/customer'
       fullPath: '/customer/'
       preLoaderRoute: typeof CustomerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/register': {
+      id: '/driver/register'
+      path: '/driver/register'
+      fullPath: '/driver/register'
+      preLoaderRoute: typeof DriverRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/orders': {
+      id: '/driver/orders'
+      path: '/driver/orders'
+      fullPath: '/driver/orders'
+      preLoaderRoute: typeof DriverOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/login': {
+      id: '/driver/login'
+      path: '/driver/login'
+      fullPath: '/driver/login'
+      preLoaderRoute: typeof DriverLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customer/order': {
@@ -137,12 +277,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
-      path: '/login'
+      path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/drivers': {
+      id: '/admin/drivers'
+      path: '/admin/drivers'
+      fullPath: '/admin/drivers'
+      preLoaderRoute: typeof AdminDriversRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/cities': {
+      id: '/admin/cities'
+      path: '/admin/cities'
+      fullPath: '/admin/cities'
+      preLoaderRoute: typeof AdminCitiesRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/customer/orders/$id': {
       id: '/customer/orders/$id'
@@ -156,21 +317,20 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminCitiesRoute: AdminCitiesRoute,
+  AdminDriversRoute: AdminDriversRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
+  DriverLoginRoute: DriverLoginRoute,
+  DriverOrdersRoute: DriverOrdersRoute,
+  DriverRegisterRoute: DriverRegisterRoute,
+  AdminIndexRoute: AdminIndexRoute,
   CustomerIndexRoute: CustomerIndexRoute,
+  DriverIndexRoute: DriverIndexRoute,
   CustomerOrdersIdRoute: CustomerOrdersIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

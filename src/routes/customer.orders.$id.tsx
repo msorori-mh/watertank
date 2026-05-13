@@ -9,10 +9,12 @@ export const Route = createFileRoute("/customer/orders/$id")({
 
 const STEPS = [
   { id: "pending", label: "تم الاستلام" },
-  { id: "accepted", label: "قُبل الطلب" },
+  { id: "approved", label: "قُبل الطلب" },
   { id: "assigned", label: "تعيين سائق" },
   { id: "on_the_way", label: "في الطريق" },
-  { id: "delivered", label: "تم التسليم" },
+  { id: "arrived", label: "وصل الموقع" },
+  { id: "delivering", label: "بدأ الصب" },
+  { id: "completed", label: "تم التسليم" },
 ];
 
 function OrderDetail() {
