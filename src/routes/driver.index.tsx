@@ -88,7 +88,7 @@ function DriverHome() {
     // إشعار العميل بكل تقدم
     const t = STEP_TO_NOTIF[step.next];
     if (t && active.customer_id) {
-      const msg = ORDER_EVENT_MESSAGES[t];
+      const msg = ORDER_EVENT_MESSAGES[t]!;
       await notifyUser(active.customer_id, active.id, t, msg.title, msg.body(shortId(active.id)));
     }
 

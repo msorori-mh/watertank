@@ -54,7 +54,7 @@ function DriverAvailableOrders() {
     const order = orders.find((o) => o.id === id);
     await supabase.from("orders").update({ driver_id: driver.id, status: "accepted" }).eq("id", id);
     if (order?.customer_id) {
-      const msg = ORDER_EVENT_MESSAGES.order_accepted;
+      const msg = ORDER_EVENT_MESSAGES.order_accepted!;
       await notifyUser(order.customer_id, id, "order_accepted", msg.title, msg.body(shortId(id)));
     }
     setAccepting(null);

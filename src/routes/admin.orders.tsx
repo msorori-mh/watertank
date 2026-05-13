@@ -62,7 +62,7 @@ function AdminOrders() {
     if (prev && patch.status && patch.status !== prev.status) {
       const t = STATUS_TO_NOTIF[patch.status];
       if (t) {
-        const msg = ORDER_EVENT_MESSAGES[t];
+        const msg = ORDER_EVENT_MESSAGES[t]!;
         await notifyUser(prev.customer_id, id, t, msg.title, msg.body(shortId(id)));
       }
     }
