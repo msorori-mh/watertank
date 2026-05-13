@@ -60,7 +60,7 @@ function AdminFinance() {
     const { error } = await supabase.rpc("record_cash_handover", {
       _driver_id: driver.id,
       _amount: amount,
-      _notes: f.notes || null,
+      _notes: f.notes || undefined,
     });
     setSubmitting(null);
     if (error) { alert("تعذر تسجيل التسليم: " + error.message); return; }
