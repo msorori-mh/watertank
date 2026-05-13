@@ -31,9 +31,8 @@ export async function notifyUser(
 }
 
 /** خرائط رسائل قياسية لأحداث الطلب */
-export const ORDER_EVENT_MESSAGES: Record<
-  Exclude<NotificationType, "general">,
-  { title: string; body: (orderShort: string) => string }
+export const ORDER_EVENT_MESSAGES: Partial<
+  Record<NotificationType, { title: string; body: (orderShort: string) => string }>
 > = {
   order_approved: {
     title: "تم اعتماد طلبك",
