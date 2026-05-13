@@ -102,15 +102,15 @@ function AdminFinance() {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
           <div className="p-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-display font-bold">عهد السائقين</h2>
-            <span className="text-xs text-muted-foreground">المتبقي على كل سائق</span>
+            <h2 className="font-display font-bold">عمولات التطبيق المستحقة على السائقين</h2>
+            <span className="text-xs text-muted-foreground">عمولة فقط — لا تشمل قيمة الطلبات</span>
           </div>
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-xs text-muted-foreground">
               <tr>
                 <th className="text-right p-3">السائق</th>
                 <th className="text-right p-3">الهاتف</th>
-                <th className="text-right p-3">العهدة</th>
+                <th className="text-right p-3">عمولات مستحقة</th>
                 <th className="text-right p-3">إجراء</th>
               </tr>
             </thead>
@@ -127,9 +127,9 @@ function AdminFinance() {
                         {Number(d.balance || 0) > 0 ? (
                           <button onClick={() => setForm((s) => ({ ...s, [d.id]: { ...f, open: !f.open } }))}
                             className="rounded-lg bg-emerald-100 text-emerald-700 px-2 py-1 text-xs font-semibold hover:bg-emerald-200">
-                            {f.open ? "إخفاء" : "تسجيل تسليم مبلغ"}
+                            {f.open ? "إخفاء" : "تسديد عمولة التطبيق"}
                           </button>
-                        ) : <span className="text-xs text-muted-foreground">لا توجد عهدة</span>}
+                        ) : <span className="text-xs text-muted-foreground">لا توجد عمولات</span>}
                       </td>
                     </tr>
                     {f.open && (
@@ -157,7 +157,7 @@ function AdminFinance() {
                               onClick={() => submitHandover(d)}
                               className="rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-semibold disabled:opacity-60"
                             >
-                              {submitting === d.id ? "..." : "تأكيد التسليم"}
+                              {submitting === d.id ? "..." : "تأكيد التسديد"}
                             </button>
                           </div>
                         </td>
@@ -172,7 +172,7 @@ function AdminFinance() {
 
         <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
           <div className="p-4 border-b border-border">
-            <h2 className="font-display font-bold">سجل تسليم العهد</h2>
+            <h2 className="font-display font-bold">سجل تسديد العمولات</h2>
           </div>
           <div className="max-h-[480px] overflow-auto">
             <table className="w-full text-sm">
