@@ -1,177 +1,212 @@
-# بناء تطبيق Android لـ "وايت ماء" — وضع الإنتاج
+# بناء تطبيق Android — وايت ماء
 
-## ملخص الوضع
+## ⚠️ ملاحظة مهمة: هذه نسخة MVP تجريبية
 
-| العنصر | القيمة |
-|---|---|
-| App ID | `app.lovable.wayetmaa` |
-| App Name | `وايت ماء` |
-| Web Dir | `dist/` (ملفات محزّمة داخل APK) |
-| `server.url` | **معطّل** — لا اعتماد على رابط Lovable |
-| الإنترنت مطلوب لـ | Supabase Auth + REST + Realtime + GPS Maps فقط |
+هذه النسخة تستخدم آلية **Hot Reload المُحسّن**، وليست نسخة Production مستقلة بعد.
 
----
+### كيف يعمل التطبيق حالياً
 
-## ⚠️ تنبيه معماري مهم — اقرأ قبل البناء
+- APK لا يحتوي على ملفات الواجهة (HTML/CSS/JS) محلياً.
+- عند تشغيل التطبيق، يحمّل الواجهة من رابط Lovable الثابت المنشور:
+  ```
+  https://project--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app
+  ```
+- أي تحديث للواجهة يصل للمستخدم **فوراً** بعد نشره من Lovable (بدون إعادة بناء APK).
 
-المشروع يستخدم **TanStack Start** الذي ينتج افتراضياً Cloudflare Worker
-(SSR) وليس مجلد `dist/` ثابتاً جاهزاً للحزم في APK.
+### المتطلبات الحرجة
 
-لتشغيل وضع الإنتاج فعلياً يلزم أحد المسارَين:
+| المتطلب | الحالة |
+|---------|--------|
+| نشر المشروع من Lovable (زر Publish) | **إلزامي قبل بناء APK** |
+| اتصال إنترنت دائم على الجهاز | **إلزامي لتشغيل التطبيق** |
+| Supabase (Auth + Realtime + Database) | يعمل عبر الإنترنت |
+| GPS الجغرافي | يعمل (صلاحيات تلقائية) |
 
-### المسار (أ) — Prerender جميع المسارات
-أضف في `vite.config.ts`:
-```ts
-export default defineConfig({
-  tanstackStart: {
-    server: { entry: 'server' },
-    prerender: {
-      enabled: true,
-      crawlLinks: true,
-      routes: [
-        '/', '/customer/login', '/driver/login', '/driver/register',
-        '/admin/login',
-      ],
-    },
-  },
-});
-```
-ثم `npm run build` يُولّد HTML ثابت + أصول العميل في `dist/client/`.
-عدّل `webDir` إلى `'dist/client'` في `capacitor.config.ts`.
+### مزايا هذه النسخة
 
-### المسار (ب) — تحويل المشروع إلى Vite SPA
-تغيير معماري كبير: استبدال TanStack Start بـ Vite + TanStack Router (SPA).
-لا حاجة له ما دامت كل صفحاتنا تستخدم `supabase` browser client مباشرة
-بدون `createServerFn` (وهو الوضع الحالي).
+- ✅ تحديثات فورية بدون إعادة بناء/توزيع APK جديد
+- ✅ لا تكسر معاينة Lovable ولا تطوير الميزات
+- ✅ نشر سريع للاختبار والتجربة الأولية
+- ✅ المنطق الكامل (طلبات/سائق/إدارة/مالية) يعمل كما في Web
 
-> الخبر الجيد: **لا توجد** أي `createServerFn` في `src/`، لذا الانتقال
-> لـ SPA أو Prerender كامل ممكن دون فقدان منطق.
+### قيود هذه النسخة
+
+- ❌ لا يعمل بدون إنترنت (لا يوجد offline mode)
+- ❌ بطء أول تحميل حسب سرعة الاتصال
+- ❌ غير مناسب للنشر النهائي على Google Play
 
 ---
 
-## خطوات بناء APK Release (محلياً)
+## خطوات بناء APK
 
-> يلزم: Android Studio + JDK 17 + Android SDK + مفتاح توقيع Release.
+### 1. تجهيز البيئة المحلية (مرة واحدة)
 
-### 1) بناء الواجهة
 ```bash
-git clone <repo>
-cd <repo>
-npm install
-npm run build           # يُنتج dist/
+# يجب توفر:
+# - Node.js 18+
+# - JDK 17
+# - Android Studio + Android SDK
+# - متغير ANDROID_HOME مضبوط
 ```
 
-### 2) إضافة منصة Android
+### 2. تصدير المشروع من Lovable
+
+1. اضغط **GitHub → Connect to GitHub** في Lovable
+2. استنسخ المستودع محلياً:
+   ```bash
+   git clone <your-repo-url>
+   cd <project-folder>
+   npm install
+   ```
+
+### 3. نشر المشروع من Lovable (إلزامي)
+
+قبل بناء APK، اضغط **Publish** في Lovable للتأكد أن الرابط الثابت يعمل:
+```
+https://project--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app
+```
+
+اختبر الرابط في المتصفح أولاً للتأكد أنه يفتح التطبيق.
+
+### 4. إضافة منصة Android
+
 ```bash
-npx cap add android     # لمرة واحدة فقط
-npx cap sync android    # ينسخ dist/ + الإضافات + يحدّث AndroidManifest
+npx cap add android
+npx cap sync android
 ```
 
-`npx cap sync` يحقن تلقائياً في `android/app/src/main/AndroidManifest.xml`:
-- `android.permission.INTERNET`
-- `android.permission.ACCESS_FINE_LOCATION`
-- `android.permission.ACCESS_COARSE_LOCATION`
+### 5. بناء نسخة Debug (للاختبار)
 
-### 3) توليد أيقونة + Splash
 ```bash
-npm i -D @capacitor/assets
-mkdir -p resources
-# ضع: resources/icon.png (1024×1024) و resources/splash.png (2732×2732)
-npx capacitor-assets generate --android
+npx cap open android
+# داخل Android Studio: Build → Build APK
 ```
 
-### 4) إنشاء مفتاح توقيع Release
-```bash
-keytool -genkey -v -keystore wayet-release.keystore \
-  -alias wayet -keyalg RSA -keysize 2048 -validity 10000
-```
-احفظ الـ keystore + كلمات المرور في مكان آمن (لا تضعها في Git).
-
-### 5) ربط المفتاح بـ Gradle
-في `android/app/build.gradle` أضف داخل `android { ... }`:
-```gradle
-signingConfigs {
-    release {
-        storeFile file('../../wayet-release.keystore')
-        storePassword System.getenv('WAYET_STORE_PASS')
-        keyAlias 'wayet'
-        keyPassword System.getenv('WAYET_KEY_PASS')
-    }
-}
-buildTypes {
-    release {
-        signingConfig signingConfigs.release
-        minifyEnabled true
-        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-    }
-}
-```
-
-### 6) بناء APK / AAB موقّع
+أو عبر CLI:
 ```bash
 cd android
-./gradlew assembleRelease     # ينتج app/build/outputs/apk/release/app-release.apk
-./gradlew bundleRelease       # ينتج .aab لـ Play Store
+./gradlew assembleDebug
+# الناتج: android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-أو من Android Studio: `Build > Generate Signed Bundle / APK`.
+### 6. بناء نسخة Release (للتوزيع)
+
+#### أ) إنشاء keystore (مرة واحدة)
+
+```bash
+keytool -genkey -v -keystore wayetmaa-release.keystore \
+  -alias wayetmaa -keyalg RSA -keysize 2048 -validity 10000
+```
+
+احتفظ بالملف وكلمة المرور في مكان آمن — فقدانهما يعني عدم قدرتك على تحديث التطبيق لاحقاً.
+
+#### ب) إعداد التوقيع في `android/app/build.gradle`
+
+```gradle
+android {
+    signingConfigs {
+        release {
+            storeFile file('../../wayetmaa-release.keystore')
+            storePassword 'YOUR_PASSWORD'
+            keyAlias 'wayetmaa'
+            keyPassword 'YOUR_PASSWORD'
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+}
+```
+
+#### ج) بناء APK موقّع
+
+```bash
+cd android
+./gradlew assembleRelease
+# الناتج: android/app/build/outputs/apk/release/app-release.apk
+```
+
+#### د) أو AAB لـ Google Play
+
+```bash
+./gradlew bundleRelease
+# الناتج: android/app/build/outputs/bundle/release/app-release.aab
+```
 
 ---
 
-## اختبارات إلزامية قبل النشر
+## الاختبار على جهاز حقيقي
+
+### قائمة فحص أساسية
+
+- [ ] التطبيق يفتح ويعرض شاشة البداية (عميل + سائق)
+- [ ] لا تظهر بطاقة "الإدارة" في تطبيق الجوال
+- [ ] تسجيل دخول عميل جديد يعمل
+- [ ] تسجيل دخول سائق جديد يعمل
+- [ ] إنشاء طلب من العميل ينجح
+- [ ] الطلب لا يظهر للسائق قبل اعتماد الإدارة
+- [ ] Realtime يعمل (تحديث حالة الطلب فوري)
+- [ ] صلاحية GPS تُطلب وتعمل
+- [ ] تتبع موقع السائق يعمل
 
 ### اختبار GPS
-1. ثبّت APK على جهاز فعلي (لا محاكي).
-2. افتح `العميل > طلب جديد > تحديد موقعي`.
-3. يجب أن يظهر طلب صلاحية الموقع لأول مرة، ثم يُلتقط الإحداثيان.
-4. إن لم يظهر الطلب: تأكد من تشغيل الموقع في إعدادات الهاتف.
+
+- افتح صفحة السائق
+- اقبل صلاحية الموقع عند الطلب
+- تأكد أن `navigator.geolocation` يرجع إحداثيات صحيحة
 
 ### اختبار Realtime
-1. سجّل دخول كعميل وأنشئ طلباً.
-2. على جهاز/متصفح آخر سجّل دخول كمدير → اعتمد الطلب.
-3. يجب أن تتحدّث حالة الطلب على شاشة العميل **خلال ثانيتين** بدون refresh.
-4. إن لم تتحدّث: افحص أن WebSocket لـ `wss://*.supabase.co` يصل من الشبكة.
 
-### اختبار Auth + Routing داخل WebView
-1. سجّل دخول كسائق برقم تجريبي + OTP `1234`.
-2. أعد تشغيل التطبيق — الجلسة يجب أن تبقى محفوظة (localStorage).
-3. تنقّل بين تبويبات السائق — لا يجب ظهور 404 ولا فتح متصفح خارجي.
+- افتح التطبيق على جهازين (عميل + سائق)
+- أنشئ طلباً من العميل
+- اعتمد الطلب من لوحة الإدارة (web)
+- يجب أن يظهر للسائق فوراً بدون refresh
 
 ---
 
-## تغيير App ID لاسم تجاري لاحقاً
+## ملاحظات مهمة
 
-`appId` الحالي: `app.lovable.wayetmaa`
+### تغيير App ID لاحقاً (للنشر التجاري)
 
-عند اعتماد الاسم التجاري الرسمي (مثلاً `ye.wayetmaa.app`):
+عند الجاهزية للنشر النهائي، غيّر `appId` من:
+```
+app.lovable.wayetmaa
+```
+إلى اسم تجاري رسمي مثل:
+```
+sa.yourcompany.wayetmaa
+```
 
-1. عدّل `capacitor.config.ts` → `appId`.
-2. **احذف** مجلد `android/` كاملاً.
-3. أعد `npx cap add android` لإعادة توليده بـ ID الجديد.
-4. أعد توليد مفتاح توقيع جديد (لأن Play Store يربط ID بمفتاح).
+⚠️ **تحذير**: تغيير `appId` بعد النشر على Google Play يُعتبر تطبيقاً جديداً ولا يمكن للمستخدمين الترقية.
 
-> ⚠️ لا تغيّر `appId` بعد نشر التطبيق على Play Store — لن تستطيع تحديثه،
-> سيُعتبر تطبيقاً جديداً.
+### الانتقال من MVP إلى Production
+
+عندما يكتمل النظام ويُختبر بالكامل، يمكن إنشاء **نسخة SPA مستقلة** بإحدى طريقتين:
+
+1. **مشروع منفصل** — استنساخ المشروع الحالي وتحويله إلى Vite SPA نقي.
+2. **تحويل كامل** — إعادة هيكلة المشروع الحالي (سيكسر معاينة Lovable).
+
+النسخة المستقلة ستعمل دون الحاجة لتحميل الواجهة من Lovable، وتدعم offline mode.
+
+### إذا تغيّر الرابط المنشور
+
+الرابط `project--{project-id}.lovable.app` ثابت ولا يتغير حتى لو أعدت تسمية المشروع. لكن إذا انتقل المشروع لمعرّف آخر، حدّث `server.url` في `capacitor.config.ts` ثم:
+```bash
+npx cap sync android
+```
+وأعد بناء APK.
 
 ---
 
-## مشاكل متبقية / قيود
+## استكشاف الأخطاء
 
-| القيد | التأثير |
-|---|---|
-| TanStack Start لا يُنتج `dist/` ثابتاً افتراضياً | يلزم تفعيل Prerender أو SPA — انظر "تنبيه معماري" أعلاه |
-| لا بناء داخل Lovable | APK يُبنى محلياً فقط |
-| يحتاج إنترنت للـ API | لا يعمل Offline-first (مقبول لتطبيق توصيل) |
-| لا Push Notifications بعد | يحتاج إضافة `@capacitor/push-notifications` + Firebase |
-| لا Deep Links مخصّصة | يكفي للـ Routing الداخلي حالياً |
-
-## هل التطبيق Production-Ready؟
-
-**جزئياً نعم** — على مستوى Capacitor + Android:
-- ✅ إعدادات الإنتاج صحيحة (لا hot reload، لا cleartext).
-- ✅ الصلاحيات مضبوطة.
-- ✅ App ID + اسم + Splash + StatusBar جاهزة.
-- ✅ خطوات Release موثّقة (keystore + signing).
-- ⚠️ **يلزم إضافة Prerender** لتفعيل البناء كاملاً (سطرَين في `vite.config.ts`).
-- ⚠️ يلزم اختبار فعلي على جهاز قبل النشر.
-- ⏳ Push Notifications + تحليلات لاحقاً.
+| المشكلة | الحل |
+|---------|------|
+| شاشة بيضاء عند فتح التطبيق | تأكد أن المشروع منشور وأن الرابط يفتح في المتصفح |
+| `net::ERR_INTERNET_DISCONNECTED` | لا يوجد إنترنت — هذه النسخة تتطلبه |
+| GPS لا يعمل | افحص صلاحيات التطبيق في إعدادات Android |
+| Realtime متقطع | افحص جودة الاتصال (WebSocket يحتاج اتصالاً مستقراً) |
+| تسجيل الدخول لا يحفظ | افحص أن localStorage مفعّل في WebView |
