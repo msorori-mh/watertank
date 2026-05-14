@@ -227,16 +227,49 @@ function DriverHome() {
                 قيمة الطلب يستلمها السائق نقداً من العميل، وعمولة التطبيق تُسجَّل كمستحق على السائق ويتم تسديدها لاحقاً للإدارة.
               </div>
             )}
-            <div className="rounded-lg bg-primary/5 px-3 py-2 text-xs font-semibold text-primary">
-              الحالة: {active.status}
-            </div>
-            {active.address_snapshot && (
-              <a href={`https://www.google.com/maps?q=${(active.address_snapshot as any).lat},${(active.address_snapshot as any).lng}`}
-                target="_blank" rel="noreferrer"
-                className="block text-center rounded-xl border-2 border-primary/30 py-2 text-sm font-semibold text-primary">
-                <MapPin className="h-4 w-4 inline" /> فتح في خرائط جوجل
-              </a>
+            {/* Customer + Quick actions */}
+            {(contact?.phone || contact?.name) && (
+              <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-xs leading-5">
+                <div className="font-semibold text-slate-900">{contact?.name || "العميل"}</div>
+                {contact?.phone && <div className="text-slate-600 ltr:text-left" dir="ltr">{contact.phone}</div>}
+              </div>
             )}
+            <div className="grid grid-cols-3 gap-2">
+              {contact?.phone && (
+                <>
+                  <a href={`tel:${contact.phone}`}
+                    className="flex items-center justify-center gap-1 rounded-xl bg-emerald-600 text-white py-2 text-xs font-bold">
+                    <Phone className="h-3.5 w-3.5" /> اتصال
+                  </a>
+                  <a href={`https://wa.me/${contact.phone.replace(/[^0-9]/g, "")}`}
+                    target="_blank" rel="noreferrer"
+                    className="flex items-center justify-center gap-1 rounded-xl bg-[#25D366] text-white py-2 text-xs font-bold">
+                    <MessageCircle className="h-3.5 w-3.5" /> واتساب
+                  </a>
+                </>
+              )}
+              {active.address_snapshot && (
+                <a href={`https://www.google.com/maps?q=${(active.address_snapshot as any).lat},${(active.address_snapshot as any).lng}`}
+                  target="_blank" rel="noreferrer"
+                  className={`flex items-center justify-center gap-1 rounded-xl bg-primary text-primary-foreground py-2 text-xs font-bold ${contact?.phone ? "" : "col-span-3"}`}>
+                  <Navigation className="h-3.5 w-3.5" /> الخريطة
+                </a>
+              )}
+            </div>
+
+            {/* Timeline */}
+            <div className="flex items-center justify-between gap-1 pt-1">
+              {STATUS_TIMELINE.map((s, i) => {
+                const currentIdx = STATUS_TIMELINE.findIndex(x => x.key === active.status);
+                const done = i <= currentIdx;
+                return (
+                  <div key={s.key} className="flex-1 flex flex-col items-center">
+                    <div className={`h-2 w-full rounded-full ${done ? "bg-primary" : "bg-slate-200"}`} />
+                    <div className={`mt-1 text-[9px] text-center ${done ? "text-primary font-semibold" : "text-slate-400"}`}>{s.label}</div>
+                  </div>
+                );
+              })}
+            </div>
             {NEXT_STATUS[active.status] && (
               <button onClick={advance} disabled={updating}
                 className={`w-full rounded-xl py-3 font-bold shadow-[var(--shadow-glow)] disabled:opacity-60 flex items-center justify-center gap-2 ${
