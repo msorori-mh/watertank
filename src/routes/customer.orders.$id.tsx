@@ -135,6 +135,15 @@ function OrderDetail() {
           </div>
         )}
 
+        {order.wallet_refunded_at && (
+          <div className="rounded-2xl bg-purple-50 border border-purple-200 p-5 text-purple-800">
+            <p className="font-bold mb-1">تم استرداد المبلغ إلى محفظتك</p>
+            <p className="text-xs">المبلغ: {Number(order.price).toLocaleString("ar-EG")} ر.ي</p>
+            <p className="text-xs">التاريخ: {new Date(order.wallet_refunded_at).toLocaleString("ar-EG")}</p>
+            {order.refund_reason && <p className="text-xs mt-1">السبب: {order.refund_reason}</p>}
+          </div>
+        )}
+
         {driver && (
           <div className="rounded-2xl bg-card shadow-[var(--shadow-soft)] p-5">
             <h3 className="font-display font-bold mb-3">السائق</h3>
