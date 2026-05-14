@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { Plus, Truck, Clock, CheckCircle2, MapPin, LogOut, ChevronLeft, Droplets, Wallet, BarChart3 } from "lucide-react";
+import { Plus, Truck, Clock, CheckCircle2, MapPin, LogOut, ChevronLeft, Droplets, Wallet, BarChart3, Settings } from "lucide-react";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
 
 export const Route = createFileRoute("/customer/")({
@@ -136,6 +136,21 @@ function CustomerHome() {
             <div>
               <p className="font-bold text-sm">تقاريري</p>
               <p className="text-xs opacity-80">ملخص الطلبات وحركة المحفظة</p>
+            </div>
+          </div>
+          <ChevronLeft className="h-5 w-5" />
+        </Link>
+        <Link
+          to="/customer/settings"
+          className="mt-3 flex items-center justify-between rounded-2xl bg-white/10 backdrop-blur p-3 hover:bg-white/20 transition"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <Settings className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">الإعدادات</p>
+              <p className="text-xs opacity-80">بياناتك وتفضيلاتك</p>
             </div>
           </div>
           <ChevronLeft className="h-5 w-5" />

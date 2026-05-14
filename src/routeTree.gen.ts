@@ -13,12 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as DriverSettingsRouteImport } from './routes/driver.settings'
 import { Route as DriverReportsRouteImport } from './routes/driver.reports'
 import { Route as DriverRegisterRouteImport } from './routes/driver.register'
 import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
 import { Route as DriverLoginRouteImport } from './routes/driver.login'
 import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
 import { Route as CustomerWalletRouteImport } from './routes/customer.wallet'
+import { Route as CustomerSettingsRouteImport } from './routes/customer.settings'
 import { Route as CustomerReportsRouteImport } from './routes/customer.reports'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
@@ -58,6 +60,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DriverSettingsRoute = DriverSettingsRouteImport.update({
+  id: '/driver/settings',
+  path: '/driver/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DriverReportsRoute = DriverReportsRouteImport.update({
   id: '/driver/reports',
   path: '/driver/reports',
@@ -86,6 +93,11 @@ const DriverEarningsRoute = DriverEarningsRouteImport.update({
 const CustomerWalletRoute = CustomerWalletRouteImport.update({
   id: '/customer/wallet',
   path: '/customer/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerSettingsRoute = CustomerSettingsRouteImport.update({
+  id: '/customer/settings',
+  path: '/customer/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomerReportsRoute = CustomerReportsRouteImport.update({
@@ -197,12 +209,14 @@ export interface FileRoutesByFullPath {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/reports': typeof CustomerReportsRoute
+  '/customer/settings': typeof CustomerSettingsRoute
   '/customer/wallet': typeof CustomerWalletRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
   '/driver/reports': typeof DriverReportsRoute
+  '/driver/settings': typeof DriverSettingsRoute
   '/admin/': typeof AdminIndexRoute
   '/customer/': typeof CustomerIndexRoute
   '/driver/': typeof DriverIndexRoute
@@ -227,12 +241,14 @@ export interface FileRoutesByTo {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/reports': typeof CustomerReportsRoute
+  '/customer/settings': typeof CustomerSettingsRoute
   '/customer/wallet': typeof CustomerWalletRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
   '/driver/reports': typeof DriverReportsRoute
+  '/driver/settings': typeof DriverSettingsRoute
   '/admin': typeof AdminIndexRoute
   '/customer': typeof CustomerIndexRoute
   '/driver': typeof DriverIndexRoute
@@ -258,12 +274,14 @@ export interface FileRoutesById {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/reports': typeof CustomerReportsRoute
+  '/customer/settings': typeof CustomerSettingsRoute
   '/customer/wallet': typeof CustomerWalletRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
   '/driver/reports': typeof DriverReportsRoute
+  '/driver/settings': typeof DriverSettingsRoute
   '/admin/': typeof AdminIndexRoute
   '/customer/': typeof CustomerIndexRoute
   '/driver/': typeof DriverIndexRoute
@@ -290,12 +308,14 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/reports'
+    | '/customer/settings'
     | '/customer/wallet'
     | '/driver/earnings'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
     | '/driver/reports'
+    | '/driver/settings'
     | '/admin/'
     | '/customer/'
     | '/driver/'
@@ -320,12 +340,14 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/reports'
+    | '/customer/settings'
     | '/customer/wallet'
     | '/driver/earnings'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
     | '/driver/reports'
+    | '/driver/settings'
     | '/admin'
     | '/customer'
     | '/driver'
@@ -350,12 +372,14 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/reports'
+    | '/customer/settings'
     | '/customer/wallet'
     | '/driver/earnings'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
     | '/driver/reports'
+    | '/driver/settings'
     | '/admin/'
     | '/customer/'
     | '/driver/'
@@ -381,12 +405,14 @@ export interface RootRouteChildren {
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
   CustomerReportsRoute: typeof CustomerReportsRoute
+  CustomerSettingsRoute: typeof CustomerSettingsRoute
   CustomerWalletRoute: typeof CustomerWalletRoute
   DriverEarningsRoute: typeof DriverEarningsRoute
   DriverLoginRoute: typeof DriverLoginRoute
   DriverOrdersRoute: typeof DriverOrdersRoute
   DriverRegisterRoute: typeof DriverRegisterRoute
   DriverReportsRoute: typeof DriverReportsRoute
+  DriverSettingsRoute: typeof DriverSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   CustomerIndexRoute: typeof CustomerIndexRoute
   DriverIndexRoute: typeof DriverIndexRoute
@@ -422,6 +448,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/settings': {
+      id: '/driver/settings'
+      path: '/driver/settings'
+      fullPath: '/driver/settings'
+      preLoaderRoute: typeof DriverSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/driver/reports': {
@@ -464,6 +497,13 @@ declare module '@tanstack/react-router' {
       path: '/customer/wallet'
       fullPath: '/customer/wallet'
       preLoaderRoute: typeof CustomerWalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/settings': {
+      id: '/customer/settings'
+      path: '/customer/settings'
+      fullPath: '/customer/settings'
+      preLoaderRoute: typeof CustomerSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customer/reports': {
@@ -613,12 +653,14 @@ const rootRouteChildren: RootRouteChildren = {
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
   CustomerReportsRoute: CustomerReportsRoute,
+  CustomerSettingsRoute: CustomerSettingsRoute,
   CustomerWalletRoute: CustomerWalletRoute,
   DriverEarningsRoute: DriverEarningsRoute,
   DriverLoginRoute: DriverLoginRoute,
   DriverOrdersRoute: DriverOrdersRoute,
   DriverRegisterRoute: DriverRegisterRoute,
   DriverReportsRoute: DriverReportsRoute,
+  DriverSettingsRoute: DriverSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
   CustomerIndexRoute: CustomerIndexRoute,
   DriverIndexRoute: DriverIndexRoute,

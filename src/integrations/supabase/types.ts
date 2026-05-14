@@ -190,6 +190,10 @@ export type Database = {
           id: string
           license_status: Database["public"]["Enums"]["license_status"]
           name: string
+          notifications_enabled: boolean
+          payout_account: string | null
+          payout_method: string | null
+          payout_recipient_name: string | null
           phone: string
           rating: number
           status: Database["public"]["Enums"]["driver_status"]
@@ -205,6 +209,10 @@ export type Database = {
           id?: string
           license_status?: Database["public"]["Enums"]["license_status"]
           name: string
+          notifications_enabled?: boolean
+          payout_account?: string | null
+          payout_method?: string | null
+          payout_recipient_name?: string | null
           phone: string
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
@@ -220,6 +228,10 @@ export type Database = {
           id?: string
           license_status?: Database["public"]["Enums"]["license_status"]
           name?: string
+          notifications_enabled?: boolean
+          payout_account?: string | null
+          payout_method?: string | null
+          payout_recipient_name?: string | null
           phone?: string
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
@@ -476,6 +488,7 @@ export type Database = {
           lat: number | null
           lng: number | null
           name: string | null
+          notifications_enabled: boolean
           phone: string | null
           type: Database["public"]["Enums"]["user_type"]
           updated_at: string
@@ -490,6 +503,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name?: string | null
+          notifications_enabled?: boolean
           phone?: string | null
           type?: Database["public"]["Enums"]["user_type"]
           updated_at?: string
@@ -504,6 +518,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name?: string | null
+          notifications_enabled?: boolean
           phone?: string | null
           type?: Database["public"]["Enums"]["user_type"]
           updated_at?: string
