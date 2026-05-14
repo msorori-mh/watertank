@@ -565,6 +565,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_wallet_topup: {
+        Args: { _topup_id: string }
+        Returns: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          id: string
+          payment_method_id: string | null
+          receipt_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sender_name: string | null
+          sender_phone: string | null
+          status: Database["public"]["Enums"]["topup_status"]
+          transfer_reference: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wallet_topups"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       calculate_app_commission: {
         Args: { _capacity: number; _city: string; _price: number }
         Returns: Record<string, unknown>
@@ -625,6 +650,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reject_wallet_topup: {
+        Args: { _admin_notes?: string; _topup_id: string }
+        Returns: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          id: string
+          payment_method_id: string | null
+          receipt_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sender_name: string | null
+          sender_phone: string | null
+          status: Database["public"]["Enums"]["topup_status"]
+          transfer_reference: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wallet_topups"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "admin" | "customer" | "driver"
@@ -642,6 +692,8 @@ export type Database = {
         | "order_completed"
         | "order_cancelled"
         | "general"
+        | "wallet_topup_approved"
+        | "wallet_topup_rejected"
       order_status:
         | "pending"
         | "approved"
@@ -801,6 +853,8 @@ export const Constants = {
         "order_completed",
         "order_cancelled",
         "general",
+        "wallet_topup_approved",
+        "wallet_topup_rejected",
       ],
       order_status: [
         "pending",
