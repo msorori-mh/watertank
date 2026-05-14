@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import {
-import { CustomerBottomNav } from "@/components/CustomerBottomNav";
   ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2,
   MapPin, Wallet, MessageCircle, Phone, ChevronLeft, Pencil, X
 } from "lucide-react";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/settings")({
   component: CustomerSettings,
