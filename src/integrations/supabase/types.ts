@@ -315,10 +315,12 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["payment_status"]
           price: number
           quantity: number
+          refund_reason: string | null
           scheduled_at: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string
           wallet_paid_at: string | null
+          wallet_refunded_at: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         Insert: {
@@ -341,10 +343,12 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           price: number
           quantity?: number
+          refund_reason?: string | null
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string
           wallet_paid_at?: string | null
+          wallet_refunded_at?: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         Update: {
@@ -367,10 +371,12 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           price?: number
           quantity?: number
+          refund_reason?: string | null
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string
           wallet_paid_at?: string | null
+          wallet_refunded_at?: string | null
           water_type?: Database["public"]["Enums"]["water_type"]
         }
         Relationships: [
@@ -706,10 +712,12 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["payment_status"]
           price: number
           quantity: number
+          refund_reason: string | null
           scheduled_at: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string
           wallet_paid_at: string | null
+          wallet_refunded_at: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         SetofOptions: {
@@ -749,10 +757,12 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["payment_status"]
           price: number
           quantity: number
+          refund_reason: string | null
           scheduled_at: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string
           wallet_paid_at: string | null
+          wallet_refunded_at: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         SetofOptions: {
@@ -803,6 +813,43 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "cash_handovers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      refund_wallet_order: {
+        Args: { _order_id: string; _reason?: string }
+        Returns: {
+          address_id: string | null
+          address_snapshot: Json | null
+          app_commission: number
+          capacity: number
+          city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
+          created_at: string
+          customer_id: string
+          driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
+          id: string
+          notes: string | null
+          payment_collected_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          price: number
+          quantity: number
+          refund_reason: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          wallet_paid_at: string | null
+          wallet_refunded_at: string | null
+          water_type: Database["public"]["Enums"]["water_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -885,7 +932,7 @@ export type Database = {
         | "cancelled"
         | "rejected"
       payment_method: "cash" | "wallet"
-      payment_status: "pending" | "paid" | "failed"
+      payment_status: "pending" | "paid" | "failed" | "refunded"
       topup_status: "pending" | "approved" | "rejected"
       user_type: "customer" | "driver" | "admin"
       wallet_tx_direction: "credit" | "debit"
@@ -1051,7 +1098,7 @@ export const Constants = {
         "rejected",
       ],
       payment_method: ["cash", "wallet"],
-      payment_status: ["pending", "paid", "failed"],
+      payment_status: ["pending", "paid", "failed", "refunded"],
       topup_status: ["pending", "approved", "rejected"],
       user_type: ["customer", "driver", "admin"],
       wallet_tx_direction: ["credit", "debit"],
