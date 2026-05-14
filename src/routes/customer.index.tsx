@@ -18,6 +18,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/")({
   component: CustomerHome,
@@ -269,6 +270,7 @@ function CustomerHome() {
           )}
         </section>
       </main>
+      <CustomerBottomNav />
     </div>
   );
 }
