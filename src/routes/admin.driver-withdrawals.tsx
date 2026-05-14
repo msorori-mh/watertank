@@ -83,12 +83,13 @@ function AdminDriverWithdrawals() {
         {loading ? (
           <div className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-primary" /></div>
         ) : (
-          <table className="w-full text-sm min-w-[800px]">
+          <table className="w-full text-sm min-w-[950px]">
             <thead className="bg-slate-50 text-xs text-muted-foreground">
               <tr>
                 <th className="text-right p-3">السائق</th>
                 <th className="text-right p-3">المبلغ</th>
                 <th className="text-right p-3">الحالة</th>
+                <th className="text-right p-3">طريقة الاستلام</th>
                 <th className="text-right p-3">ملاحظات السائق</th>
                 <th className="text-right p-3">ملاحظات الإدارة</th>
                 <th className="text-right p-3">التاريخ</th>
@@ -106,8 +107,9 @@ function AdminDriverWithdrawals() {
                     </td>
                     <td className="p-3 font-bold">{Number(r.amount).toLocaleString("ar-EG")} ر.ي</td>
                     <td className="p-3"><span className={`text-xs rounded-full px-2 py-0.5 ${COLORS[r.status]}`}>{LABELS[r.status]}</span></td>
-                    <td className="p-3 text-xs max-w-[200px] whitespace-pre-wrap">{r.payment_method_notes || "—"}</td>
-                    <td className="p-3 text-xs max-w-[200px] whitespace-pre-wrap">{r.admin_notes || "—"}</td>
+                    <td className="p-3 text-xs max-w-[240px]"><PayoutDetails d={d} /></td>
+                    <td className="p-3 text-xs max-w-[180px] whitespace-pre-wrap">{r.payment_method_notes || "—"}</td>
+                    <td className="p-3 text-xs max-w-[180px] whitespace-pre-wrap">{r.admin_notes || "—"}</td>
                     <td className="p-3 text-xs">{new Date(r.created_at).toLocaleString("ar-EG")}</td>
                     <td className="p-3">
                       <div className="flex flex-col gap-1">
@@ -133,7 +135,7 @@ function AdminDriverWithdrawals() {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="p-8 text-center text-muted-foreground text-sm">لا توجد طلبات</td></tr>
+                <tr><td colSpan={8} className="p-8 text-center text-muted-foreground text-sm">لا توجد طلبات</td></tr>
               )}
             </tbody>
           </table>
