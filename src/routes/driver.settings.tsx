@@ -27,9 +27,15 @@ function DriverSettings() {
   const [capacity, setCapacity] = useState<number>(0);
   const [availability, setAvailability] = useState<"available" | "busy" | "offline">("offline");
   const [notif, setNotif] = useState(true);
-  const [payoutMethod, setPayoutMethod] = useState("cash");
-  const [payoutAccount, setPayoutAccount] = useState("");
-  const [payoutName, setPayoutName] = useState("");
+  const [payoutType, setPayoutType] = useState<PayoutType>("bank");
+  // bank
+  const [bankName, setBankName] = useState("");
+  const [bankAccountHolder, setBankAccountHolder] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  // transfer network
+  const [transferRecipientName, setTransferRecipientName] = useState("");
+  const [transferPhone, setTransferPhone] = useState("");
+  const [transferNetworkName, setTransferNetworkName] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
