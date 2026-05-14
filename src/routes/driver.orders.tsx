@@ -84,17 +84,23 @@ function DriverAvailableOrders() {
               </div>
               <div className="text-left">
                 <p className="font-display font-bold">{Number(o.price).toLocaleString("ar-EG")}</p>
-                <p className="text-xs text-muted-foreground">ر.ي • تستلمها كاملة</p>
-                {Number(o.app_commission || 0) > 0 && (
+                <p className="text-xs text-muted-foreground">ر.ي{o.payment_method === "wallet" ? " • مدفوع مسبقاً" : " • تستلمها كاملة"}</p>
+                {o.payment_method !== "wallet" && Number(o.app_commission || 0) > 0 && (
                   <p className="text-[11px] text-rose-600 mt-1 font-semibold">
                     عمولة: {Number(o.app_commission).toLocaleString("ar-EG")} ر.ي
                   </p>
                 )}
               </div>
             </div>
-            <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 mt-2 leading-5">
-              قيمة الطلب يستلمها السائق نقداً من العميل، وعمولة التطبيق تُسجَّل كمستحق لاحق للإدارة.
-            </p>
+            {o.payment_method === "wallet" ? (
+              <p className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1.5 mt-2 leading-5 font-semibold">
+                مدفوع من محفظة العميل — لا تحصّل أي مبلغ نقدي.
+              </p>
+            ) : (
+              <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 mt-2 leading-5">
+                قيمة الطلب يستلمها السائق نقداً من العميل، وعمولة التطبيق تُسجَّل كمستحق لاحق للإدارة.
+              </p>
+            )}
             {o.address_snapshot && (
               <a href={`https://www.google.com/maps?q=${(o.address_snapshot as any).lat},${(o.address_snapshot as any).lng}`}
                 target="_blank" rel="noreferrer"
