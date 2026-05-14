@@ -40,6 +40,8 @@ function AdminWalletTopups() {
   const [acting, setActing] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<Topup | null>(null);
   const [rejectNotes, setRejectNotes] = useState("");
+  const [approving, setApproving] = useState<Topup | null>(null);
+  const [approveAmount, setApproveAmount] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // filters
@@ -102,12 +104,18 @@ function AdminWalletTopups() {
     });
   }, [items, status, methodId, from, to, search]);
 
-  const approve = async (id: string) => {
-    if (!confirm("اعتماد هذا الطلب وإضافة المبلغ إلى محفظة العميل؟")) return;
-    setActing(id);
-    const { error } = await supabase.rpc("approve_wallet_topup" as any, { _topup_id: id });
+  const submitApprove = async () => {
+    if (!approving) return;
+    const amt = Number(approveAmount);
+    if (!amt || amt <= 0) { alert("أدخل مبلغاً صحيحاً"); return; }
+    setActing(approving.id);
+    const { error } = await supabase.rpc("approve_wallet_topup" as any, {
+      _topup_id: approving.id,
+      _approved_amount: amt,
+    });
     setActing(null);
     if (error) { alert("فشل الاعتماد: " + error.message); return; }
+    setApproving(null); setApproveAmount("");
     load();
   };
 
@@ -207,7 +215,7 @@ function AdminWalletTopups() {
 
                 {t.status === "pending" ? (
                   <div className="flex gap-2 mt-4 pt-3 border-t border-border">
-                    <button onClick={() => approve(t.id)} disabled={acting === t.id}
+                    <button onClick={() => { setApproving(t); setApproveAmount(String(t.amount)); }} disabled={acting === t.id}
                       className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-semibold flex items-center justify-center gap-2 text-sm disabled:opacity-50">
                       {acting === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />} اعتماد
                     </button>
@@ -264,6 +272,38 @@ function AdminWalletTopups() {
           </div>
         </div>
       )}
+      {approving && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setApproving(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-border flex items-center justify-between">
+              <h2 className="font-display font-bold">اعتماد طلب التعبئة</h2>
+              <button onClick={() => setApproving(null)} className="p-1"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                المبلغ المطلوب من العميل: <span className="font-semibold text-foreground">{Number(approving.amount).toLocaleString("ar-EG")} ر.ي</span>
+              </p>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">المبلغ الفعلي للشحن (ر.ي)</label>
+                <input type="number" min={1} step="any" value={approveAmount}
+                  onChange={(e) => setApproveAmount(e.target.value)}
+                  className="w-full rounded-xl border-2 border-input px-3 py-2 text-sm focus:border-primary outline-none" />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  يمكنك تعديل المبلغ في حال أرسل العميل قيمة مختلفة عن المطلوب.
+                </p>
+              </div>
+            </div>
+            <div className="p-5 border-t border-border flex gap-2">
+              <button onClick={() => setApproving(null)} className="flex-1 px-4 py-2 rounded-xl border border-border">إلغاء</button>
+              <button onClick={submitApprove} disabled={acting === approving.id}
+                className="flex-1 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2">
+                {acting === approving.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />} تأكيد الاعتماد
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </AdminShell>
   );
 }
