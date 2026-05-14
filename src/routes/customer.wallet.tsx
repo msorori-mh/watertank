@@ -157,6 +157,7 @@ function CustomerWallet() {
           onDone={() => { setShowForm(false); load(user.id); }}
         />
       )}
+      <CustomerBottomNav />
     </div>
   );
 }
