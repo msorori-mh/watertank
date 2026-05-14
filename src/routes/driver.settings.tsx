@@ -139,19 +139,6 @@ function DriverSettings() {
         <Section icon={Truck} title="المركبة">
           <Field label="رقم اللوحة" value={plate} onChange={setPlate} />
           <Field label="السعة (لتر)" value={String(capacity || "")} onChange={(v) => setCapacity(Number(v) || 0)} type="number" />
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground">نوع الوايت</label>
-            <div className="grid grid-cols-2 gap-2 mt-1">
-              {WATER_TYPES.map(t => (
-                <button key={t.value} type="button" onClick={() => setWaterType(t.value as any)}
-                  className={`rounded-xl border-2 p-3 text-sm font-semibold transition ${
-                    waterType === t.value ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground"
-                  }`}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
         </Section>
 
         <Section icon={Banknote} title="السحب والمستحقات">
