@@ -72,7 +72,7 @@ function DriverEarnings() {
 
   const submit = async () => {
     setSubmitting(true);
-    const { error } = await supabase.rpc("request_driver_withdrawal", { _payment_method_notes: notes || null });
+    const { error } = await supabase.rpc("request_driver_withdrawal", { _payment_method_notes: notes || undefined });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success("تم إرسال طلب السحب");
