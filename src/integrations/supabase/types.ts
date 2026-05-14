@@ -772,6 +772,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_order_customer_contact: {
+        Args: { _order_id: string }
+        Returns: {
+          name: string
+          phone: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
