@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { Plus, Truck, Clock, CheckCircle2, MapPin, LogOut, ChevronLeft, Droplets, Wallet, BarChart3 } from "lucide-react";
+import { Plus, Truck, Clock, CheckCircle2, MapPin, LogOut, ChevronLeft, Droplets, Wallet, BarChart3, Settings } from "lucide-react";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
 
 export const Route = createFileRoute("/customer/")({
