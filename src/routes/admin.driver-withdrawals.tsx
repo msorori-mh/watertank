@@ -144,3 +144,35 @@ function AdminDriverWithdrawals() {
     </AdminShell>
   );
 }
+
+function PayoutDetails({ d }: { d: any }) {
+  if (!d) return <span className="text-muted-foreground">—</span>;
+  const type = d.payout_type || (d.payout_method === "bank" ? "bank" : d.payout_method ? "transfer_network" : null);
+  if (type === "bank") {
+    const bank = d.bank_name || "—";
+    const holder = d.bank_account_holder || d.payout_recipient_name || "—";
+    const num = d.bank_account_number || d.payout_account || "—";
+    return (
+      <div className="space-y-0.5">
+        <p className="font-semibold flex items-center gap-1"><Building2 className="h-3 w-3 text-blue-600" /> إيداع بنكي</p>
+        <p><span className="text-muted-foreground">البنك:</span> {bank}</p>
+        <p><span className="text-muted-foreground">الحساب:</span> {holder}</p>
+        <p className="font-mono"><span className="text-muted-foreground font-sans">رقم:</span> {num}</p>
+      </div>
+    );
+  }
+  if (type === "transfer_network") {
+    const recipient = d.transfer_recipient_name || d.payout_recipient_name || "—";
+    const phone = d.transfer_phone || d.payout_account || "—";
+    const network = d.transfer_network_name || "—";
+    return (
+      <div className="space-y-0.5">
+        <p className="font-semibold flex items-center gap-1"><Smartphone className="h-3 w-3 text-emerald-600" /> حوالة شبكة</p>
+        <p><span className="text-muted-foreground">المستلم:</span> {recipient}</p>
+        <p className="font-mono"><span className="text-muted-foreground font-sans">هاتف:</span> {phone}</p>
+        <p><span className="text-muted-foreground">الشبكة:</span> {network}</p>
+      </div>
+    );
+  }
+  return <span className="text-muted-foreground">لم تُحدّد</span>;
+}
