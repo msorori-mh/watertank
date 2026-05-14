@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { LayoutDashboard, ListOrdered, LogOut, Loader2, Truck, Wallet, BarChart3 } from "lucide-react";
+import { LayoutDashboard, ListOrdered, LogOut, Loader2, Truck, Wallet, BarChart3, Settings } from "lucide-react";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
 
 export type DriverInfo = {
