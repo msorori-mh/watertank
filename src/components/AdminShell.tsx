@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, Wallet, BarChart3, LogOut, Loader2, Droplets, Percent, CreditCard } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, Wallet, BarChart3, LogOut, Loader2, Droplets, Percent, CreditCard, WalletCards } from "lucide-react";
 
 export function AdminShell({ children, title }: { children: React.ReactNode; title: string }) {
   const nav = useNavigate();
