@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
@@ -40,6 +41,11 @@ import { Route as AdminCitiesRouteImport } from './routes/admin.cities'
 import { Route as CustomerProfileCompleteRouteImport } from './routes/customer.profile.complete'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -193,6 +199,7 @@ const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -258,6 +266,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/reset-password'
     | '/admin/cities'
     | '/admin/commissions'
     | '/admin/customers'
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/reset-password'
     | '/admin/cities'
     | '/admin/commissions'
     | '/admin/customers'
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/reset-password'
     | '/admin/cities'
     | '/admin/commissions'
     | '/admin/customers'
@@ -389,6 +401,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   AdminCitiesRoute: typeof AdminCitiesRoute
   AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
@@ -422,6 +435,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -637,6 +657,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   AdminCitiesRoute: AdminCitiesRoute,
   AdminCommissionsRoute: AdminCommissionsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
