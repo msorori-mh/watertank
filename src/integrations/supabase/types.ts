@@ -944,7 +944,7 @@ export type Database = {
       user_type: "customer" | "driver" | "admin"
       wallet_tx_direction: "credit" | "debit"
       wallet_tx_type: "topup" | "order_payment" | "refund" | "adjustment"
-      water_type: "sweet" | "desalinated" | "well"
+      water_type: "normal" | "kawthar"
       withdrawal_status: "pending" | "approved" | "rejected" | "paid"
     }
     CompositeTypes: {
@@ -1110,7 +1110,7 @@ export const Constants = {
       user_type: ["customer", "driver", "admin"],
       wallet_tx_direction: ["credit", "debit"],
       wallet_tx_type: ["topup", "order_payment", "refund", "adjustment"],
-      water_type: ["sweet", "desalinated", "well"],
+      water_type: ["normal", "kawthar"],
       withdrawal_status: ["pending", "approved", "rejected", "paid"],
     },
   },
