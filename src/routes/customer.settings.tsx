@@ -6,6 +6,7 @@ import {
   ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2,
   MapPin, Wallet, MessageCircle, Phone, ChevronLeft, Pencil, X
 } from "lucide-react";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/settings")({
   component: CustomerSettings,
@@ -91,6 +92,8 @@ function CustomerSettings() {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <Loader2 className="h-6 w-6 animate-spin text-primary" />
+    
+      <CustomerBottomNav />
     </div>
   );
 

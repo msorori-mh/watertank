@@ -72,18 +72,40 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
     font-family: var(--font-body);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+    /* safe-area على الهواتف ذات الحواف المنحنية / النوتش */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* أزرار وروابط بحد أدنى مريح للمس على الجوال */
+  button, [role="button"], a {
+    touch-action: manipulation;
+  }
+
+  /* منع الـ zoom التلقائي على iOS عند التركيز على الحقول */
+  input, select, textarea {
+    font-size: 16px;
   }
 }
+
+/* أدوات مساعدة للـ safe-area داخل العناصر الثابتة */
+.safe-pb { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+.safe-pt { padding-top: max(env(safe-area-inset-top), 0.5rem); }
 
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, MapPin, Loader2, Droplets, Wallet, Banknote, Plus, Star, CheckCircle2 } from "lucide-react";
 import { WATER_TYPES } from "@/lib/water-types";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/order")({
   component: NewOrder,
@@ -119,7 +120,9 @@ function NewOrder() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" />
+      <CustomerBottomNav />
+    </div>;
   }
 
   return (
