@@ -25,11 +25,6 @@ function NewOrder() {
   const [description, setDescription] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
