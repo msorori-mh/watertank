@@ -1,252 +1,217 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
+import { downloadCSV } from "@/lib/csv";
 
 export const Route = createFileRoute("/admin/reports")({
   component: AdminReports,
 });
 
 function AdminReports() {
-  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [topups, setTopups] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
+
+  const [from, setFrom] = useState<string>("");
+  const [to, setTo] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [driverId, setDriverId] = useState<string>("");
+  const [pm, setPm] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
 
   useEffect(() => {
     (async () => {
-      const [{ data: orders }, { data: drivers }] = await Promise.all([
-        supabase.from("orders").select("id,city,status,price,app_commission,commission_status,driver_id,created_at").order("created_at", { ascending: false }).limit(1000),
-        supabase.from("drivers").select("id,name"),
+      setLoading(true);
+      let q = supabase.from("orders").select("id,city,status,price,app_commission,commission_status,driver_id,driver_payout_amount,driver_payout_status,payment_method,created_at,customer_id");
+      if (from) q = q.gte("created_at", from);
+      if (to) q = q.lte("created_at", to + "T23:59:59");
+      if (city) q = q.eq("city", city);
+      if (driverId) q = q.eq("driver_id", driverId);
+      if (pm) q = q.eq("payment_method", pm as any);
+      if (status) q = q.eq("status", status as any);
+
+      const [{ data: ords }, { data: drv }, { data: tp }, { data: wd }, { data: cts }] = await Promise.all([
+        q.order("created_at", { ascending: false }).limit(2000),
+        supabase.from("drivers").select("id,name,city"),
+        supabase.from("wallet_topups").select("id,amount,status,created_at,user_id"),
+        supabase.from("driver_withdrawal_requests").select("id,amount,status,created_at,driver_id"),
+        supabase.from("cities").select("name").eq("is_active", true),
       ]);
-      setData({ orders: orders || [], drivers: drivers || [] });
+      setOrders(ords || []);
+      setDrivers(drv || []);
+      setTopups(tp || []);
+      setWithdrawals(wd || []);
+      setCities(cts || []);
       setLoading(false);
     })();
-  }, []);
+  }, [from, to, city, driverId, pm, status]);
 
-  if (loading || !data) return <AdminShell title="التقارير"><div className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-primary" /></div></AdminShell>;
+  const driverName = (id: string | null) => drivers.find(d => d.id === id)?.name || "—";
 
-  const orders = data.orders;
-  const drivers: any[] = data.drivers;
+  const stats = useMemo(() => {
+    const completed = orders.filter(o => o.status === "completed");
+    const cancelled = orders.filter(o => o.status === "cancelled");
+    const rejected = orders.filter(o => o.status === "rejected");
+    const totalValue = orders.reduce((a, o) => a + Number(o.price), 0);
+    const completedValue = completed.reduce((a, o) => a + Number(o.price), 0);
+    const totalCommission = orders.reduce((a, o) => a + Number(o.app_commission || 0), 0);
+    const cashUnpaid = orders.filter(o => o.payment_method === "cash" && o.commission_status === "unpaid").reduce((a, o) => a + Number(o.app_commission || 0), 0);
+    const walletCollected = orders.filter(o => o.payment_method === "wallet" && o.commission_status === "collected").reduce((a, o) => a + Number(o.app_commission || 0), 0);
+    const walletPayoutPending = orders.filter(o => o.payment_method === "wallet" && (o.driver_payout_status === "available" || o.driver_payout_status === "pending")).reduce((a, o) => a + Number(o.driver_payout_amount || 0), 0);
+    const withdrawalsPaid = withdrawals.filter(w => w.status === "paid").reduce((a, w) => a + Number(w.amount), 0);
+    return { total: orders.length, completed: completed.length, cancelled: cancelled.length, rejected: rejected.length, totalValue, completedValue, totalCommission, cashUnpaid, walletCollected, walletPayoutPending, withdrawalsPaid };
+  }, [orders, withdrawals]);
 
-  // Daily report (last 7 days)
-  const days: Record<string, { count: number; revenue: number }> = {};
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
-    const key = d.toISOString().slice(0, 10);
-    days[key] = { count: 0, revenue: 0 };
-  }
-  orders.forEach((o: any) => {
-    const k = new Date(o.created_at).toISOString().slice(0, 10);
-    if (days[k]) {
-      days[k].count++;
-      if (o.status === "completed") days[k].revenue += Number(o.price);
-    }
-  });
+  const byCity = useMemo(() => {
+    const m: Record<string, { count: number; revenue: number; commission: number }> = {};
+    orders.forEach(o => {
+      const r = m[o.city] || (m[o.city] = { count: 0, revenue: 0, commission: 0 });
+      r.count++;
+      if (o.status === "completed") r.revenue += Number(o.price);
+      r.commission += Number(o.app_commission || 0);
+    });
+    return Object.entries(m).sort((a, b) => b[1].revenue - a[1].revenue);
+  }, [orders]);
 
-  // City report
-  const cities: Record<string, { count: number; revenue: number; cancelled: number }> = {};
-  orders.forEach((o: any) => {
-    const c = cities[o.city] || (cities[o.city] = { count: 0, revenue: 0, cancelled: 0 });
-    c.count++;
-    if (o.status === "completed") c.revenue += Number(o.price);
-    if (o.status === "cancelled" || o.status === "rejected") c.cancelled++;
-  });
+  const byDriver = useMemo(() => {
+    const m: Record<string, { name: string; count: number; revenue: number; commission: number; unpaid: number }> = {};
+    drivers.forEach(d => { m[d.id] = { name: d.name, count: 0, revenue: 0, commission: 0, unpaid: 0 }; });
+    orders.forEach(o => {
+      if (!o.driver_id) return;
+      const r = m[o.driver_id]; if (!r) return;
+      r.count++;
+      if (o.status === "completed") r.revenue += Number(o.price);
+      r.commission += Number(o.app_commission || 0);
+      if (o.commission_status === "unpaid") r.unpaid += Number(o.app_commission || 0);
+    });
+    return Object.values(m).filter(r => r.count > 0).sort((a, b) => b.revenue - a.revenue);
+  }, [orders, drivers]);
 
-  // Driver performance + commissions
-  const drvStats: Record<string, { count: number; revenue: number; commission: number; unpaidCommission: number; name: string }> = {};
-  drivers.forEach(d => { drvStats[d.id] = { count: 0, revenue: 0, commission: 0, unpaidCommission: 0, name: d.name }; });
-  orders.forEach((o: any) => {
-    if (!o.driver_id) return;
-    const s = drvStats[o.driver_id]; if (!s) return;
-    s.count++;
-    if (o.status === "completed") s.revenue += Number(o.price);
-    s.commission += Number(o.app_commission || 0);
-    if (o.commission_status === "unpaid") s.unpaidCommission += Number(o.app_commission || 0);
-  });
+  const topupStats = useMemo(() => {
+    const approved = topups.filter(t => t.status === "approved");
+    const pending = topups.filter(t => t.status === "pending");
+    const rejectedT = topups.filter(t => t.status === "rejected");
+    return {
+      approved: approved.length, approvedSum: approved.reduce((a, t) => a + Number(t.amount), 0),
+      pending: pending.length, pendingSum: pending.reduce((a, t) => a + Number(t.amount), 0),
+      rejected: rejectedT.length,
+    };
+  }, [topups]);
 
-  const cancelled = orders.filter((o: any) => o.status === "cancelled" || o.status === "rejected");
-  const totalRevenue = orders.filter((o: any) => o.status === "completed").reduce((a: number, o: any) => a + Number(o.price), 0);
-
-  // Commission daily / per city
-  const commissionDays: Record<string, number> = {};
-  Object.keys(days).forEach(k => { commissionDays[k] = 0; });
-  const commissionCities: Record<string, { total: number; unpaid: number }> = {};
-  let zeroCommissionCount = 0;
-  orders.forEach((o: any) => {
-    const c = Number(o.app_commission || 0);
-    const k = new Date(o.created_at).toISOString().slice(0, 10);
-    if (commissionDays[k] !== undefined) commissionDays[k] += c;
-    const cc = commissionCities[o.city] || (commissionCities[o.city] = { total: 0, unpaid: 0 });
-    cc.total += c;
-    if (o.commission_status === "unpaid") cc.unpaid += c;
-    if (c === 0 && o.status === "completed") zeroCommissionCount++;
-  });
-  const totalCommission = orders.reduce((a: number, o: any) => a + Number(o.app_commission || 0), 0);
-  const totalUnpaidCommission = orders.filter((o: any) => o.commission_status === "unpaid").reduce((a: number, o: any) => a + Number(o.app_commission || 0), 0);
+  if (loading) return <AdminShell title="التقارير"><div className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-primary" /></div></AdminShell>;
 
   return (
     <AdminShell title="التقارير">
-      <div className="space-y-6">
-        {/* Daily */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
-          <div className="p-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-display font-bold">الطلبات اليومية (آخر 7 أيام)</h2>
-            <span className="text-xs text-muted-foreground">إجمالي الإيرادات: <span className="font-bold text-primary">{totalRevenue.toLocaleString("ar-EG")} ر.ي</span></span>
-          </div>
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-xs text-muted-foreground">
-              <tr>
-                <th className="text-right p-3">التاريخ</th>
-                <th className="text-right p-3">عدد الطلبات</th>
-                <th className="text-right p-3">الإيرادات</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(days).map(([k, v]) => (
-                <tr key={k} className="border-t border-border">
-                  <td className="p-3">{new Date(k).toLocaleDateString("ar-EG", { weekday: "short", day: "numeric", month: "short" })}</td>
-                  <td className="p-3">{v.count}</td>
-                  <td className="p-3 font-semibold">{v.revenue.toLocaleString("ar-EG")} ر.ي</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Filters */}
+      <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-4 mb-4 grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
+        <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="rounded-lg border border-border p-2" />
+        <input type="date" value={to} onChange={e => setTo(e.target.value)} className="rounded-lg border border-border p-2" />
+        <select value={city} onChange={e => setCity(e.target.value)} className="rounded-lg border border-border p-2">
+          <option value="">كل المدن</option>
+          {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+        </select>
+        <select value={driverId} onChange={e => setDriverId(e.target.value)} className="rounded-lg border border-border p-2">
+          <option value="">كل السائقين</option>
+          {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+        <select value={pm} onChange={e => setPm(e.target.value)} className="rounded-lg border border-border p-2">
+          <option value="">كل طرق الدفع</option>
+          <option value="cash">نقدي</option>
+          <option value="wallet">محفظة</option>
+        </select>
+        <select value={status} onChange={e => setStatus(e.target.value)} className="rounded-lg border border-border p-2">
+          <option value="">كل الحالات</option>
+          {["pending","approved","accepted","on_the_way","arrived","delivering","payment_collected","completed","cancelled","rejected"].map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
 
-        {/* Cities */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
-          <div className="p-4 border-b border-border"><h2 className="font-display font-bold">الطلبات حسب المدينة</h2></div>
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-xs text-muted-foreground">
-              <tr>
-                <th className="text-right p-3">المدينة</th>
-                <th className="text-right p-3">إجمالي الطلبات</th>
-                <th className="text-right p-3">الإيرادات</th>
-                <th className="text-right p-3">الملغية/المرفوضة</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(cities).sort((a, b) => b[1].revenue - a[1].revenue).map(([city, v]) => (
-                <tr key={city} className="border-t border-border">
-                  <td className="p-3 font-medium">{city}</td>
-                  <td className="p-3">{v.count}</td>
-                  <td className="p-3 font-semibold">{v.revenue.toLocaleString("ar-EG")} ر.ي</td>
-                  <td className="p-3 text-rose-600">{v.cancelled}</td>
-                </tr>
-              ))}
-              {Object.keys(cities).length === 0 && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground text-sm">لا توجد بيانات</td></tr>}
-            </tbody>
-          </table>
-        </div>
+      {/* KPI cards */}
+      <div className="grid gap-3 md:grid-cols-4 mb-4">
+        <Kpi label="إجمالي الطلبات" value={stats.total} />
+        <Kpi label="مكتملة" value={stats.completed} color="text-emerald-700" />
+        <Kpi label="ملغية" value={stats.cancelled} color="text-rose-600" />
+        <Kpi label="مرفوضة" value={stats.rejected} color="text-rose-600" />
+        <Kpi label="إجمالي قيمة الطلبات" value={`${stats.totalValue.toLocaleString("ar-EG")} ر.ي`} />
+        <Kpi label="إيرادات المكتملة" value={`${stats.completedValue.toLocaleString("ar-EG")} ر.ي`} color="text-emerald-700" />
+        <Kpi label="إجمالي عمولات التطبيق" value={`${stats.totalCommission.toLocaleString("ar-EG")} ر.ي`} />
+        <Kpi label="عمولات نقدية غير مسددة" value={`${stats.cashUnpaid.toLocaleString("ar-EG")} ر.ي`} color="text-rose-600" />
+        <Kpi label="عمولات محفظة محصلة" value={`${stats.walletCollected.toLocaleString("ar-EG")} ر.ي`} color="text-emerald-700" />
+        <Kpi label="مستحقات سائقين (محفظة)" value={`${stats.walletPayoutPending.toLocaleString("ar-EG")} ر.ي`} />
+        <Kpi label="سحوبات مدفوعة" value={`${stats.withdrawalsPaid.toLocaleString("ar-EG")} ر.ي`} />
+      </div>
 
-        {/* Drivers */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
-          <div className="p-4 border-b border-border"><h2 className="font-display font-bold">أداء السائقين</h2></div>
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-xs text-muted-foreground">
-              <tr>
-                <th className="text-right p-3">السائق</th>
-                <th className="text-right p-3">عدد الطلبات</th>
-                <th className="text-right p-3">إجمالي الإيرادات</th>
-                <th className="text-right p-3">عمولات التطبيق</th>
-                <th className="text-right p-3">عمولات غير مسددة</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.values(drvStats).sort((a, b) => b.revenue - a.revenue).map((s, i) => (
-                <tr key={i} className="border-t border-border">
-                  <td className="p-3 font-medium">{s.name}</td>
-                  <td className="p-3">{s.count}</td>
-                  <td className="p-3 font-semibold">{s.revenue.toLocaleString("ar-EG")} ر.ي</td>
-                  <td className="p-3 font-semibold text-emerald-700">{s.commission.toLocaleString("ar-EG")} ر.ي</td>
-                  <td className="p-3 font-semibold text-rose-600">{s.unpaidCommission.toLocaleString("ar-EG")} ر.ي</td>
-                </tr>
-              ))}
-              {Object.keys(drvStats).length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">لا يوجد سائقون</td></tr>}
-            </tbody>
-          </table>
-        </div>
+      {/* Export buttons */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <ExportBtn label="تصدير الطلبات" onClick={() => downloadCSV("orders.csv", orders.map(o => ({
+          id: o.id, created_at: o.created_at, city: o.city, status: o.status, payment_method: o.payment_method,
+          price: o.price, app_commission: o.app_commission, commission_status: o.commission_status,
+          driver: driverName(o.driver_id), driver_payout_amount: o.driver_payout_amount, driver_payout_status: o.driver_payout_status,
+        })))} />
+        <ExportBtn label="تصدير العمولات" onClick={() => downloadCSV("commissions.csv", orders.filter(o => Number(o.app_commission || 0) > 0).map(o => ({
+          order_id: o.id, created_at: o.created_at, city: o.city, driver: driverName(o.driver_id),
+          payment_method: o.payment_method, price: o.price, app_commission: o.app_commission, commission_status: o.commission_status,
+        })))} />
+        <ExportBtn label="تصدير السحوبات" onClick={() => downloadCSV("withdrawals.csv", withdrawals.map(w => ({
+          id: w.id, created_at: w.created_at, driver: driverName(w.driver_id), amount: w.amount, status: w.status,
+        })))} />
+        <ExportBtn label="تصدير تعبئات المحفظة" onClick={() => downloadCSV("wallet-topups.csv", topups.map(t => ({
+          id: t.id, created_at: t.created_at, user_id: t.user_id, amount: t.amount, status: t.status,
+        })))} />
+      </div>
 
-        {/* Commissions overview */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
-            <p className="text-xs text-muted-foreground">إجمالي عمولات التطبيق</p>
-            <p className="font-display font-bold text-xl mt-1">{totalCommission.toLocaleString("ar-EG")} ر.ي</p>
+      {/* Tables */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card title="الطلبات حسب المدينة">
+          <Table headers={["المدينة","الطلبات","الإيرادات","العمولة"]} rows={byCity.map(([c, v]) => [c, v.count, `${v.revenue.toLocaleString("ar-EG")} ر.ي`, `${v.commission.toLocaleString("ar-EG")} ر.ي`])} />
+        </Card>
+        <Card title="أداء السائقين">
+          <Table headers={["السائق","طلبات","إيرادات","عمولة","غير مسدد"]} rows={byDriver.map(d => [d.name, d.count, `${d.revenue.toLocaleString("ar-EG")}`, `${d.commission.toLocaleString("ar-EG")}`, `${d.unpaid.toLocaleString("ar-EG")}`])} />
+        </Card>
+        <Card title="المحفظة والتعبئات">
+          <div className="p-4 text-sm space-y-2">
+            <Row label="تعبئات معتمدة" value={`${topupStats.approved} (${topupStats.approvedSum.toLocaleString("ar-EG")} ر.ي)`} />
+            <Row label="تعبئات معلقة" value={`${topupStats.pending} (${topupStats.pendingSum.toLocaleString("ar-EG")} ر.ي)`} />
+            <Row label="تعبئات مرفوضة" value={`${topupStats.rejected}`} />
           </div>
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
-            <p className="text-xs text-muted-foreground">عمولات غير مسددة</p>
-            <p className="font-display font-bold text-xl mt-1 text-rose-600">{totalUnpaidCommission.toLocaleString("ar-EG")} ر.ي</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5">
-            <p className="text-xs text-muted-foreground">طلبات مكتملة بعمولة صفرية</p>
-            <p className="font-display font-bold text-xl mt-1">{zeroCommissionCount}</p>
-          </div>
-        </div>
-
-        {/* Commissions per day & per city */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
-            <div className="p-4 border-b border-border"><h2 className="font-display font-bold">عمولات التطبيق اليومية</h2></div>
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-xs text-muted-foreground">
-                <tr><th className="text-right p-3">التاريخ</th><th className="text-right p-3">العمولة</th></tr>
-              </thead>
-              <tbody>
-                {Object.entries(commissionDays).map(([k, v]) => (
-                  <tr key={k} className="border-t border-border">
-                    <td className="p-3">{new Date(k).toLocaleDateString("ar-EG", { weekday: "short", day: "numeric", month: "short" })}</td>
-                    <td className="p-3 font-semibold">{v.toLocaleString("ar-EG")} ر.ي</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
-            <div className="p-4 border-b border-border"><h2 className="font-display font-bold">عمولات التطبيق حسب المدينة</h2></div>
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-xs text-muted-foreground">
-                <tr><th className="text-right p-3">المدينة</th><th className="text-right p-3">الإجمالي</th><th className="text-right p-3">غير مسدد</th></tr>
-              </thead>
-              <tbody>
-                {Object.entries(commissionCities).sort((a, b) => b[1].total - a[1].total).map(([city, v]) => (
-                  <tr key={city} className="border-t border-border">
-                    <td className="p-3 font-medium">{city}</td>
-                    <td className="p-3 font-semibold">{v.total.toLocaleString("ar-EG")} ر.ي</td>
-                    <td className="p-3 text-rose-600">{v.unpaid.toLocaleString("ar-EG")} ر.ي</td>
-                  </tr>
-                ))}
-                {Object.keys(commissionCities).length === 0 && <tr><td colSpan={3} className="p-6 text-center text-muted-foreground text-sm">لا توجد بيانات</td></tr>}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Cancelled */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
-          <div className="p-4 border-b border-border"><h2 className="font-display font-bold">الطلبات الملغية والمرفوضة ({cancelled.length})</h2></div>
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-xs text-muted-foreground">
-              <tr>
-                <th className="text-right p-3">الرقم</th>
-                <th className="text-right p-3">المدينة</th>
-                <th className="text-right p-3">الحالة</th>
-                <th className="text-right p-3">التاريخ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cancelled.slice(0, 20).map((o: any) => (
-                <tr key={o.id} className="border-t border-border">
-                  <td className="p-3 font-mono text-xs">#{o.id.slice(0, 8).toUpperCase()}</td>
-                  <td className="p-3">{o.city}</td>
-                  <td className="p-3"><span className="rounded-full bg-rose-100 text-rose-700 px-2 py-0.5 text-xs">{o.status}</span></td>
-                  <td className="p-3 text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString("ar-EG")}</td>
-                </tr>
-              ))}
-              {cancelled.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground text-sm">لا توجد طلبات ملغية</td></tr>}
-            </tbody>
-          </table>
-        </div>
+        </Card>
+        <Card title="السحوبات">
+          <Table headers={["التاريخ","السائق","المبلغ","الحالة"]} rows={withdrawals.slice(0, 30).map(w => [
+            new Date(w.created_at).toLocaleDateString("ar-EG"), driverName(w.driver_id), `${Number(w.amount).toLocaleString("ar-EG")} ر.ي`, w.status,
+          ])} />
+        </Card>
       </div>
     </AdminShell>
   );
+}
+
+function Kpi({ label, value, color = "" }: any) {
+  return (
+    <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-4">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={`font-display font-bold text-lg mt-1 ${color}`}>{value}</p>
+    </div>
+  );
+}
+function Card({ title, children }: any) {
+  return <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden"><div className="p-4 border-b border-border"><h2 className="font-display font-bold">{title}</h2></div>{children}</div>;
+}
+function Table({ headers, rows }: { headers: string[]; rows: any[][] }) {
+  return (
+    <table className="w-full text-sm">
+      <thead className="bg-slate-50 text-xs text-muted-foreground"><tr>{headers.map(h => <th key={h} className="text-right p-3">{h}</th>)}</tr></thead>
+      <tbody>
+        {rows.length === 0 ? <tr><td colSpan={headers.length} className="p-6 text-center text-muted-foreground text-sm">لا توجد بيانات</td></tr> :
+          rows.map((r, i) => <tr key={i} className="border-t border-border">{r.map((c, j) => <td key={j} className="p-3">{c}</td>)}</tr>)}
+      </tbody>
+    </table>
+  );
+}
+function Row({ label, value }: any) { return <div className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="font-bold">{value}</span></div>; }
+function ExportBtn({ label, onClick }: any) {
+  return <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold hover:opacity-90"><Download className="h-4 w-4" /> {label}</button>;
 }
