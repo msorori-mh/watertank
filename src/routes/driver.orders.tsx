@@ -51,14 +51,32 @@ function DriverAvailableOrders() {
 
   const accept = async (id: string) => {
     setAccepting(id);
-    const order = orders.find((o) => o.id === id);
-    await supabase.from("orders").update({ driver_id: driver.id, status: "accepted" }).eq("id", id);
-    if (order?.customer_id) {
-      const msg = ORDER_EVENT_MESSAGES.order_accepted!;
-      await notifyUser(order.customer_id, id, "order_accepted", msg.title, msg.body(shortId(id)));
+    try {
+      // منع تعدد الطلبات النشطة
+      const { data: active } = await supabase.from("orders").select("id")
+        .eq("driver_id", driver.id)
+        .in("status", ["accepted","on_the_way","arrived","delivering","payment_collected"] as any)
+        .limit(1).maybeSingle();
+      if (active) {
+        alert("يجب إنهاء الطلب الحالي أولاً");
+        nav({ to: "/driver" });
+        return;
+      }
+      const order = orders.find((o) => o.id === id);
+      const { error } = await supabase.from("orders")
+        .update({ driver_id: driver.id, status: "accepted" })
+        .eq("id", id)
+        .is("driver_id", null)
+        .eq("status", "approved");
+      if (error) { alert("تعذر قبول الطلب: " + error.message); return; }
+      if (order?.customer_id) {
+        const msg = ORDER_EVENT_MESSAGES.order_accepted!;
+        await notifyUser(order.customer_id, id, "order_accepted", msg.title, msg.body(shortId(id)));
+      }
+      nav({ to: "/driver" });
+    } finally {
+      setAccepting(null);
     }
-    setAccepting(null);
-    nav({ to: "/driver" });
   };
 
   return (
