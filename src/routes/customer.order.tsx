@@ -2,16 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, MapPin, Loader2, Droplets, Wallet, Banknote, Plus, Star, CheckCircle2 } from "lucide-react";
+import { WATER_TYPES } from "@/lib/water-types";
 
 export const Route = createFileRoute("/customer/order")({
   component: NewOrder,
 });
-
-const WATER_TYPES = [
-  { id: "sweet", name: "ماء حلو", desc: "للشرب والطبخ" },
-  { id: "desalinated", name: "ماء محلاة", desc: "محلاة من المحطات" },
-  { id: "well", name: "ماء آبار", desc: "للاستخدام العام" },
-];
 
 type Address = {
   id: string; user_id: string; title: string; city: string;
