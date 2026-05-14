@@ -129,9 +129,14 @@ function AdminOrders() {
                     <td className="p-3">{o.capacity.toLocaleString("ar-EG")} لتر</td>
                     <td className="p-3 font-semibold">{Number(o.price).toLocaleString("ar-EG")} ر.ي</td>
                     <td className="p-3">
-                      <span className={`text-xs rounded-full px-2 py-0.5 ${o.payment_status === "paid" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                        {o.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className={`text-xs rounded-full px-2 py-0.5 w-fit ${o.payment_method === "wallet" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
+                          {o.payment_method === "wallet" ? "محفظة" : "عند التسليم"}
+                        </span>
+                        <span className={`text-xs rounded-full px-2 py-0.5 w-fit ${o.payment_status === "paid" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                          {o.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-3">
                       <select
