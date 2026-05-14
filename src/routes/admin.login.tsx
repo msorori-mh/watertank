@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { adminLogin, adminSignup } from "@/lib/wayet-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, Shield, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/login")({
@@ -16,15 +17,38 @@ function AdminLogin() {
   const [setupCode, setSetupCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   const submit = async () => {
-    setError(""); setLoading(true);
+    setError(""); setInfo(""); setLoading(true);
     try {
       if (mode === "login") await adminLogin(email, password);
       else await adminSignup(email, password, name, setupCode);
       nav({ to: "/admin" });
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
+  };
+
+  const sendReset = async () => {
+    setError(""); setInfo("");
+    if (!forgotEmail.trim()) return setError("أدخل البريد الإلكتروني");
+    setForgotLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setInfo("تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني. تحقّق من البريد.");
+      setForgotOpen(false);
+      setForgotEmail("");
+    } catch (e: any) {
+      setError(e.message || "تعذّر إرسال رابط الاستعادة");
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   return (
@@ -72,6 +96,7 @@ function AdminLogin() {
             />
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}
+          {info && <p className="text-sm text-emerald-600">{info}</p>}
           <button
             onClick={submit} disabled={loading}
             className="w-full rounded-xl bg-primary px-5 py-4 font-bold text-primary-foreground shadow-[var(--shadow-glow)] disabled:opacity-60 flex items-center justify-center gap-2"
@@ -79,8 +104,47 @@ function AdminLogin() {
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {mode === "login" ? "دخول" : "إنشاء الحساب"}
           </button>
+
+          {mode === "login" && (
+            <>
+              {!forgotOpen ? (
+                <button
+                  onClick={() => { setForgotOpen(true); setForgotEmail(email); setError(""); setInfo(""); }}
+                  className="w-full text-sm text-primary hover:underline"
+                >
+                  نسيت كلمة المرور؟
+                </button>
+              ) : (
+                <div className="rounded-xl border-2 border-input bg-card p-3 space-y-2">
+                  <p className="text-xs text-muted-foreground">سنرسل لك رابط إعادة تعيين كلمة المرور إلى بريدك.</p>
+                  <input
+                    type="email" dir="ltr"
+                    value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="email@wayet.com"
+                    className="w-full rounded-lg border-2 border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={sendReset} disabled={forgotLoading}
+                      className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {forgotLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                      إرسال الرابط
+                    </button>
+                    <button
+                      onClick={() => { setForgotOpen(false); setError(""); }}
+                      className="rounded-lg border-2 border-input px-3 py-2 text-sm"
+                    >
+                      إلغاء
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           <button
-            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); }}
+            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); setInfo(""); setForgotOpen(false); }}
             className="w-full text-sm text-muted-foreground hover:text-deep"
           >
             {mode === "login" ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لدي حساب — تسجيل الدخول"}
