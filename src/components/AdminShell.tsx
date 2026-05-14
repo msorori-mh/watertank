@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, Wallet, BarChart3, LogOut, Loader2, Droplets, Percent, CreditCard, WalletCards } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, Wallet, BarChart3, LogOut, Loader2, Droplets, Percent, CreditCard, WalletCards, Banknote } from "lucide-react";
 
 export function AdminShell({ children, title }: { children: React.ReactNode; title: string }) {
   const nav = useNavigate();
@@ -32,7 +32,7 @@ export function AdminShell({ children, title }: { children: React.ReactNode; tit
 
   if (!ready) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
-  const tabs: { to: "/admin" | "/admin/orders" | "/admin/drivers" | "/admin/customers" | "/admin/cities" | "/admin/commissions" | "/admin/payment-methods" | "/admin/wallet-topups" | "/admin/finance" | "/admin/reports"; label: string; icon: any; exact?: boolean }[] = [
+  const tabs: { to: "/admin" | "/admin/orders" | "/admin/drivers" | "/admin/customers" | "/admin/cities" | "/admin/commissions" | "/admin/payment-methods" | "/admin/wallet-topups" | "/admin/driver-withdrawals" | "/admin/finance" | "/admin/reports"; label: string; icon: any; exact?: boolean }[] = [
     { to: "/admin", label: "اللوحة", icon: LayoutDashboard, exact: true },
     { to: "/admin/orders", label: "الطلبات", icon: ClipboardList },
     { to: "/admin/drivers", label: "السائقون", icon: Truck },
@@ -41,6 +41,7 @@ export function AdminShell({ children, title }: { children: React.ReactNode; tit
     { to: "/admin/commissions", label: "العمولات", icon: Percent },
     { to: "/admin/payment-methods", label: "طرق الدفع", icon: CreditCard },
     { to: "/admin/wallet-topups", label: "تعبئة المحافظ", icon: WalletCards },
+    { to: "/admin/driver-withdrawals", label: "سحوبات السائقين", icon: Banknote },
     { to: "/admin/finance", label: "المالية", icon: Wallet },
     { to: "/admin/reports", label: "التقارير", icon: BarChart3 },
   ];
