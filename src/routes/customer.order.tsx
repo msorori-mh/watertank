@@ -28,13 +28,23 @@ function NewOrder() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) { nav({ to: "/customer/login" }); return; }
       setUser(data.session.user);
-      const { data: prof } = await supabase.from("profiles")
-        .select("city").eq("id", data.session.user.id).maybeSingle();
+      const [{ data: prof }, { data: w }] = await Promise.all([
+        supabase.from("profiles").select("city").eq("id", data.session.user.id).maybeSingle(),
+        supabase.from("wallets").select("balance").eq("user_id", data.session.user.id).maybeSingle(),
+      ]);
       if (!prof?.city) { nav({ to: "/customer/profile/complete" }); return; }
+      setWalletBalance(Number(w?.balance ?? 0));
     });
   }, [nav]);
 
