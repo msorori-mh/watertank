@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import { useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, Truck, Banknote, Power } from "lucide-react";
-import { WATER_TYPES } from "@/lib/water-types";
+
 
 export const Route = createFileRoute("/driver/settings")({
   component: DriverSettings,
