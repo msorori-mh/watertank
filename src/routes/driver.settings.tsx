@@ -48,7 +48,7 @@ function DriverSettings() {
     setCity(d.city || "");
     setPlate(d.vehicle_plate || "");
     setCapacity(d.vehicle_capacity || 0);
-    setWaterType((d.water_type as any) || "normal");
+    
     setAvailability(d.availability || "offline");
     setNotif(d.notifications_enabled !== false);
     setPayoutMethod(d.payout_method || "cash");
