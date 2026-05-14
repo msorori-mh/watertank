@@ -1,68 +1,48 @@
-## نموذج العمولة الجديد
+## الهدف
+إعادة هيكلة نموذج "إضافة/تعديل طريقة دفع" في `/admin/payment-methods` ليدعم 3 أنواع يمنية محددة، مع إظهار الحقول المناسبة لكل نوع فقط.
 
-التطبيق لا يستلم قيمة الطلب. السائق يستلم كامل المبلغ من العميل، ويتراكم عليه عمولة فقط لصالح التطبيق. `drivers.balance` يمثل **عمولات مستحقة على السائق فقط**.
+## الأنواع الثلاثة والحقول
 
-## التغييرات على قاعدة البيانات
+| النوع | الحقول المطلوبة |
+|------|------------------|
+| **إيداع بنكي** (`bank_deposit`) | اسم البنك، اسم صاحب الحساب، رقم الحساب، باركود الحساب (QR) |
+| **تحويل عبر الشبكة الموحدة** (`unified_transfer`) | اسم المستلم، رقم هاتف المستلم |
+| **سداد عبر نقطة حاسب** (`pos_point`) | اسم صاحب النقطة، رقم النقطة |
 
-### 1) جدول `commission_settings` (جديد)
-- `id`, `city` (text، nullable = كل المدن)
-- `capacity` (integer، nullable = كل السعات)
-- `commission_type` ('fixed' | 'percentage')
-- `commission_value` numeric default 0
-- `free_until` date nullable
-- `is_active` boolean default true
-- `created_at`, `updated_at`
-- RLS: قراءة للمصادقين، إدارة للأدمن فقط
+الحقول المشتركة لكل الأنواع: `name` (اسم ظاهر للسائق)، `instructions` (اختياري)، `is_active`.
 
-### 2) إضافة أعمدة على `orders`
-- `app_commission` numeric default 0
-- `commission_status` text default 'unpaid'  (`unpaid` | `paid` | `free`)
-- `commission_rule_snapshot` jsonb nullable
+## التغييرات
 
-### 3) دالة `calculate_app_commission(_city, _capacity, _price)`
-- تختار أنسب قاعدة فعالة (city+capacity > city > capacity > عام)
-- إذا `free_until >= today` ⇒ 0 وحالة `free`
-- fixed ⇒ القيمة، percentage ⇒ price*value/100
-- لا تتجاوز قيمة الطلب
-- ترجع `(amount, snapshot_jsonb)`
+### 1) قاعدة البيانات (migration واحدة)
+- لا تغيير في بنية الأعمدة (الأعمدة الحالية كافية: `bank_name` نستخدم `provider_name`، `account_holder_name`، `account_number`، `qr_code_url`، `phone_number`).
+- فقط: تحديث القيم المسموحة لعمود `type` عبر CHECK constraint جديد:
+  ```
+  type IN ('bank_deposit','unified_transfer','pos_point')
+  ```
+  + ترحيل القيم القديمة:
+  - `bank` → `bank_deposit`
+  - `transfer_network` → `unified_transfer`
+  - `direct_transfer` / `other` → `unified_transfer` (الأقرب)
 
-### 4) Trigger على `orders`
-عند تحويل الحالة من `pending` إلى `approved`: احسب العمولة، خزّن `app_commission`، `commission_rule_snapshot`، و`commission_status` (`free` إذا 0 وإلا `unpaid`).
+### 2) صفحة الأدمن `src/routes/admin.payment-methods.tsx`
+- استبدال `TYPE_LABELS` بالأنواع الثلاثة الجديدة مع أيقونات (Landmark / Send / Smartphone).
+- عند اختيار النوع في النموذج، إظهار الحقول الخاصة به فقط:
+  - **bank_deposit**: حقل "اسم البنك" (يحفظ في `provider_name`) + "اسم صاحب الحساب" + "رقم الحساب" + رفع صورة QR.
+  - **unified_transfer**: "اسم المستلم" (يحفظ في `account_holder_name`) + "رقم الهاتف".
+  - **pos_point**: "اسم صاحب النقطة" (في `account_holder_name`) + "رقم النقطة" (في `account_number`).
+- التحقق من الحقول المطلوبة حسب النوع قبل الحفظ.
+- عرض البطاقات: إظهار الحقول ذات القيمة فقط (المنطق الحالي يدعم ذلك، يحتاج فقط تعديل ترتيب وتسميات حسب النوع).
 
-### 5) تعديل `collect_order_payment`
-- بدل `balance += order.price` ⇒ `balance += app_commission`
-- إذا `app_commission = 0` لا يتغير الرصيد، حالة العمولة `free`
-- وإلا `commission_status = 'unpaid'`
+### 3) صفحات السائق التي تعرض طرق الدفع
+- `src/routes/driver.settings.tsx` و/أو شاشة تسديد العمولة (إن وجدت): إظهار الحقول المناسبة لكل نوع وأيقونة مميزة. (تعديل عرض فقط).
 
-### 6) تعديل `record_cash_handover`
-- يبقى يخصم من `drivers.balance`
-- يضيف ربط بأحدث طلبات السائق غير المسددة (تحديث `commission_status='paid'` للطلبات بقدر المبلغ المسلَّم) — اختياري بسيط: حدّث طلبات FIFO حتى استيعاب المبلغ
+### 4) عدم التغيير
+- الجداول الأخرى، RLS، دوال `collect_order_payment` / `record_cash_handover`، رحلة الطلب، المحفظة.
+- bucket `payment-qr` يبقى كما هو.
 
-## التغييرات في الكود
-
-### واجهة الإدارة
-- صفحة جديدة: `src/routes/admin.commissions.tsx` لإدارة قواعد العمولة (CRUD)
-- إضافة رابط في `AdminShell`
-- تحديث `admin.finance.tsx`:
-  - بطاقات: قيمة الطلبات (محصّلة عبر السائقين)، عمولات مستحقة، عمولات مسددة، عمولات غير مسددة، عمولات اليوم
-  - تغيير "تسجيل تسليم مبلغ" ⇒ "تسديد عمولة التطبيق"
-  - عمود الرصيد ⇒ "عمولات مستحقة"
-- `admin.reports.tsx`: قسم عمولات (يومي، حسب السائق، حسب المدينة، صفرية، غير مسددة)
-- `admin.orders.tsx`: عرض `app_commission` بجانب السعر
-
-### واجهة السائق
-- `driver.orders.tsx` و`driver.index.tsx`: إظهار قيمة الطلب (يستلمها كاملة) + عمولة التطبيق + ملاحظة توضيحية
-- صفحة الطلب: نفس العرض
-
-### بدون تغيير
-- المصادقة، Google Login، RLS الحالية، Realtime، الإشعارات، دورة الطلب، اعتماد السائق، إنشاء الطلب
-- الطلبات القديمة: `app_commission` افتراضي 0 ⇒ تُعامل كعمولة صفرية تلقائياً
-
-## خطوات التنفيذ
-
-1. Migration واحدة: إنشاء `commission_settings`، إضافة أعمدة `orders`، دوال `calculate_app_commission` و trigger، تعديل `collect_order_payment`، RLS
-2. صفحة `admin.commissions.tsx` + رابط في `AdminShell`
-3. تحديث `admin.finance.tsx` (مصطلحات + بيانات)
-4. تحديث `admin.reports.tsx` (تقارير عمولة)
-5. تحديث واجهات السائق لإظهار العمولة
-6. اختبار الحالات: مجاني، ثابت، نسبة، تحصيل، تسليم
+## نقاط التحقق بعد التنفيذ
+1. إنشاء طريقة من كل نوع وحفظها.
+2. تظهر الحقول الصحيحة فقط في النموذج عند تبديل النوع.
+3. القيم القديمة ظهرت بعد الترحيل دون كسر.
+4. القائمة في صفحة الأدمن تعرض كل بطاقة بتسميات صحيحة.
+5. لا تأثير على الطلبات أو السحوبات.
