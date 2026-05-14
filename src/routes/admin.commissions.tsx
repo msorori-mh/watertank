@@ -185,9 +185,16 @@ function AdminCommissions() {
                     </button>
                   </td>
                   <td className="p-3">
-                    <button onClick={() => remove(r.id)} className="text-rose-600 hover:bg-rose-50 p-1.5 rounded">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex gap-1">
+                      <button onClick={() => startEdit(r)}
+                        className={`p-1.5 rounded ${editingId === r.id ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-100"}`}
+                        title="تعديل">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => remove(r.id)} className="text-rose-600 hover:bg-rose-50 p-1.5 rounded" title="حذف">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
