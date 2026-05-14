@@ -86,17 +86,7 @@ function DriverSettings() {
     if (!plate.trim()) { setError("رقم اللوحة مطلوب"); return; }
     if (!capacity || capacity <= 0) { setError("سعة الوايت غير صالحة"); return; }
     if (profileEmail && !/^\S+@\S+\.\S+$/.test(profileEmail)) { setError("بريد إلكتروني غير صالح"); return; }
-    setSaving(true);
 
-    const [{ error: dErr }, { error: pErr }] = await Promise.all([
-      supabase.from("drivers").update({
-        name: name.trim(),
-        phone: phone.trim(),
-        city: city || null,
-        vehicle_plate: plate.trim(),
-        vehicle_capacity: capacity,
-        availability,
-        notifications_enabled: notif,
     if (payoutType === "bank") {
       if (!bankAccountNumber.trim()) { setError("رقم الحساب البنكي مطلوب"); return; }
       if (!bankAccountHolder.trim()) { setError("اسم صاحب الحساب مطلوب"); return; }
