@@ -97,9 +97,35 @@ function DriverSettings() {
         vehicle_capacity: capacity,
         availability,
         notifications_enabled: notif,
-        payout_method: payoutMethod,
-        payout_account: payoutAccount.trim() || null,
-        payout_recipient_name: payoutName.trim() || null,
+    if (payoutType === "bank") {
+      if (!bankAccountNumber.trim()) { setError("رقم الحساب البنكي مطلوب"); return; }
+      if (!bankAccountHolder.trim()) { setError("اسم صاحب الحساب مطلوب"); return; }
+    } else {
+      if (!transferPhone.trim()) { setError("رقم الهاتف للحوالة مطلوب"); return; }
+      if (!transferRecipientName.trim()) { setError("اسم المستلم مطلوب"); return; }
+    }
+    setSaving(true);
+
+    const [{ error: dErr }, { error: pErr }] = await Promise.all([
+      supabase.from("drivers").update({
+        name: name.trim(),
+        phone: phone.trim(),
+        city: city || null,
+        vehicle_plate: plate.trim(),
+        vehicle_capacity: capacity,
+        availability,
+        notifications_enabled: notif,
+        payout_type: payoutType,
+        // legacy mirror for backward compat
+        payout_method: payoutType === "bank" ? "bank" : "transfer_network",
+        payout_account: payoutType === "bank" ? bankAccountNumber.trim() : transferPhone.trim(),
+        payout_recipient_name: payoutType === "bank" ? bankAccountHolder.trim() : transferRecipientName.trim(),
+        bank_name: payoutType === "bank" ? bankName.trim() || null : bankName.trim() || null,
+        bank_account_holder: payoutType === "bank" ? bankAccountHolder.trim() || null : bankAccountHolder.trim() || null,
+        bank_account_number: payoutType === "bank" ? bankAccountNumber.trim() || null : bankAccountNumber.trim() || null,
+        transfer_recipient_name: payoutType === "transfer_network" ? transferRecipientName.trim() || null : transferRecipientName.trim() || null,
+        transfer_phone: payoutType === "transfer_network" ? transferPhone.trim() || null : transferPhone.trim() || null,
+        transfer_network_name: payoutType === "transfer_network" ? transferNetworkName.trim() || null : transferNetworkName.trim() || null,
       } as any).eq("id", driver.id),
       supabase.from("profiles").update({
         email: profileEmail.trim() || null,
