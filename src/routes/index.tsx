@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Truck, Shield, Droplets } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,7 +38,10 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f0f9ff] via-background to-background font-body text-deep flex flex-col">
-      <header className="px-6 pt-12 pb-8 text-center max-w-3xl mx-auto">
+      <header className="px-6 pt-10 pb-8 text-center max-w-3xl mx-auto">
+        <div className="flex justify-center mb-4">
+          <Logo size={72} />
+        </div>
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
           <Droplets className="h-3.5 w-3.5" /> منصة وايت ماء — اليمن
         </div>
