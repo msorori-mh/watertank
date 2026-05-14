@@ -16,13 +16,9 @@ import type { CapacitorConfig } from '@capacitor/cli';
  *   - يجب نشر المشروع أولاً من Lovable (زر Publish) قبل بناء APK.
  *   - اتصال إنترنت دائم مطلوب لتحميل الواجهة.
  *   - الإنترنت يبقى مطلوباً أيضاً لـ Supabase (Auth + REST + Realtime + GPS sync).
- *
- * لاحقاً (بعد اكتمال النظام واختباره):
- *   - سيتم إنشاء نسخة SPA مستقلة للإنتاج تعمل offline-capable
- *     (الواجهة من dist محلياً، البيانات فقط من الإنترنت).
  */
 const config: CapacitorConfig = {
-  appId: 'app.lovable.wayetmaa',
+  appId: 'app.wayetmaa.mobile',
   appName: 'وايت ماء',
   webDir: 'dist',
 
@@ -54,6 +50,15 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: 'LIGHT',
       backgroundColor: '#0ea5e9',
+      overlaysWebView: false,
+    },
+    App: {
+      // افتراضات افتراضية — يمكن تعديلها لاحقاً
+    },
+    Geolocation: {
+      // الإعدادات الفعلية تُدار عبر صلاحيات Android
+      // (ACCESS_FINE_LOCATION + ACCESS_COARSE_LOCATION)
+      // التي يضيفها plugin @capacitor/geolocation تلقائياً عند sync.
     },
   },
 };
