@@ -215,7 +215,7 @@ function AdminWalletTopups() {
 
                 {t.status === "pending" ? (
                   <div className="flex gap-2 mt-4 pt-3 border-t border-border">
-                    <button onClick={() => approve(t.id)} disabled={acting === t.id}
+                    <button onClick={() => { setApproving(t); setApproveAmount(String(t.amount)); }} disabled={acting === t.id}
                       className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-semibold flex items-center justify-center gap-2 text-sm disabled:opacity-50">
                       {acting === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />} اعتماد
                     </button>
