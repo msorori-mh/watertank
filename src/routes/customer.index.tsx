@@ -93,7 +93,8 @@ function CustomerHome() {
 
   const handleSignOut = async () => { await signOut(); nav({ to: "/" }); };
 
-  const greeting = useMemo(getGreeting, []);
+  const [greeting, setGreeting] = useState("صباح الخير");
+  useEffect(() => { setGreeting(getGreeting(new Date().getHours())); }, []);
   const displayName = useMemo(() => {
     const raw = profile?.full_name || profile?.name || profile?.phone || profile?.email || "بك";
     return String(raw).split("@")[0];
