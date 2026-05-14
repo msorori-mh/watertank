@@ -342,6 +342,51 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          account_holder_name: string | null
+          account_number: string | null
+          created_at: string
+          id: string
+          instructions: string | null
+          is_active: boolean
+          name: string
+          phone_number: string | null
+          provider_name: string | null
+          qr_code_url: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          account_holder_name?: string | null
+          account_number?: string | null
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name: string
+          phone_number?: string | null
+          provider_name?: string | null
+          qr_code_url?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          account_holder_name?: string | null
+          account_number?: string | null
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name?: string
+          phone_number?: string | null
+          provider_name?: string | null
+          qr_code_url?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pricing: {
         Row: {
           capacity: number
