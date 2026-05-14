@@ -17,15 +17,38 @@ function AdminLogin() {
   const [setupCode, setSetupCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   const submit = async () => {
-    setError(""); setLoading(true);
+    setError(""); setInfo(""); setLoading(true);
     try {
       if (mode === "login") await adminLogin(email, password);
       else await adminSignup(email, password, name, setupCode);
       nav({ to: "/admin" });
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
+  };
+
+  const sendReset = async () => {
+    setError(""); setInfo("");
+    if (!forgotEmail.trim()) return setError("أدخل البريد الإلكتروني");
+    setForgotLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setInfo("تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني. تحقّق من البريد.");
+      setForgotOpen(false);
+      setForgotEmail("");
+    } catch (e: any) {
+      setError(e.message || "تعذّر إرسال رابط الاستعادة");
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   return (
