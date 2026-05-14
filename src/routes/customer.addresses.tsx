@@ -6,6 +6,7 @@ import {
   Star, Home, Briefcase, Sprout, MapPinned, X,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/addresses")({
   component: AddressesPage,
@@ -153,6 +154,8 @@ function AddressesPage() {
           onSaved={async () => { await refresh(user.id); setEditing(null); }}
         />
       )}
+    
+      <CustomerBottomNav />
     </div>
   );
 }

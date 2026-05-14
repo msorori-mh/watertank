@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import {
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
   ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2,
   MapPin, Wallet, MessageCircle, Phone, ChevronLeft, Pencil, X
 } from "lucide-react";
@@ -91,6 +92,8 @@ function CustomerSettings() {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <Loader2 className="h-6 w-6 animate-spin text-primary" />
+    
+      <CustomerBottomNav />
     </div>
   );
 

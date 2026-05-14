@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, MapPin, Truck, CheckCircle2, Clock, X, Loader2, Phone } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/orders/$id")({
   component: OrderDetail,
@@ -62,7 +63,9 @@ function OrderDetail() {
     load();
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" />
+      <CustomerBottomNav />
+    </div>;
   if (!order) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">الطلب غير موجود</div>;
 
   const stepIdx = STEPS.findIndex(s => s.id === order.status);

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Wallet, ClipboardList, CheckCircle2, XCircle, Banknote } from "lucide-react";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/reports")({
   component: CustomerReports,
@@ -31,7 +32,9 @@ function CustomerReports() {
     })();
   }, [nav]);
 
-  if (loading || !data) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  if (loading || !data) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" />
+      <CustomerBottomNav />
+    </div>;
 
   const orders: any[] = data.orders;
   const completed = orders.filter(o => o.status === "completed");
