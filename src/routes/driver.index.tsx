@@ -33,10 +33,20 @@ const WALLET_LABEL_OVERRIDES: Record<string, string> = {
   delivering: "تم التسليم",
 };
 
+const STATUS_TIMELINE: { key: OrderStatus; label: string }[] = [
+  { key: "accepted", label: "تم القبول" },
+  { key: "on_the_way", label: "في الطريق" },
+  { key: "arrived", label: "وصل" },
+  { key: "delivering", label: "يصب" },
+  { key: "payment_collected", label: "تم الدفع" },
+  { key: "completed", label: "اكتمل" },
+];
+
 function DriverHome() {
   const nav = useNavigate();
   const gate = useDriverGate();
   const [active, setActive] = useState<any>(null);
+  const [contact, setContact] = useState<{ name: string | null; phone: string | null } | null>(null);
   const [stats, setStats] = useState({ today: 0, earnings: 0 });
   const [updating, setUpdating] = useState(false);
 
@@ -48,6 +58,13 @@ function DriverHome() {
     ]);
     setActive(act);
     setStats({ today: my?.length || 0, earnings: (my || []).reduce((a, o) => a + Number(o.price), 0) });
+    if (act?.id) {
+      const { data: c } = await supabase.rpc("get_order_customer_contact", { _order_id: act.id });
+      const row = Array.isArray(c) ? c[0] : c;
+      setContact(row ? { name: row.name, phone: row.phone } : null);
+    } else {
+      setContact(null);
+    }
   };
 
   useEffect(() => {
