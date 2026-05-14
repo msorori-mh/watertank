@@ -72,6 +72,9 @@ function NewOrder() {
     if (!addressTitle.trim()) return setError("ادخل اسم العنوان (مثل: المنزل)");
     if (!coords) return setError("حدّد موقعك على الخريطة أو استخدم تحديد الموقع");
     if (price === 0) return setError("لا يوجد سعر متاح لهذا الحجم في هذه المدينة");
+    if (paymentMethod === "wallet" && walletBalance < price) {
+      return setError("رصيد المحفظة غير كافٍ، يرجى تعبئة المحفظة.");
+    }
     setSubmitting(true);
     try {
       // Save address
@@ -85,21 +88,36 @@ function NewOrder() {
       }).select().single();
       if (addrErr) throw addrErr;
 
-      const { data: order, error: ordErr } = await supabase.from("orders").insert({
-        customer_id: user.id,
-        city,
-        address_id: addr.id,
-        address_snapshot: { title: addressTitle, description, lat: coords.lat, lng: coords.lng },
-        water_type: waterType as any,
-        capacity,
-        quantity: 1,
-        price,
-        payment_method: "cash" as any,
-        notes: notes || null,
-      }).select().single();
-      if (ordErr) throw ordErr;
+      const snapshot = { title: addressTitle, description, lat: coords.lat, lng: coords.lng };
 
-      nav({ to: "/customer/orders/$id", params: { id: order.id } });
+      if (paymentMethod === "wallet") {
+        const { data: order, error: rpcErr } = await supabase.rpc("create_wallet_order", {
+          _city: city,
+          _address_id: addr.id,
+          _address_snapshot: snapshot as any,
+          _water_type: waterType as any,
+          _capacity: capacity,
+          _price: price,
+          _notes: notes || null,
+        });
+        if (rpcErr) throw rpcErr;
+        nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
+      } else {
+        const { data: order, error: ordErr } = await supabase.from("orders").insert({
+          customer_id: user.id,
+          city,
+          address_id: addr.id,
+          address_snapshot: snapshot,
+          water_type: waterType as any,
+          capacity,
+          quantity: 1,
+          price,
+          payment_method: "cash" as any,
+          notes: notes || null,
+        }).select().single();
+        if (ordErr) throw ordErr;
+        nav({ to: "/customer/orders/$id", params: { id: order.id } });
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
