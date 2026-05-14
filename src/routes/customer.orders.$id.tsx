@@ -96,7 +96,7 @@ function OrderDetail() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">الدفع</p>
-              <p className="font-bold">نقداً عند الاستلام</p>
+              <p className="font-bold">{order.payment_method === "wallet" ? "من المحفظة (مدفوع)" : "نقداً عند الاستلام"}</p>
             </div>
           </div>
           {order.address_snapshot && (
