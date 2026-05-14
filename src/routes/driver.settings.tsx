@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import { useDriverGate, DriverLoading } from "@/components/DriverShell";
-import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, Truck, Banknote, Power } from "lucide-react";
+import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, Truck, Banknote, Power, Building2, Smartphone, Phone } from "lucide-react";
 
 
 export const Route = createFileRoute("/driver/settings")({
@@ -11,11 +11,7 @@ export const Route = createFileRoute("/driver/settings")({
 });
 
 const APP_VERSION = "1.0.0";
-const PAYOUT_METHODS = [
-  { value: "cash", label: "نقداً" },
-  { value: "bank", label: "تحويل بنكي" },
-  { value: "wallet", label: "محفظة إلكترونية" },
-];
+type PayoutType = "bank" | "transfer_network";
 
 function DriverSettings() {
   const nav = useNavigate();
@@ -31,9 +27,15 @@ function DriverSettings() {
   const [capacity, setCapacity] = useState<number>(0);
   const [availability, setAvailability] = useState<"available" | "busy" | "offline">("offline");
   const [notif, setNotif] = useState(true);
-  const [payoutMethod, setPayoutMethod] = useState("cash");
-  const [payoutAccount, setPayoutAccount] = useState("");
-  const [payoutName, setPayoutName] = useState("");
+  const [payoutType, setPayoutType] = useState<PayoutType>("bank");
+  // bank
+  const [bankName, setBankName] = useState("");
+  const [bankAccountHolder, setBankAccountHolder] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  // transfer network
+  const [transferRecipientName, setTransferRecipientName] = useState("");
+  const [transferPhone, setTransferPhone] = useState("");
+  const [transferNetworkName, setTransferNetworkName] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -51,9 +53,14 @@ function DriverSettings() {
     
     setAvailability(d.availability || "offline");
     setNotif(d.notifications_enabled !== false);
-    setPayoutMethod(d.payout_method || "cash");
-    setPayoutAccount(d.payout_account || "");
-    setPayoutName(d.payout_recipient_name || d.name || "");
+    const ptRaw = d.payout_type || (d.payout_method === "bank" ? "bank" : d.payout_method ? "transfer_network" : "bank");
+    setPayoutType((ptRaw === "bank" ? "bank" : "transfer_network") as PayoutType);
+    setBankName(d.bank_name || "");
+    setBankAccountHolder(d.bank_account_holder || d.payout_recipient_name || d.name || "");
+    setBankAccountNumber(d.bank_account_number || (d.payout_method === "bank" ? d.payout_account || "" : ""));
+    setTransferRecipientName(d.transfer_recipient_name || d.payout_recipient_name || d.name || "");
+    setTransferPhone(d.transfer_phone || (d.payout_method && d.payout_method !== "bank" ? d.payout_account || "" : "") || d.phone || "");
+    setTransferNetworkName(d.transfer_network_name || "");
 
     (async () => {
       const [{ data: c }, { data: prof }] = await Promise.all([
@@ -79,6 +86,14 @@ function DriverSettings() {
     if (!plate.trim()) { setError("رقم اللوحة مطلوب"); return; }
     if (!capacity || capacity <= 0) { setError("سعة الوايت غير صالحة"); return; }
     if (profileEmail && !/^\S+@\S+\.\S+$/.test(profileEmail)) { setError("بريد إلكتروني غير صالح"); return; }
+
+    if (payoutType === "bank") {
+      if (!bankAccountNumber.trim()) { setError("رقم الحساب البنكي مطلوب"); return; }
+      if (!bankAccountHolder.trim()) { setError("اسم صاحب الحساب مطلوب"); return; }
+    } else {
+      if (!transferPhone.trim()) { setError("رقم الهاتف للحوالة مطلوب"); return; }
+      if (!transferRecipientName.trim()) { setError("اسم المستلم مطلوب"); return; }
+    }
     setSaving(true);
 
     const [{ error: dErr }, { error: pErr }] = await Promise.all([
@@ -90,9 +105,17 @@ function DriverSettings() {
         vehicle_capacity: capacity,
         availability,
         notifications_enabled: notif,
-        payout_method: payoutMethod,
-        payout_account: payoutAccount.trim() || null,
-        payout_recipient_name: payoutName.trim() || null,
+        payout_type: payoutType,
+        // legacy mirror for backward compat
+        payout_method: payoutType === "bank" ? "bank" : "transfer_network",
+        payout_account: payoutType === "bank" ? bankAccountNumber.trim() : transferPhone.trim(),
+        payout_recipient_name: payoutType === "bank" ? bankAccountHolder.trim() : transferRecipientName.trim(),
+        bank_name: payoutType === "bank" ? bankName.trim() || null : bankName.trim() || null,
+        bank_account_holder: payoutType === "bank" ? bankAccountHolder.trim() || null : bankAccountHolder.trim() || null,
+        bank_account_number: payoutType === "bank" ? bankAccountNumber.trim() || null : bankAccountNumber.trim() || null,
+        transfer_recipient_name: payoutType === "transfer_network" ? transferRecipientName.trim() || null : transferRecipientName.trim() || null,
+        transfer_phone: payoutType === "transfer_network" ? transferPhone.trim() || null : transferPhone.trim() || null,
+        transfer_network_name: payoutType === "transfer_network" ? transferNetworkName.trim() || null : transferNetworkName.trim() || null,
       } as any).eq("id", driver.id),
       supabase.from("profiles").update({
         email: profileEmail.trim() || null,
@@ -141,16 +164,42 @@ function DriverSettings() {
           <Field label="السعة (لتر)" value={String(capacity || "")} onChange={(v) => setCapacity(Number(v) || 0)} type="number" />
         </Section>
 
-        <Section icon={Banknote} title="السحب والمستحقات">
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground">طريقة الاستلام</label>
-            <select value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
-              {PAYOUT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
+        <Section icon={Banknote} title="استلام المستحقات">
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { v: "bank", label: "إيداع بنكي", icon: Building2 },
+              { v: "transfer_network", label: "حوالة عبر الشبكة", icon: Smartphone },
+            ] as const).map(o => {
+              const Icon = o.icon;
+              const active = payoutType === o.v;
+              return (
+                <button key={o.v} type="button" onClick={() => setPayoutType(o.v)}
+                  className={`rounded-xl border-2 p-3 text-xs font-bold transition flex flex-col items-center gap-1 ${
+                    active ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground"
+                  }`}>
+                  <Icon className="h-5 w-5" />
+                  {o.label}
+                </button>
+              );
+            })}
           </div>
-          <Field label="اسم المستفيد" value={payoutName} onChange={setPayoutName} />
-          <Field label="رقم الحساب أو الهاتف" value={payoutAccount} onChange={setPayoutAccount} />
+
+          {payoutType === "bank" ? (
+            <>
+              <Field label="اسم البنك" value={bankName} onChange={setBankName} />
+              <Field label="اسم صاحب الحساب" value={bankAccountHolder} onChange={setBankAccountHolder} />
+              <Field label="رقم الحساب" value={bankAccountNumber} onChange={setBankAccountNumber} />
+            </>
+          ) : (
+            <>
+              <Field label="اسم المستلم" value={transferRecipientName} onChange={setTransferRecipientName} />
+              <Field label="رقم الهاتف" value={transferPhone} onChange={setTransferPhone} type="tel" />
+              <Field label="اسم الشبكة (اختياري)" value={transferNetworkName} onChange={setTransferNetworkName} />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                أمثلة: الشبكة الموحدة، الكريمي، النجم، جوالي…
+              </p>
+            </>
+          )}
         </Section>
 
         <Section icon={Power} title="التوفر">

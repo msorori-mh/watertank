@@ -51,8 +51,7 @@ const ACTIVE_STATUSES = new Set([
   "pending", "approved", "assigned", "on_the_way", "arrived", "delivering",
 ]);
 
-function getGreeting() {
-  const h = new Date().getHours();
+function getGreeting(h: number) {
   if (h < 5) return "مساء الخير";
   if (h < 12) return "صباح الخير";
   if (h < 18) return "مساء الخير";
@@ -94,7 +93,8 @@ function CustomerHome() {
 
   const handleSignOut = async () => { await signOut(); nav({ to: "/" }); };
 
-  const greeting = useMemo(getGreeting, []);
+  const [greeting, setGreeting] = useState("صباح الخير");
+  useEffect(() => { setGreeting(getGreeting(new Date().getHours())); }, []);
   const displayName = useMemo(() => {
     const raw = profile?.full_name || profile?.name || profile?.phone || profile?.email || "بك";
     return String(raw).split("@")[0];
