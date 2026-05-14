@@ -21,7 +21,7 @@ function NewOrder() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddrId, setSelectedAddrId] = useState<string>("");
   const [capacity, setCapacity] = useState<number>(5000);
-  const [waterType, setWaterType] = useState("sweet");
+  const [waterType, setWaterType] = useState("normal");
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
   const [walletBalance, setWalletBalance] = useState<number>(0);
