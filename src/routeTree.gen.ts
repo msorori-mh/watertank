@@ -20,6 +20,7 @@ import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminPaymentMethodsRouteImport } from './routes/admin.payment-methods'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
@@ -85,6 +86,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/admin/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPaymentMethodsRoute = AdminPaymentMethodsRouteImport.update({
+  id: '/admin/payment-methods',
+  path: '/admin/payment-methods',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/admin/orders',
   path: '/admin/orders',
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/payment-methods': typeof AdminPaymentMethodsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/payment-methods': typeof AdminPaymentMethodsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/payment-methods': typeof AdminPaymentMethodsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/admin/finance'
     | '/admin/login'
     | '/admin/orders'
+    | '/admin/payment-methods'
     | '/admin/reports'
     | '/auth/callback'
     | '/customer/login'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/admin/finance'
     | '/admin/login'
     | '/admin/orders'
+    | '/admin/payment-methods'
     | '/admin/reports'
     | '/auth/callback'
     | '/customer/login'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/admin/finance'
     | '/admin/login'
     | '/admin/orders'
+    | '/admin/payment-methods'
     | '/admin/reports'
     | '/auth/callback'
     | '/customer/login'
@@ -276,6 +288,7 @@ export interface RootRouteChildren {
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminPaymentMethodsRoute: typeof AdminPaymentMethodsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   CustomerLoginRoute: typeof CustomerLoginRoute
@@ -369,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/payment-methods': {
+      id: '/admin/payment-methods'
+      path: '/admin/payment-methods'
+      fullPath: '/admin/payment-methods'
+      preLoaderRoute: typeof AdminPaymentMethodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/orders': {
       id: '/admin/orders'
       path: '/admin/orders'
@@ -444,6 +464,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminFinanceRoute: AdminFinanceRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminPaymentMethodsRoute: AdminPaymentMethodsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   CustomerLoginRoute: CustomerLoginRoute,
