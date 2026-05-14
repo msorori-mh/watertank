@@ -185,6 +185,9 @@ export type Database = {
         Row: {
           availability: Database["public"]["Enums"]["driver_availability"]
           balance: number
+          bank_account_holder: string | null
+          bank_account_number: string | null
+          bank_name: string | null
           city: string | null
           created_at: string
           id: string
@@ -194,9 +197,13 @@ export type Database = {
           payout_account: string | null
           payout_method: string | null
           payout_recipient_name: string | null
+          payout_type: string | null
           phone: string
           rating: number
           status: Database["public"]["Enums"]["driver_status"]
+          transfer_network_name: string | null
+          transfer_phone: string | null
+          transfer_recipient_name: string | null
           user_id: string | null
           vehicle_capacity: number
           vehicle_plate: string
@@ -204,6 +211,9 @@ export type Database = {
         Insert: {
           availability?: Database["public"]["Enums"]["driver_availability"]
           balance?: number
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
           city?: string | null
           created_at?: string
           id?: string
@@ -213,9 +223,13 @@ export type Database = {
           payout_account?: string | null
           payout_method?: string | null
           payout_recipient_name?: string | null
+          payout_type?: string | null
           phone: string
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
+          transfer_network_name?: string | null
+          transfer_phone?: string | null
+          transfer_recipient_name?: string | null
           user_id?: string | null
           vehicle_capacity: number
           vehicle_plate: string
@@ -223,6 +237,9 @@ export type Database = {
         Update: {
           availability?: Database["public"]["Enums"]["driver_availability"]
           balance?: number
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
           city?: string | null
           created_at?: string
           id?: string
@@ -232,9 +249,13 @@ export type Database = {
           payout_account?: string | null
           payout_method?: string | null
           payout_recipient_name?: string | null
+          payout_type?: string | null
           phone?: string
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
+          transfer_network_name?: string | null
+          transfer_phone?: string | null
+          transfer_recipient_name?: string | null
           user_id?: string | null
           vehicle_capacity?: number
           vehicle_plate?: string
