@@ -225,6 +225,42 @@ function NewOrder() {
           )}
         </section>
 
+        {/* Payment method */}
+        <section>
+          <label className="text-xs font-semibold text-muted-foreground mb-2 block">طريقة الدفع</label>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => setPaymentMethod("cash")}
+              className={`rounded-xl p-3 text-right border-2 ${paymentMethod === "cash" ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+              <div className="flex items-center gap-2">
+                <Banknote className={`h-5 w-5 ${paymentMethod === "cash" ? "text-primary" : "text-muted-foreground"}`} />
+                <div>
+                  <div className="font-bold text-sm">نقداً عند التسليم</div>
+                  <div className="text-[11px] text-muted-foreground">ادفع للسائق مباشرة</div>
+                </div>
+              </div>
+            </button>
+            <button onClick={() => setPaymentMethod("wallet")}
+              className={`rounded-xl p-3 text-right border-2 ${paymentMethod === "wallet" ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+              <div className="flex items-center gap-2">
+                <Wallet className={`h-5 w-5 ${paymentMethod === "wallet" ? "text-primary" : "text-muted-foreground"}`} />
+                <div>
+                  <div className="font-bold text-sm">من المحفظة</div>
+                  <div className="text-[11px] text-muted-foreground">رصيدك: {walletBalance.toLocaleString("ar-EG")} ر.ي</div>
+                </div>
+              </div>
+            </button>
+          </div>
+          {paymentMethod === "wallet" && walletBalance < price && price > 0 && (
+            <div className="mt-2 rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-700">
+              <p className="font-semibold">رصيد المحفظة غير كافٍ</p>
+              <p className="text-xs mt-1">المطلوب {price.toLocaleString("ar-EG")} ر.ي ورصيدك {walletBalance.toLocaleString("ar-EG")} ر.ي</p>
+              <Link to="/customer/wallet" className="inline-block mt-2 rounded-lg bg-rose-600 text-white px-3 py-1.5 text-xs font-bold">
+                تعبئة المحفظة
+              </Link>
+            </div>
+          )}
+        </section>
+
         {/* Notes */}
         <section>
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">ملاحظات (اختياري)</label>
@@ -243,7 +279,7 @@ function NewOrder() {
       <div className="fixed bottom-0 inset-x-0 bg-card border-t border-border p-4">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">الإجمالي • نقداً عند الاستلام</p>
+            <p className="text-xs text-muted-foreground">الإجمالي • {paymentMethod === "wallet" ? "خصم من المحفظة" : "نقداً عند الاستلام"}</p>
             <p className="font-display font-bold text-xl">{price.toLocaleString("ar-EG")} ر.ي</p>
           </div>
           <button
