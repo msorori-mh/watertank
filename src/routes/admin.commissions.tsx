@@ -98,8 +98,8 @@ function AdminCommissions() {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5 mb-6">
-        <h2 className="font-display font-bold mb-4">إضافة قاعدة عمولة</h2>
+      <div ref={formRef} className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5 mb-6">
+        <h2 className="font-display font-bold mb-4">{editingId ? "تعديل قاعدة عمولة" : "إضافة قاعدة عمولة"}</h2>
         <div className="grid gap-3 md:grid-cols-3">
           <div>
             <label className="text-xs text-muted-foreground">المدينة</label>
