@@ -201,17 +201,19 @@ function NewOrder() {
         {/* Water type */}
         <section>
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">نوع الماء</label>
-          <div className="grid gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {WATER_TYPES.map(w => {
               const sel = waterType === w.id;
               return (
                 <button key={w.id} onClick={() => setWaterType(w.id)}
-                  className={`flex items-center gap-3 rounded-xl p-3 text-right border-2 ${sel ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
-                  <Droplets className={`h-5 w-5 ${sel ? "text-primary" : "text-muted-foreground"}`} />
-                  <div className="flex-1">
-                    <div className="font-bold text-sm">{w.name}</div>
-                    <div className="text-xs text-muted-foreground">{w.desc}</div>
+                  style={sel ? { borderColor: w.color, background: `${w.color}10` } : undefined}
+                  className={`flex flex-col items-center gap-2 rounded-2xl p-4 text-center border-2 transition ${sel ? "" : "border-border bg-card"}`}>
+                  <div className="h-12 w-12 rounded-full flex items-center justify-center"
+                    style={{ background: `${w.color}1A` }}>
+                    <Droplets className="h-6 w-6" style={{ color: w.color }} />
                   </div>
+                  <div className="font-bold text-sm" style={sel ? { color: w.color } : undefined}>{w.name}</div>
+                  <div className="text-[11px] text-muted-foreground leading-4">{w.desc}</div>
                 </button>
               );
             })}
