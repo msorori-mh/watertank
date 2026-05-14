@@ -164,16 +164,42 @@ function DriverSettings() {
           <Field label="السعة (لتر)" value={String(capacity || "")} onChange={(v) => setCapacity(Number(v) || 0)} type="number" />
         </Section>
 
-        <Section icon={Banknote} title="السحب والمستحقات">
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground">طريقة الاستلام</label>
-            <select value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
-              {PAYOUT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
+        <Section icon={Banknote} title="استلام المستحقات">
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { v: "bank", label: "إيداع بنكي", icon: Building2 },
+              { v: "transfer_network", label: "حوالة عبر الشبكة", icon: Smartphone },
+            ] as const).map(o => {
+              const Icon = o.icon;
+              const active = payoutType === o.v;
+              return (
+                <button key={o.v} type="button" onClick={() => setPayoutType(o.v)}
+                  className={`rounded-xl border-2 p-3 text-xs font-bold transition flex flex-col items-center gap-1 ${
+                    active ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground"
+                  }`}>
+                  <Icon className="h-5 w-5" />
+                  {o.label}
+                </button>
+              );
+            })}
           </div>
-          <Field label="اسم المستفيد" value={payoutName} onChange={setPayoutName} />
-          <Field label="رقم الحساب أو الهاتف" value={payoutAccount} onChange={setPayoutAccount} />
+
+          {payoutType === "bank" ? (
+            <>
+              <Field label="اسم البنك" value={bankName} onChange={setBankName} />
+              <Field label="اسم صاحب الحساب" value={bankAccountHolder} onChange={setBankAccountHolder} />
+              <Field label="رقم الحساب" value={bankAccountNumber} onChange={setBankAccountNumber} />
+            </>
+          ) : (
+            <>
+              <Field label="اسم المستلم" value={transferRecipientName} onChange={setTransferRecipientName} />
+              <Field label="رقم الهاتف" value={transferPhone} onChange={setTransferPhone} type="tel" />
+              <Field label="اسم الشبكة (اختياري)" value={transferNetworkName} onChange={setTransferNetworkName} />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                أمثلة: الشبكة الموحدة، الكريمي، النجم، جوالي…
+              </p>
+            </>
+          )}
         </Section>
 
         <Section icon={Power} title="التوفر">
