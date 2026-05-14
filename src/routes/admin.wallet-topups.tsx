@@ -272,6 +272,38 @@ function AdminWalletTopups() {
           </div>
         </div>
       )}
+      {approving && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setApproving(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-border flex items-center justify-between">
+              <h2 className="font-display font-bold">اعتماد طلب التعبئة</h2>
+              <button onClick={() => setApproving(null)} className="p-1"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                المبلغ المطلوب من العميل: <span className="font-semibold text-foreground">{Number(approving.amount).toLocaleString("ar-EG")} ر.ي</span>
+              </p>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">المبلغ الفعلي للشحن (ر.ي)</label>
+                <input type="number" min={1} step="any" value={approveAmount}
+                  onChange={(e) => setApproveAmount(e.target.value)}
+                  className="w-full rounded-xl border-2 border-input px-3 py-2 text-sm focus:border-primary outline-none" />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  يمكنك تعديل المبلغ في حال أرسل العميل قيمة مختلفة عن المطلوب.
+                </p>
+              </div>
+            </div>
+            <div className="p-5 border-t border-border flex gap-2">
+              <button onClick={() => setApproving(null)} className="flex-1 px-4 py-2 rounded-xl border border-border">إلغاء</button>
+              <button onClick={submitApprove} disabled={acting === approving.id}
+                className="flex-1 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2">
+                {acting === approving.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />} تأكيد الاعتماد
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </AdminShell>
   );
 }
