@@ -109,6 +109,7 @@ function CustomerHome() {
             </div>
           </div>
           <ChevronLeft className="h-5 w-5" />
+        </Link>
       </header>
 
       <main className="px-5 -mt-6">
