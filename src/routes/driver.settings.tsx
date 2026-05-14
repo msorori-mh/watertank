@@ -29,7 +29,6 @@ function DriverSettings() {
   const [city, setCity] = useState("");
   const [plate, setPlate] = useState("");
   const [capacity, setCapacity] = useState<number>(0);
-  const [waterType, setWaterType] = useState<"normal" | "kawthar">("normal");
   const [availability, setAvailability] = useState<"available" | "busy" | "offline">("offline");
   const [notif, setNotif] = useState(true);
   const [payoutMethod, setPayoutMethod] = useState("cash");
