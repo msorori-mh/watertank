@@ -56,7 +56,7 @@ function AdminDriverWithdrawals() {
     }
     setActing(id);
     const { error } = await supabase.rpc("process_driver_withdrawal", {
-      _request_id: id, _action: action, _admin_notes: notes,
+      _request_id: id, _action: action, _admin_notes: notes ?? undefined,
     });
     setActing(null);
     if (error) { toast.error(error.message); return; }
