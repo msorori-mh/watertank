@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import { useDriverGate, DriverLoading } from "@/components/DriverShell";
-import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, Truck, Banknote, Power } from "lucide-react";
+import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, Truck, Banknote, Power, Building2, Smartphone, Phone } from "lucide-react";
 
 
 export const Route = createFileRoute("/driver/settings")({
@@ -11,11 +11,7 @@ export const Route = createFileRoute("/driver/settings")({
 });
 
 const APP_VERSION = "1.0.0";
-const PAYOUT_METHODS = [
-  { value: "cash", label: "نقداً" },
-  { value: "bank", label: "تحويل بنكي" },
-  { value: "wallet", label: "محفظة إلكترونية" },
-];
+type PayoutType = "bank" | "transfer_network";
 
 function DriverSettings() {
   const nav = useNavigate();
