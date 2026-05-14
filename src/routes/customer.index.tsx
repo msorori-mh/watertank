@@ -110,6 +110,21 @@ function CustomerHome() {
           </div>
           <ChevronLeft className="h-5 w-5" />
         </Link>
+        <Link
+          to="/customer/addresses"
+          className="mt-3 flex items-center justify-between rounded-2xl bg-white/10 backdrop-blur p-3 hover:bg-white/20 transition"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">عناويني</p>
+              <p className="text-xs opacity-80">إدارة عناوين التسليم المحفوظة</p>
+            </div>
+          </div>
+          <ChevronLeft className="h-5 w-5" />
+        </Link>
       </header>
 
       <main className="px-5 -mt-6">
