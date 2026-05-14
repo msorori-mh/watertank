@@ -536,6 +536,48 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string | null
+          direction: Database["public"]["Enums"]["wallet_tx_direction"]
+          id: string
+          order_id: string | null
+          topup_id: string | null
+          type: Database["public"]["Enums"]["wallet_tx_type"]
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          description?: string | null
+          direction: Database["public"]["Enums"]["wallet_tx_direction"]
+          id?: string
+          order_id?: string | null
+          topup_id?: string | null
+          type: Database["public"]["Enums"]["wallet_tx_type"]
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          direction?: Database["public"]["Enums"]["wallet_tx_direction"]
+          id?: string
+          order_id?: string | null
+          topup_id?: string | null
+          type?: Database["public"]["Enums"]["wallet_tx_type"]
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: []
+      }
       wallets: {
         Row: {
           balance: number
@@ -596,6 +638,46 @@ export type Database = {
       }
       collect_order_payment: {
         Args: { _order_id: string }
+        Returns: {
+          address_id: string | null
+          address_snapshot: Json | null
+          app_commission: number
+          capacity: number
+          city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
+          created_at: string
+          customer_id: string
+          driver_id: string | null
+          id: string
+          notes: string | null
+          payment_collected_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          price: number
+          quantity: number
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          water_type: Database["public"]["Enums"]["water_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_wallet_order: {
+        Args: {
+          _address_id: string
+          _address_snapshot: Json
+          _capacity: number
+          _city: string
+          _notes?: string
+          _price: number
+          _water_type: Database["public"]["Enums"]["water_type"]
+        }
         Returns: {
           address_id: string | null
           address_snapshot: Json | null
@@ -710,6 +792,8 @@ export type Database = {
       payment_status: "pending" | "paid" | "failed"
       topup_status: "pending" | "approved" | "rejected"
       user_type: "customer" | "driver" | "admin"
+      wallet_tx_direction: "credit" | "debit"
+      wallet_tx_type: "topup" | "order_payment" | "refund" | "adjustment"
       water_type: "sweet" | "desalinated" | "well"
     }
     CompositeTypes: {
@@ -873,6 +957,8 @@ export const Constants = {
       payment_status: ["pending", "paid", "failed"],
       topup_status: ["pending", "approved", "rejected"],
       user_type: ["customer", "driver", "admin"],
+      wallet_tx_direction: ["credit", "debit"],
+      wallet_tx_type: ["topup", "order_payment", "refund", "adjustment"],
       water_type: ["sweet", "desalinated", "well"],
     },
   },

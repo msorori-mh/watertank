@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronRight, MapPin, Loader2, Droplets, Crosshair } from "lucide-react";
+import { ChevronRight, MapPin, Loader2, Droplets, Crosshair, Wallet, Banknote } from "lucide-react";
 
 export const Route = createFileRoute("/customer/order")({
   component: NewOrder,
@@ -25,6 +25,8 @@ function NewOrder() {
   const [description, setDescription] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
+  const [walletBalance, setWalletBalance] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,9 +34,12 @@ function NewOrder() {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) { nav({ to: "/customer/login" }); return; }
       setUser(data.session.user);
-      const { data: prof } = await supabase.from("profiles")
-        .select("city").eq("id", data.session.user.id).maybeSingle();
+      const [{ data: prof }, { data: w }] = await Promise.all([
+        supabase.from("profiles").select("city").eq("id", data.session.user.id).maybeSingle(),
+        supabase.from("wallets").select("balance").eq("user_id", data.session.user.id).maybeSingle(),
+      ]);
       if (!prof?.city) { nav({ to: "/customer/profile/complete" }); return; }
+      setWalletBalance(Number(w?.balance ?? 0));
     });
   }, [nav]);
 
@@ -67,6 +72,9 @@ function NewOrder() {
     if (!addressTitle.trim()) return setError("ادخل اسم العنوان (مثل: المنزل)");
     if (!coords) return setError("حدّد موقعك على الخريطة أو استخدم تحديد الموقع");
     if (price === 0) return setError("لا يوجد سعر متاح لهذا الحجم في هذه المدينة");
+    if (paymentMethod === "wallet" && walletBalance < price) {
+      return setError("رصيد المحفظة غير كافٍ، يرجى تعبئة المحفظة.");
+    }
     setSubmitting(true);
     try {
       // Save address
@@ -80,21 +88,36 @@ function NewOrder() {
       }).select().single();
       if (addrErr) throw addrErr;
 
-      const { data: order, error: ordErr } = await supabase.from("orders").insert({
-        customer_id: user.id,
-        city,
-        address_id: addr.id,
-        address_snapshot: { title: addressTitle, description, lat: coords.lat, lng: coords.lng },
-        water_type: waterType as any,
-        capacity,
-        quantity: 1,
-        price,
-        payment_method: "cash" as any,
-        notes: notes || null,
-      }).select().single();
-      if (ordErr) throw ordErr;
+      const snapshot = { title: addressTitle, description, lat: coords.lat, lng: coords.lng };
 
-      nav({ to: "/customer/orders/$id", params: { id: order.id } });
+      if (paymentMethod === "wallet") {
+        const { data: order, error: rpcErr } = await supabase.rpc("create_wallet_order", {
+          _city: city,
+          _address_id: addr.id,
+          _address_snapshot: snapshot as any,
+          _water_type: waterType as any,
+          _capacity: capacity,
+          _price: price,
+          _notes: notes || undefined,
+        });
+        if (rpcErr) throw rpcErr;
+        nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
+      } else {
+        const { data: order, error: ordErr } = await supabase.from("orders").insert({
+          customer_id: user.id,
+          city,
+          address_id: addr.id,
+          address_snapshot: snapshot,
+          water_type: waterType as any,
+          capacity,
+          quantity: 1,
+          price,
+          payment_method: "cash" as any,
+          notes: notes || null,
+        }).select().single();
+        if (ordErr) throw ordErr;
+        nav({ to: "/customer/orders/$id", params: { id: order.id } });
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -202,6 +225,42 @@ function NewOrder() {
           )}
         </section>
 
+        {/* Payment method */}
+        <section>
+          <label className="text-xs font-semibold text-muted-foreground mb-2 block">طريقة الدفع</label>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => setPaymentMethod("cash")}
+              className={`rounded-xl p-3 text-right border-2 ${paymentMethod === "cash" ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+              <div className="flex items-center gap-2">
+                <Banknote className={`h-5 w-5 ${paymentMethod === "cash" ? "text-primary" : "text-muted-foreground"}`} />
+                <div>
+                  <div className="font-bold text-sm">نقداً عند التسليم</div>
+                  <div className="text-[11px] text-muted-foreground">ادفع للسائق مباشرة</div>
+                </div>
+              </div>
+            </button>
+            <button onClick={() => setPaymentMethod("wallet")}
+              className={`rounded-xl p-3 text-right border-2 ${paymentMethod === "wallet" ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+              <div className="flex items-center gap-2">
+                <Wallet className={`h-5 w-5 ${paymentMethod === "wallet" ? "text-primary" : "text-muted-foreground"}`} />
+                <div>
+                  <div className="font-bold text-sm">من المحفظة</div>
+                  <div className="text-[11px] text-muted-foreground">رصيدك: {walletBalance.toLocaleString("ar-EG")} ر.ي</div>
+                </div>
+              </div>
+            </button>
+          </div>
+          {paymentMethod === "wallet" && walletBalance < price && price > 0 && (
+            <div className="mt-2 rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-700">
+              <p className="font-semibold">رصيد المحفظة غير كافٍ</p>
+              <p className="text-xs mt-1">المطلوب {price.toLocaleString("ar-EG")} ر.ي ورصيدك {walletBalance.toLocaleString("ar-EG")} ر.ي</p>
+              <Link to="/customer/wallet" className="inline-block mt-2 rounded-lg bg-rose-600 text-white px-3 py-1.5 text-xs font-bold">
+                تعبئة المحفظة
+              </Link>
+            </div>
+          )}
+        </section>
+
         {/* Notes */}
         <section>
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">ملاحظات (اختياري)</label>
@@ -220,7 +279,7 @@ function NewOrder() {
       <div className="fixed bottom-0 inset-x-0 bg-card border-t border-border p-4">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">الإجمالي • نقداً عند الاستلام</p>
+            <p className="text-xs text-muted-foreground">الإجمالي • {paymentMethod === "wallet" ? "خصم من المحفظة" : "نقداً عند الاستلام"}</p>
             <p className="font-display font-bold text-xl">{price.toLocaleString("ar-EG")} ر.ي</p>
           </div>
           <button
