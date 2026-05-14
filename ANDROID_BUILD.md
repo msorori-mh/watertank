@@ -173,7 +173,7 @@ cd android
 
 عند الجاهزية للنشر النهائي، غيّر `appId` من:
 ```
-app.lovable.wayetmaa
+app.wayetmaa.mobile
 ```
 إلى اسم تجاري رسمي مثل:
 ```
