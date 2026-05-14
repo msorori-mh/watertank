@@ -697,57 +697,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      approve_wallet_topup:
-        | {
-            Args: { _topup_id: string }
-            Returns: {
-              admin_notes: string | null
-              amount: number
-              created_at: string
-              id: string
-              payment_method_id: string | null
-              receipt_url: string | null
-              reviewed_at: string | null
-              reviewed_by: string | null
-              sender_name: string | null
-              sender_phone: string | null
-              status: Database["public"]["Enums"]["topup_status"]
-              transfer_reference: string | null
-              updated_at: string
-              user_id: string
-            }
-            SetofOptions: {
-              from: "*"
-              to: "wallet_topups"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
-        | {
-            Args: { _approved_amount?: number; _topup_id: string }
-            Returns: {
-              admin_notes: string | null
-              amount: number
-              created_at: string
-              id: string
-              payment_method_id: string | null
-              receipt_url: string | null
-              reviewed_at: string | null
-              reviewed_by: string | null
-              sender_name: string | null
-              sender_phone: string | null
-              status: Database["public"]["Enums"]["topup_status"]
-              transfer_reference: string | null
-              updated_at: string
-              user_id: string
-            }
-            SetofOptions: {
-              from: "*"
-              to: "wallet_topups"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
+      approve_wallet_topup: {
+        Args: { _approved_amount?: number; _topup_id: string }
+        Returns: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          id: string
+          payment_method_id: string | null
+          receipt_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sender_name: string | null
+          sender_phone: string | null
+          status: Database["public"]["Enums"]["topup_status"]
+          transfer_reference: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wallet_topups"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       calculate_app_commission: {
         Args: { _capacity: number; _city: string; _price: number }
         Returns: Record<string, unknown>

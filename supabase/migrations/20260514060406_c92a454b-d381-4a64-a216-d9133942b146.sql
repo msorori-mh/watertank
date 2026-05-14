@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.approve_wallet_topup(uuid);
