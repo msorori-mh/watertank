@@ -16,6 +16,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DriverRegisterRouteImport } from './routes/driver.register'
 import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
 import { Route as DriverLoginRouteImport } from './routes/driver.login'
+import { Route as CustomerWalletRouteImport } from './routes/customer.wallet'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
@@ -64,6 +65,11 @@ const DriverOrdersRoute = DriverOrdersRouteImport.update({
 const DriverLoginRoute = DriverLoginRouteImport.update({
   id: '/driver/login',
   path: '/driver/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerWalletRoute = CustomerWalletRouteImport.update({
+  id: '/customer/wallet',
+  path: '/customer/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomerOrderRoute = CustomerOrderRouteImport.update({
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
+  '/customer/wallet': typeof CustomerWalletRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
+  '/customer/wallet': typeof CustomerWalletRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
+  '/customer/wallet': typeof CustomerWalletRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/customer/login'
     | '/customer/order'
+    | '/customer/wallet'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/customer/login'
     | '/customer/order'
+    | '/customer/wallet'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/customer/login'
     | '/customer/order'
+    | '/customer/wallet'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
@@ -293,6 +305,7 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
+  CustomerWalletRoute: typeof CustomerWalletRoute
   DriverLoginRoute: typeof DriverLoginRoute
   DriverOrdersRoute: typeof DriverOrdersRoute
   DriverRegisterRoute: typeof DriverRegisterRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/driver/login'
       fullPath: '/driver/login'
       preLoaderRoute: typeof DriverLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/wallet': {
+      id: '/customer/wallet'
+      path: '/customer/wallet'
+      fullPath: '/customer/wallet'
+      preLoaderRoute: typeof CustomerWalletRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customer/order': {
@@ -469,6 +489,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
+  CustomerWalletRoute: CustomerWalletRoute,
   DriverLoginRoute: DriverLoginRoute,
   DriverOrdersRoute: DriverOrdersRoute,
   DriverRegisterRoute: DriverRegisterRoute,
