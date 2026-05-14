@@ -96,6 +96,7 @@ function AdminLogin() {
             />
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}
+          {info && <p className="text-sm text-emerald-600">{info}</p>}
           <button
             onClick={submit} disabled={loading}
             className="w-full rounded-xl bg-primary px-5 py-4 font-bold text-primary-foreground shadow-[var(--shadow-glow)] disabled:opacity-60 flex items-center justify-center gap-2"
@@ -103,8 +104,47 @@ function AdminLogin() {
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {mode === "login" ? "دخول" : "إنشاء الحساب"}
           </button>
+
+          {mode === "login" && (
+            <>
+              {!forgotOpen ? (
+                <button
+                  onClick={() => { setForgotOpen(true); setForgotEmail(email); setError(""); setInfo(""); }}
+                  className="w-full text-sm text-primary hover:underline"
+                >
+                  نسيت كلمة المرور؟
+                </button>
+              ) : (
+                <div className="rounded-xl border-2 border-input bg-card p-3 space-y-2">
+                  <p className="text-xs text-muted-foreground">سنرسل لك رابط إعادة تعيين كلمة المرور إلى بريدك.</p>
+                  <input
+                    type="email" dir="ltr"
+                    value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="email@wayet.com"
+                    className="w-full rounded-lg border-2 border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={sendReset} disabled={forgotLoading}
+                      className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {forgotLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                      إرسال الرابط
+                    </button>
+                    <button
+                      onClick={() => { setForgotOpen(false); setError(""); }}
+                      className="rounded-lg border-2 border-input px-3 py-2 text-sm"
+                    >
+                      إلغاء
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           <button
-            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); }}
+            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); setInfo(""); setForgotOpen(false); }}
             className="w-full text-sm text-muted-foreground hover:text-deep"
           >
             {mode === "login" ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لدي حساب — تسجيل الدخول"}
