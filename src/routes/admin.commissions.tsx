@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { Loader2, Plus, Trash2, Percent } from "lucide-react";
+import { Loader2, Plus, Trash2, Percent, Pencil, X, Save } from "lucide-react";
 
 export const Route = createFileRoute("/admin/commissions")({
   component: AdminCommissions,
