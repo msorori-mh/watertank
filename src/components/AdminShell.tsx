@@ -2,7 +2,8 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, Wallet, BarChart3, LogOut, Loader2, Droplets, Percent, CreditCard, WalletCards, Banknote } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, Wallet, BarChart3, LogOut, Loader2, Percent, CreditCard, WalletCards, Banknote } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export function AdminShell({ children, title }: { children: React.ReactNode; title: string }) {
   const nav = useNavigate();
@@ -50,11 +51,9 @@ export function AdminShell({ children, title }: { children: React.ReactNode; tit
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       <aside className="md:w-64 bg-white border-l border-border md:min-h-screen">
         <div className="p-5 border-b border-border flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Droplets className="h-5 w-5 text-primary" />
-          </div>
+          <Logo size={40} />
           <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">لوحة الإدارة</p>
+            <p className="text-xs text-muted-foreground">وايت ماء — الإدارة</p>
             <p className="font-display font-bold text-sm truncate">{profile?.name || profile?.email || "مدير"}</p>
           </div>
         </div>
