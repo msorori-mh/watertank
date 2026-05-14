@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
-import { CheckCircle2, Clock, Truck, Wallet, Star, MapPin, Loader2, BadgeDollarSign } from "lucide-react";
+import { CheckCircle2, Clock, Truck, Wallet, Star, MapPin, Loader2, BadgeDollarSign, Phone, MessageCircle, Navigation } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId, type NotificationType } from "@/lib/notifications";
 
 const STEP_TO_NOTIF: Record<string, NotificationType | undefined> = {
