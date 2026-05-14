@@ -20,6 +20,7 @@ import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
 import { Route as CustomerWalletRouteImport } from './routes/customer.wallet'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
+import { Route as CustomerAddressesRouteImport } from './routes/customer.addresses'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AdminWalletTopupsRouteImport } from './routes/admin.wallet-topups'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
@@ -88,6 +89,11 @@ const CustomerOrderRoute = CustomerOrderRouteImport.update({
 const CustomerLoginRoute = CustomerLoginRouteImport.update({
   id: '/customer/login',
   path: '/customer/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerAddressesRoute = CustomerAddressesRouteImport.update({
+  id: '/customer/addresses',
+  path: '/customer/addresses',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/wallet-topups': typeof AdminWalletTopupsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/customer/addresses': typeof CustomerAddressesRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/wallet': typeof CustomerWalletRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/wallet-topups': typeof AdminWalletTopupsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/customer/addresses': typeof CustomerAddressesRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/wallet': typeof CustomerWalletRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/wallet-topups': typeof AdminWalletTopupsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/customer/addresses': typeof CustomerAddressesRoute
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/wallet': typeof CustomerWalletRoute
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/wallet-topups'
     | '/auth/callback'
+    | '/customer/addresses'
     | '/customer/login'
     | '/customer/order'
     | '/customer/wallet'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/wallet-topups'
     | '/auth/callback'
+    | '/customer/addresses'
     | '/customer/login'
     | '/customer/order'
     | '/customer/wallet'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/wallet-topups'
     | '/auth/callback'
+    | '/customer/addresses'
     | '/customer/login'
     | '/customer/order'
     | '/customer/wallet'
@@ -341,6 +353,7 @@ export interface RootRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminWalletTopupsRoute: typeof AdminWalletTopupsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  CustomerAddressesRoute: typeof CustomerAddressesRoute
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
   CustomerWalletRoute: typeof CustomerWalletRoute
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/customer/login'
       fullPath: '/customer/login'
       preLoaderRoute: typeof CustomerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/addresses': {
+      id: '/customer/addresses'
+      path: '/customer/addresses'
+      fullPath: '/customer/addresses'
+      preLoaderRoute: typeof CustomerAddressesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -549,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminWalletTopupsRoute: AdminWalletTopupsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  CustomerAddressesRoute: CustomerAddressesRoute,
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
   CustomerWalletRoute: CustomerWalletRoute,
