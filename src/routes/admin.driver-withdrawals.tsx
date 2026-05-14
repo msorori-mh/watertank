@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { Loader2, CheckCircle2, XCircle, Banknote } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Banknote, Building2, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/driver-withdrawals")({
@@ -33,7 +33,7 @@ function AdminDriverWithdrawals() {
     const ids = Array.from(new Set((r || []).map((x: any) => x.driver_id)));
     let drv: Record<string, any> = {};
     if (ids.length) {
-      const { data: d } = await supabase.from("drivers").select("id,name,phone").in("id", ids);
+      const { data: d } = await supabase.from("drivers").select("id,name,phone,payout_type,payout_method,payout_account,payout_recipient_name,bank_name,bank_account_holder,bank_account_number,transfer_recipient_name,transfer_phone,transfer_network_name").in("id", ids);
       drv = Object.fromEntries((d || []).map((x: any) => [x.id, x]));
     }
     setRows(r || []); setDrivers(drv); setLoading(false);
