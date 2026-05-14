@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { Loader2, Plus, Trash2, Percent } from "lucide-react";
+import { Loader2, Plus, Trash2, Percent, Pencil, X, Save } from "lucide-react";
 
 export const Route = createFileRoute("/admin/commissions")({
   component: AdminCommissions,
@@ -29,6 +29,8 @@ function AdminCommissions() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Omit<Rule, "id">>(empty);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
 
   const load = async () => {
     const [{ data: r }, { data: c }] = await Promise.all([
@@ -41,6 +43,21 @@ function AdminCommissions() {
   };
   useEffect(() => { load(); }, []);
 
+  const resetForm = () => { setForm(empty); setEditingId(null); };
+
+  const startEdit = (r: Rule) => {
+    setEditingId(r.id);
+    setForm({
+      city: r.city,
+      capacity: r.capacity,
+      commission_type: r.commission_type,
+      commission_value: Number(r.commission_value),
+      free_until: r.free_until,
+      is_active: r.is_active,
+    });
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+
   const save = async () => {
     setSaving(true);
     const payload = {
@@ -50,10 +67,12 @@ function AdminCommissions() {
       free_until: form.free_until || null,
       city: form.city || null,
     };
-    const { error } = await supabase.from("commission_settings").insert(payload);
+    const { error } = editingId
+      ? await supabase.from("commission_settings").update(payload).eq("id", editingId)
+      : await supabase.from("commission_settings").insert(payload);
     setSaving(false);
     if (error) { alert("تعذر الحفظ: " + error.message); return; }
-    setForm(empty);
+    resetForm();
     load();
   };
 
@@ -79,8 +98,8 @@ function AdminCommissions() {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5 mb-6">
-        <h2 className="font-display font-bold mb-4">إضافة قاعدة عمولة</h2>
+      <div ref={formRef} className="bg-white rounded-2xl shadow-[var(--shadow-soft)] p-5 mb-6">
+        <h2 className="font-display font-bold mb-4">{editingId ? "تعديل قاعدة عمولة" : "إضافة قاعدة عمولة"}</h2>
         <div className="grid gap-3 md:grid-cols-3">
           <div>
             <label className="text-xs text-muted-foreground">المدينة</label>
@@ -113,12 +132,18 @@ function AdminCommissions() {
             <input type="date" value={form.free_until ?? ""} onChange={e => setForm({ ...form, free_until: e.target.value || null })}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
           </div>
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <button onClick={save} disabled={saving}
-              className="w-full rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              حفظ القاعدة
+              className="flex-1 rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {editingId ? "حفظ التعديلات" : "حفظ القاعدة"}
             </button>
+            {editingId && (
+              <button onClick={resetForm} type="button"
+                className="rounded-lg border border-border px-3 py-2 text-sm font-semibold flex items-center gap-1 hover:bg-slate-50">
+                <X className="h-4 w-4" /> إلغاء
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -160,9 +185,16 @@ function AdminCommissions() {
                     </button>
                   </td>
                   <td className="p-3">
-                    <button onClick={() => remove(r.id)} className="text-rose-600 hover:bg-rose-50 p-1.5 rounded">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex gap-1">
+                      <button onClick={() => startEdit(r)}
+                        className={`p-1.5 rounded ${editingId === r.id ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-100"}`}
+                        title="تعديل">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => remove(r.id)} className="text-rose-600 hover:bg-rose-50 p-1.5 rounded" title="حذف">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
