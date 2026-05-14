@@ -29,6 +29,10 @@ const NEXT_STATUS: Record<string, { next: OrderStatus; label: string }> = {
   payment_collected: { next: "completed", label: "إنهاء الطلب" },
 };
 
+const WALLET_LABEL_OVERRIDES: Record<string, string> = {
+  delivering: "تم التسليم",
+};
+
 function DriverHome() {
   const nav = useNavigate();
   const gate = useDriverGate();
