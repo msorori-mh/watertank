@@ -53,9 +53,14 @@ function DriverSettings() {
     
     setAvailability(d.availability || "offline");
     setNotif(d.notifications_enabled !== false);
-    setPayoutMethod(d.payout_method || "cash");
-    setPayoutAccount(d.payout_account || "");
-    setPayoutName(d.payout_recipient_name || d.name || "");
+    const ptRaw = d.payout_type || (d.payout_method === "bank" ? "bank" : d.payout_method ? "transfer_network" : "bank");
+    setPayoutType((ptRaw === "bank" ? "bank" : "transfer_network") as PayoutType);
+    setBankName(d.bank_name || "");
+    setBankAccountHolder(d.bank_account_holder || d.payout_recipient_name || d.name || "");
+    setBankAccountNumber(d.bank_account_number || (d.payout_method === "bank" ? d.payout_account || "" : ""));
+    setTransferRecipientName(d.transfer_recipient_name || d.payout_recipient_name || d.name || "");
+    setTransferPhone(d.transfer_phone || (d.payout_method && d.payout_method !== "bank" ? d.payout_account || "" : "") || d.phone || "");
+    setTransferNetworkName(d.transfer_network_name || "");
 
     (async () => {
       const [{ data: c }, { data: prof }] = await Promise.all([
