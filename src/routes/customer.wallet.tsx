@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Wallet, Plus, Loader2, Upload, X, CheckCircle2, Clock, XCircle, CreditCard } from "lucide-react";
