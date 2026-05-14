@@ -40,6 +40,8 @@ function AdminWalletTopups() {
   const [acting, setActing] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<Topup | null>(null);
   const [rejectNotes, setRejectNotes] = useState("");
+  const [approving, setApproving] = useState<Topup | null>(null);
+  const [approveAmount, setApproveAmount] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // filters
