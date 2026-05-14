@@ -168,77 +168,110 @@ function AddressEditor({
   onSaved: () => void;
 }) {
   const [title, setTitle] = useState(existing?.title || "");
-  const [city, setCity] = useState(existing?.city || cities[0]?.name || "");
+  const [city, setCity] = useState(existing?.city || "");
   const [description, setDescription] = useState(existing?.description || "");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     existing ? { lat: existing.lat, lng: existing.lng } : null,
   );
+  // أول عنوان للعميل دائماً افتراضي ولا يمكن إلغاؤه
   const [isDefault, setIsDefault] = useState(existing?.is_default ?? firstAddress);
+  const forceDefault = !existing && firstAddress;
   const [locating, setLocating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const useGeo = () => {
     setError("");
-    if (!navigator.geolocation) { setError("المتصفح لا يدعم تحديد الموقع"); return; }
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
+      setError("المتصفح لا يدعم تحديد الموقع");
+      return;
+    }
+    if (!window.isSecureContext) {
+      setError("تحديد الموقع يتطلب اتصالاً آمناً (HTTPS).");
+      return;
+    }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const { latitude, longitude } = pos.coords;
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+          setError("إحداثيات غير صالحة. أعد المحاولة.");
+          setLocating(false);
+          return;
+        }
+        setCoords({ lat: latitude, lng: longitude });
         setLocating(false);
       },
       (err) => {
         setLocating(false);
-        if (err.code === 1) setError("تم رفض إذن الموقع. فعّله من إعدادات التطبيق ثم أعد المحاولة.");
+        if (err.code === 1) setError("تم رفض إذن الموقع. فعّله من إعدادات المتصفح/التطبيق ثم أعد المحاولة.");
         else if (err.code === 2) setError("لا يمكن تحديد الموقع حالياً. تأكد من تشغيل GPS.");
         else if (err.code === 3) setError("انتهت مهلة تحديد الموقع. أعد المحاولة.");
         else setError("تعذّر تحديد الموقع.");
       },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
   };
 
   const save = async () => {
     setError("");
-    if (!title.trim()) return setError("ادخل اسماً للعنوان");
-    if (!city) return setError("اختر المدينة");
-    if (!coords) return setError("حدّد موقعك أولاً");
+    if (!userId) return setError("الجلسة منتهية. سجّل الدخول مجدداً.");
+    if (!title.trim()) return setError("يرجى كتابة اسم للعنوان");
+    if (!city || !city.trim()) return setError("يرجى اختيار المدينة");
+    if (!description.trim()) return setError("يرجى كتابة وصف العنوان");
+    if (!coords) return setError("يرجى تحديد موقعك على الخريطة أولاً");
+    if (!Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) {
+      return setError("إحداثيات غير صالحة. أعد تحديد الموقع.");
+    }
+
+    const wantDefault = forceDefault || isDefault;
     setSaving(true);
     try {
+      // تحقق من أن المستخدم فعلاً مسجل الدخول
+      const { data: s } = await supabase.auth.getSession();
+      if (!s.session || s.session.user.id !== userId) {
+        throw new Error("الجلسة منتهية. سجّل الدخول مجدداً.");
+      }
+
+      // إذا كان سيصبح افتراضياً، الغِ الافتراضي عن الباقي أولاً
+      if (wantDefault) {
+        const { error: clearErr } = await supabase
+          .from("addresses")
+          .update({ is_default: false } as any)
+          .eq("user_id", userId)
+          .eq("is_default", true);
+        if (clearErr) throw clearErr;
+      }
+
       if (existing) {
         const { error: e } = await supabase.from("addresses").update({
           title: title.trim(),
-          city,
-          description: description.trim() || null,
-          lat: coords.lat,
-          lng: coords.lng,
+          city: city.trim(),
+          description: description.trim(),
+          lat: Number(coords.lat),
+          lng: Number(coords.lng),
+          is_default: wantDefault,
         } as any).eq("id", existing.id);
         if (e) throw e;
       } else {
-        const { data: created, error: e } = await supabase.from("addresses").insert({
+        const { error: e } = await supabase.from("addresses").insert({
           user_id: userId,
           title: title.trim(),
-          city,
-          description: description.trim() || null,
-          lat: coords.lat,
-          lng: coords.lng,
-          is_default: isDefault,
-        } as any).select().single();
+          city: city.trim(),
+          description: description.trim(),
+          lat: Number(coords.lat),
+          lng: Number(coords.lng),
+          is_default: wantDefault,
+        } as any);
         if (e) throw e;
-        if (isDefault && created) {
-          // unset previous defaults
-          await supabase.from("addresses").update({ is_default: false } as any)
-            .eq("user_id", userId).neq("id", (created as any).id);
-        }
-      }
-      if (existing && isDefault && !existing.is_default) {
-        await supabase.from("addresses").update({ is_default: false } as any)
-          .eq("user_id", userId).neq("id", existing.id);
-        await supabase.from("addresses").update({ is_default: true } as any).eq("id", existing.id);
       }
       onSaved();
     } catch (e: any) {
-      setError(e.message || "تعذّر الحفظ");
+      const msg = e?.message || e?.error_description || "تعذّر حفظ العنوان";
+      const code = e?.code ? ` (${e.code})` : "";
+      setError(`تعذّر حفظ العنوان: ${msg}${code}`);
+      // eslint-disable-next-line no-console
+      console.error("[address-save]", e);
     } finally {
       setSaving(false);
     }
@@ -281,8 +314,12 @@ function AddressEditor({
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">المدينة</label>
             <select value={city} onChange={(e) => setCity(e.target.value)}
               className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 font-medium focus:border-primary focus:outline-none">
+              <option value="">— اختر المدينة —</option>
               {cities.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
             </select>
+            {cities.length === 0 && (
+              <p className="text-[11px] text-amber-700 mt-1">لا توجد مدن مفعّلة. تواصل مع الإدارة.</p>
+            )}
           </div>
 
           <div>
@@ -310,10 +347,11 @@ function AddressEditor({
             )}
           </div>
 
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)}
+          <label className={`flex items-center gap-2 text-sm ${forceDefault ? "opacity-70" : ""}`}>
+            <input type="checkbox" checked={forceDefault || isDefault} disabled={forceDefault}
+              onChange={(e) => setIsDefault(e.target.checked)}
               className="h-4 w-4 accent-primary" />
-            تعيين كعنوان افتراضي
+            تعيين كعنوان افتراضي{forceDefault ? " (أول عنوان)" : ""}
           </label>
 
           {error && <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{error}</p>}
