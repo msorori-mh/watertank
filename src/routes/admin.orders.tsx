@@ -133,9 +133,14 @@ function AdminOrders() {
                         <span className={`text-xs rounded-full px-2 py-0.5 w-fit ${o.payment_method === "wallet" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
                           {o.payment_method === "wallet" ? "محفظة" : "عند التسليم"}
                         </span>
-                        <span className={`text-xs rounded-full px-2 py-0.5 w-fit ${o.payment_status === "paid" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                          {o.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
+                        <span className={`text-xs rounded-full px-2 py-0.5 w-fit ${o.payment_status === "paid" ? "bg-emerald-100 text-emerald-700" : o.payment_status === "refunded" ? "bg-purple-100 text-purple-700" : "bg-amber-100 text-amber-700"}`}>
+                          {o.payment_status === "paid" ? "مدفوع" : o.payment_status === "refunded" ? "مسترد" : "غير مدفوع"}
                         </span>
+                        {o.wallet_refunded_at && (
+                          <span className="text-[10px] text-muted-foreground" title={o.refund_reason || ""}>
+                            استُرد: {new Date(o.wallet_refunded_at).toLocaleDateString("ar-EG")}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="p-3">
