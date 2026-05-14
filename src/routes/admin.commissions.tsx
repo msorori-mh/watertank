@@ -132,12 +132,18 @@ function AdminCommissions() {
             <input type="date" value={form.free_until ?? ""} onChange={e => setForm({ ...form, free_until: e.target.value || null })}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
           </div>
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <button onClick={save} disabled={saving}
-              className="w-full rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              حفظ القاعدة
+              className="flex-1 rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {editingId ? "حفظ التعديلات" : "حفظ القاعدة"}
             </button>
+            {editingId && (
+              <button onClick={resetForm} type="button"
+                className="rounded-lg border border-border px-3 py-2 text-sm font-semibold flex items-center gap-1 hover:bg-slate-50">
+                <X className="h-4 w-4" /> إلغاء
+              </button>
+            )}
           </div>
         </div>
       </div>
