@@ -104,12 +104,18 @@ function AdminWalletTopups() {
     });
   }, [items, status, methodId, from, to, search]);
 
-  const approve = async (id: string) => {
-    if (!confirm("اعتماد هذا الطلب وإضافة المبلغ إلى محفظة العميل؟")) return;
-    setActing(id);
-    const { error } = await supabase.rpc("approve_wallet_topup" as any, { _topup_id: id });
+  const submitApprove = async () => {
+    if (!approving) return;
+    const amt = Number(approveAmount);
+    if (!amt || amt <= 0) { alert("أدخل مبلغاً صحيحاً"); return; }
+    setActing(approving.id);
+    const { error } = await supabase.rpc("approve_wallet_topup" as any, {
+      _topup_id: approving.id,
+      _approved_amount: amt,
+    });
     setActing(null);
     if (error) { alert("فشل الاعتماد: " + error.message); return; }
+    setApproving(null); setApproveAmount("");
     load();
   };
 
