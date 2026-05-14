@@ -477,6 +477,89 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_topups: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          id: string
+          payment_method_id: string | null
+          receipt_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sender_name: string | null
+          sender_phone: string | null
+          status: Database["public"]["Enums"]["topup_status"]
+          transfer_reference: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          payment_method_id?: string | null
+          receipt_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
+          status?: Database["public"]["Enums"]["topup_status"]
+          transfer_reference?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          payment_method_id?: string | null
+          receipt_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
+          status?: Database["public"]["Enums"]["topup_status"]
+          transfer_reference?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_topups_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -573,6 +656,7 @@ export type Database = {
         | "rejected"
       payment_method: "cash" | "wallet"
       payment_status: "pending" | "paid" | "failed"
+      topup_status: "pending" | "approved" | "rejected"
       user_type: "customer" | "driver" | "admin"
       water_type: "sweet" | "desalinated" | "well"
     }
@@ -733,6 +817,7 @@ export const Constants = {
       ],
       payment_method: ["cash", "wallet"],
       payment_status: ["pending", "paid", "failed"],
+      topup_status: ["pending", "approved", "rejected"],
       user_type: ["customer", "driver", "admin"],
       water_type: ["sweet", "desalinated", "well"],
     },
