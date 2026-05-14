@@ -142,6 +142,45 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_withdrawal_requests: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          driver_id: string
+          id: string
+          payment_method_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          created_at?: string
+          driver_id: string
+          id?: string
+          payment_method_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          driver_id?: string
+          id?: string
+          payment_method_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       drivers: {
         Row: {
           availability: Database["public"]["Enums"]["driver_availability"]
@@ -730,6 +769,27 @@ export type Database = {
         }
         Returns: boolean
       }
+      process_driver_withdrawal: {
+        Args: { _action: string; _admin_notes?: string; _request_id: string }
+        Returns: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          driver_id: string
+          id: string
+          payment_method_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "driver_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       record_cash_handover: {
         Args: { _amount: number; _driver_id: string; _notes?: string }
         Returns: {
@@ -772,6 +832,27 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      request_driver_withdrawal: {
+        Args: { _payment_method_notes?: string }
+        Returns: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          driver_id: string
+          id: string
+          payment_method_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "driver_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "admin" | "customer" | "driver"
@@ -810,6 +891,7 @@ export type Database = {
       wallet_tx_direction: "credit" | "debit"
       wallet_tx_type: "topup" | "order_payment" | "refund" | "adjustment"
       water_type: "sweet" | "desalinated" | "well"
+      withdrawal_status: "pending" | "approved" | "rejected" | "paid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -975,6 +1057,7 @@ export const Constants = {
       wallet_tx_direction: ["credit", "debit"],
       wallet_tx_type: ["topup", "order_payment", "refund", "adjustment"],
       water_type: ["sweet", "desalinated", "well"],
+      withdrawal_status: ["pending", "approved", "rejected", "paid"],
     },
   },
 } as const

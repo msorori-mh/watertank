@@ -15,10 +15,11 @@ function AdminFinance() {
   const [form, setForm] = useState<Record<string, { amount: string; notes: string; open: boolean }>>({});
 
   const load = async () => {
-    const [{ data: orders }, { data: drivers }, { data: handovers }] = await Promise.all([
+    const [{ data: orders }, { data: drivers }, { data: handovers }, { data: withdrawals }] = await Promise.all([
       supabase.from("orders").select("id,price,app_commission,commission_status,status,payment_status,payment_method,payment_collected_at,driver_id,city,created_at,driver_payout_amount,driver_payout_status,wallet_paid_at").order("created_at", { ascending: false }).limit(500),
       supabase.from("drivers").select("id,name,balance,phone"),
       supabase.from("cash_handovers").select("id,driver_id,amount,received_by,notes,created_at").order("created_at", { ascending: false }).limit(200),
+      supabase.from("driver_withdrawal_requests").select("*").order("created_at", { ascending: false }).limit(200),
     ]);
     const receiverIds = Array.from(new Set((handovers || []).map((h: any) => h.received_by).filter(Boolean)));
     let receivers: Record<string, string> = {};
@@ -26,7 +27,7 @@ function AdminFinance() {
       const { data: profs } = await supabase.from("profiles").select("id,name,email").in("id", receiverIds);
       receivers = Object.fromEntries((profs || []).map((p: any) => [p.id, p.name || p.email || p.id.slice(0, 8)]));
     }
-    setData({ orders: orders || [], drivers: drivers || [], handovers: handovers || [], receivers });
+    setData({ orders: orders || [], drivers: drivers || [], handovers: handovers || [], receivers, withdrawals: withdrawals || [] });
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -93,12 +94,17 @@ function AdminFinance() {
     { label: "إجمالي عمولات مسددة", value: totalHandovers, icon: HandCoins, color: "bg-violet-50 text-violet-700" },
   ];
 
+  const withdrawalsPending = (data.withdrawals || []).filter((w: any) => w.status === "pending" || w.status === "approved").reduce((a: number, w: any) => a + Number(w.amount || 0), 0);
+  const withdrawalsPaid = (data.withdrawals || []).filter((w: any) => w.status === "paid").reduce((a: number, w: any) => a + Number(w.amount || 0), 0);
+
   const walletCards = [
     { label: "إجمالي مدفوعات المحفظة", value: walletPaidTotal, icon: Wallet, color: "bg-primary/10 text-primary" },
     { label: "عمولات التطبيق المحصّلة", value: walletCommissionsCollected, icon: Percent, color: "bg-emerald-50 text-emerald-700" },
     { label: "مستحقات السائقين (إجمالي)", value: walletDriverPayoutsTotal, icon: Truck, color: "bg-blue-50 text-blue-700" },
     { label: "متاح للسحب", value: walletDriverPayoutsAvailable, icon: HandCoins, color: "bg-emerald-50 text-emerald-700" },
-    { label: "معلّق (قيد التنفيذ)", value: walletDriverPayoutsPending, icon: Banknote, color: "bg-amber-50 text-amber-700" },
+    { label: "طلبات سحب قيد المعالجة", value: withdrawalsPending, icon: AlertCircle, color: "bg-amber-50 text-amber-700" },
+    { label: "إجمالي مدفوع للسائقين", value: withdrawalsPaid, icon: Banknote, color: "bg-violet-50 text-violet-700" },
+    { label: "معلّق (طلبات نشطة)", value: walletDriverPayoutsPending, icon: Banknote, color: "bg-amber-50 text-amber-700" },
   ];
 
   const SectionCards = ({ title, cards }: { title: string; cards: typeof cashCards }) => (

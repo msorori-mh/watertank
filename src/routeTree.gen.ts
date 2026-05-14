@@ -16,6 +16,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DriverRegisterRouteImport } from './routes/driver.register'
 import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
 import { Route as DriverLoginRouteImport } from './routes/driver.login'
+import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
 import { Route as CustomerWalletRouteImport } from './routes/customer.wallet'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
@@ -27,6 +28,7 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
+import { Route as AdminDriverWithdrawalsRouteImport } from './routes/admin.driver-withdrawals'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCommissionsRouteImport } from './routes/admin.commissions'
 import { Route as AdminCitiesRouteImport } from './routes/admin.cities'
@@ -66,6 +68,11 @@ const DriverOrdersRoute = DriverOrdersRouteImport.update({
 const DriverLoginRoute = DriverLoginRouteImport.update({
   id: '/driver/login',
   path: '/driver/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverEarningsRoute = DriverEarningsRouteImport.update({
+  id: '/driver/earnings',
+  path: '/driver/earnings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomerWalletRoute = CustomerWalletRouteImport.update({
@@ -123,6 +130,11 @@ const AdminDriversRoute = AdminDriversRouteImport.update({
   path: '/admin/drivers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDriverWithdrawalsRoute = AdminDriverWithdrawalsRouteImport.update({
+  id: '/admin/driver-withdrawals',
+  path: '/admin/driver-withdrawals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
   id: '/admin/customers',
   path: '/admin/customers',
@@ -154,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/driver-withdrawals': typeof AdminDriverWithdrawalsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/login': typeof AdminLoginRoute
@@ -165,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/wallet': typeof CustomerWalletRoute
+  '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
@@ -179,6 +193,7 @@ export interface FileRoutesByTo {
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/driver-withdrawals': typeof AdminDriverWithdrawalsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/login': typeof AdminLoginRoute
@@ -190,6 +205,7 @@ export interface FileRoutesByTo {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/wallet': typeof CustomerWalletRoute
+  '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
@@ -205,6 +221,7 @@ export interface FileRoutesById {
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/driver-withdrawals': typeof AdminDriverWithdrawalsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/login': typeof AdminLoginRoute
@@ -216,6 +233,7 @@ export interface FileRoutesById {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/wallet': typeof CustomerWalletRoute
+  '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
   '/driver/orders': typeof DriverOrdersRoute
   '/driver/register': typeof DriverRegisterRoute
@@ -232,6 +250,7 @@ export interface FileRouteTypes {
     | '/admin/cities'
     | '/admin/commissions'
     | '/admin/customers'
+    | '/admin/driver-withdrawals'
     | '/admin/drivers'
     | '/admin/finance'
     | '/admin/login'
@@ -243,6 +262,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/wallet'
+    | '/driver/earnings'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
@@ -257,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin/cities'
     | '/admin/commissions'
     | '/admin/customers'
+    | '/admin/driver-withdrawals'
     | '/admin/drivers'
     | '/admin/finance'
     | '/admin/login'
@@ -268,6 +289,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/wallet'
+    | '/driver/earnings'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
@@ -282,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin/cities'
     | '/admin/commissions'
     | '/admin/customers'
+    | '/admin/driver-withdrawals'
     | '/admin/drivers'
     | '/admin/finance'
     | '/admin/login'
@@ -293,6 +316,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/wallet'
+    | '/driver/earnings'
     | '/driver/login'
     | '/driver/orders'
     | '/driver/register'
@@ -308,6 +332,7 @@ export interface RootRouteChildren {
   AdminCitiesRoute: typeof AdminCitiesRoute
   AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminDriverWithdrawalsRoute: typeof AdminDriverWithdrawalsRoute
   AdminDriversRoute: typeof AdminDriversRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -319,6 +344,7 @@ export interface RootRouteChildren {
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
   CustomerWalletRoute: typeof CustomerWalletRoute
+  DriverEarningsRoute: typeof DriverEarningsRoute
   DriverLoginRoute: typeof DriverLoginRoute
   DriverOrdersRoute: typeof DriverOrdersRoute
   DriverRegisterRoute: typeof DriverRegisterRoute
@@ -378,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/driver/login'
       fullPath: '/driver/login'
       preLoaderRoute: typeof DriverLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/earnings': {
+      id: '/driver/earnings'
+      path: '/driver/earnings'
+      fullPath: '/driver/earnings'
+      preLoaderRoute: typeof DriverEarningsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customer/wallet': {
@@ -457,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDriversRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/driver-withdrawals': {
+      id: '/admin/driver-withdrawals'
+      path: '/admin/driver-withdrawals'
+      fullPath: '/admin/driver-withdrawals'
+      preLoaderRoute: typeof AdminDriverWithdrawalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/customers': {
       id: '/admin/customers'
       path: '/admin/customers'
@@ -500,6 +540,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCitiesRoute: AdminCitiesRoute,
   AdminCommissionsRoute: AdminCommissionsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
+  AdminDriverWithdrawalsRoute: AdminDriverWithdrawalsRoute,
   AdminDriversRoute: AdminDriversRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminLoginRoute: AdminLoginRoute,
@@ -511,6 +552,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
   CustomerWalletRoute: CustomerWalletRoute,
+  DriverEarningsRoute: DriverEarningsRoute,
   DriverLoginRoute: DriverLoginRoute,
   DriverOrdersRoute: DriverOrdersRoute,
   DriverRegisterRoute: DriverRegisterRoute,

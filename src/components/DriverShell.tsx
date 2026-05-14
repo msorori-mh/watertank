@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { LayoutDashboard, ListOrdered, LogOut, Loader2, Truck } from "lucide-react";
+import { LayoutDashboard, ListOrdered, LogOut, Loader2, Truck, Wallet } from "lucide-react";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
 
 export type DriverInfo = {
@@ -32,8 +32,9 @@ export function DriverShell({
   const loc = useLocation();
   const out = async () => { await signOut(); nav({ to: "/" }); };
 
-  const tabs: { to: "/driver" | "/driver/orders"; label: string; icon: any; exact?: boolean }[] = [
+  const tabs: { to: "/driver" | "/driver/orders" | "/driver/earnings"; label: string; icon: any; exact?: boolean }[] = [
     { to: "/driver", label: "لوحتي", icon: LayoutDashboard, exact: true },
+    { to: "/driver/earnings", label: "مستحقاتي", icon: Wallet },
     { to: "/driver/orders", label: "الطلبات المتاحة", icon: ListOrdered },
   ];
 
