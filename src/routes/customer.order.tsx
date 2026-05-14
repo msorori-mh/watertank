@@ -98,7 +98,7 @@ function NewOrder() {
           _water_type: waterType as any,
           _capacity: capacity,
           _price: price,
-          _notes: notes || null,
+          _notes: notes || undefined,
         });
         if (rpcErr) throw rpcErr;
         nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
