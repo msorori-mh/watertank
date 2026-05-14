@@ -183,17 +183,24 @@ function DriverHome() {
               </div>
               <div className="text-left">
                 <p className="font-display font-bold text-lg">{Number(active.price).toLocaleString("ar-EG")}</p>
-                <p className="text-xs text-muted-foreground">ر.ي • تستلمها كاملة</p>
-                {Number(active.app_commission || 0) > 0 && (
+                <p className="text-xs text-muted-foreground">ر.ي{active.payment_method === "wallet" ? " • مدفوع مسبقاً" : " • تستلمها كاملة"}</p>
+                {active.payment_method !== "wallet" && Number(active.app_commission || 0) > 0 && (
                   <p className="text-[11px] text-rose-600 mt-1 font-semibold">
                     عمولة التطبيق: {Number(active.app_commission).toLocaleString("ar-EG")} ر.ي
                   </p>
                 )}
               </div>
             </div>
-            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-900 leading-5">
-              قيمة الطلب يستلمها السائق نقداً من العميل، وعمولة التطبيق تُسجَّل كمستحق على السائق ويتم تسديدها لاحقاً للإدارة.
-            </div>
+            {active.payment_method === "wallet" ? (
+              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-[12px] text-emerald-900 leading-5 flex items-center gap-2">
+                <Wallet className="h-4 w-4" />
+                <span className="font-semibold">مدفوع من محفظة العميل — لا تحصّل أي مبلغ نقدي.</span>
+              </div>
+            ) : (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-900 leading-5">
+                قيمة الطلب يستلمها السائق نقداً من العميل، وعمولة التطبيق تُسجَّل كمستحق على السائق ويتم تسديدها لاحقاً للإدارة.
+              </div>
+            )}
             <div className="rounded-lg bg-primary/5 px-3 py-2 text-xs font-semibold text-primary">
               الحالة: {active.status}
             </div>
@@ -207,11 +214,11 @@ function DriverHome() {
             {NEXT_STATUS[active.status] && (
               <button onClick={advance} disabled={updating}
                 className={`w-full rounded-xl py-3 font-bold shadow-[var(--shadow-glow)] disabled:opacity-60 flex items-center justify-center gap-2 ${
-                  isPaymentStep ? "bg-emerald-600 text-white" : isFinalStep ? "bg-slate-900 text-white" : "bg-primary text-primary-foreground"
+                  isPaymentStep ? (active.payment_method === "wallet" ? "bg-primary text-primary-foreground" : "bg-emerald-600 text-white") : isFinalStep ? "bg-slate-900 text-white" : "bg-primary text-primary-foreground"
                 }`}>
                 {updating && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isPaymentStep && <BadgeDollarSign className="h-4 w-4" />}
-                {NEXT_STATUS[active.status].label} ←
+                {isPaymentStep && active.payment_method !== "wallet" && <BadgeDollarSign className="h-4 w-4" />}
+                {(active.payment_method === "wallet" && WALLET_LABEL_OVERRIDES[active.status]) || NEXT_STATUS[active.status].label} ←
               </button>
             )}
           </div>
