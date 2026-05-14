@@ -347,10 +347,11 @@ function AddressEditor({
             )}
           </div>
 
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)}
+          <label className={`flex items-center gap-2 text-sm ${forceDefault ? "opacity-70" : ""}`}>
+            <input type="checkbox" checked={forceDefault || isDefault} disabled={forceDefault}
+              onChange={(e) => setIsDefault(e.target.checked)}
               className="h-4 w-4 accent-primary" />
-            تعيين كعنوان افتراضي
+            تعيين كعنوان افتراضي{forceDefault ? " (أول عنوان)" : ""}
           </label>
 
           {error && <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{error}</p>}
