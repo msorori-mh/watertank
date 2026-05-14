@@ -32,11 +32,12 @@ export function DriverShell({
   const loc = useLocation();
   const out = async () => { await signOut(); nav({ to: "/" }); };
 
-  const tabs: { to: "/driver" | "/driver/orders" | "/driver/earnings" | "/driver/reports"; label: string; icon: any; exact?: boolean }[] = [
+  const tabs: { to: "/driver" | "/driver/orders" | "/driver/earnings" | "/driver/reports" | "/driver/settings"; label: string; icon: any; exact?: boolean }[] = [
     { to: "/driver", label: "لوحتي", icon: LayoutDashboard, exact: true },
     { to: "/driver/earnings", label: "مستحقاتي", icon: Wallet },
     { to: "/driver/orders", label: "المتاحة", icon: ListOrdered },
     { to: "/driver/reports", label: "تقاريري", icon: BarChart3 },
+    { to: "/driver/settings", label: "الإعدادات", icon: Settings },
   ];
 
   return (
