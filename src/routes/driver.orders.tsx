@@ -85,7 +85,11 @@ function DriverAvailableOrders() {
               <div className="text-left">
                 <p className="font-display font-bold">{Number(o.price).toLocaleString("ar-EG")}</p>
                 <p className="text-xs text-muted-foreground">ر.ي{o.payment_method === "wallet" ? " • مدفوع مسبقاً" : " • تستلمها كاملة"}</p>
-                {o.payment_method !== "wallet" && Number(o.app_commission || 0) > 0 && (
+                {o.payment_method === "wallet" ? (
+                  <p className="text-[11px] text-emerald-700 mt-1 font-semibold">
+                    مستحقك: {Number(o.driver_payout_amount || Math.max(Number(o.price) - Number(o.app_commission || 0), 0)).toLocaleString("ar-EG")} ر.ي
+                  </p>
+                ) : Number(o.app_commission || 0) > 0 && (
                   <p className="text-[11px] text-rose-600 mt-1 font-semibold">
                     عمولة: {Number(o.app_commission).toLocaleString("ar-EG")} ر.ي
                   </p>
@@ -93,9 +97,10 @@ function DriverAvailableOrders() {
               </div>
             </div>
             {o.payment_method === "wallet" ? (
-              <p className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1.5 mt-2 leading-5 font-semibold">
-                مدفوع من محفظة العميل — لا تحصّل أي مبلغ نقدي.
-              </p>
+              <div className="text-[11px] text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1.5 mt-2 leading-5 space-y-0.5">
+                <p className="font-semibold">مدفوع من محفظة العميل — لا تحصّل أي مبلغ نقدي.</p>
+                <p>قيمة الطلب: {Number(o.price).toLocaleString("ar-EG")} • عمولة التطبيق: {Number(o.app_commission || 0).toLocaleString("ar-EG")} • مستحقك بعد العمولة: {Number(o.driver_payout_amount || Math.max(Number(o.price) - Number(o.app_commission || 0), 0)).toLocaleString("ar-EG")} ر.ي</p>
+              </div>
             ) : (
               <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 mt-2 leading-5">
                 قيمة الطلب يستلمها السائق نقداً من العميل، وعمولة التطبيق تُسجَّل كمستحق لاحق للإدارة.

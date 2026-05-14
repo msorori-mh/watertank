@@ -267,6 +267,8 @@ export type Database = {
           created_at: string
           customer_id: string
           driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
           id: string
           notes: string | null
           payment_collected_at: string | null
@@ -277,6 +279,7 @@ export type Database = {
           scheduled_at: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string
+          wallet_paid_at: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         Insert: {
@@ -290,6 +293,8 @@ export type Database = {
           created_at?: string
           customer_id: string
           driver_id?: string | null
+          driver_payout_amount?: number
+          driver_payout_status?: string
           id?: string
           notes?: string | null
           payment_collected_at?: string | null
@@ -300,6 +305,7 @@ export type Database = {
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string
+          wallet_paid_at?: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         Update: {
@@ -313,6 +319,8 @@ export type Database = {
           created_at?: string
           customer_id?: string
           driver_id?: string | null
+          driver_payout_amount?: number
+          driver_payout_status?: string
           id?: string
           notes?: string | null
           payment_collected_at?: string | null
@@ -323,6 +331,7 @@ export type Database = {
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string
+          wallet_paid_at?: string | null
           water_type?: Database["public"]["Enums"]["water_type"]
         }
         Relationships: [
@@ -649,6 +658,8 @@ export type Database = {
           created_at: string
           customer_id: string
           driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
           id: string
           notes: string | null
           payment_collected_at: string | null
@@ -659,6 +670,7 @@ export type Database = {
           scheduled_at: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string
+          wallet_paid_at: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         SetofOptions: {
@@ -689,6 +701,8 @@ export type Database = {
           created_at: string
           customer_id: string
           driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
           id: string
           notes: string | null
           payment_collected_at: string | null
@@ -699,6 +713,7 @@ export type Database = {
           scheduled_at: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string
+          wallet_paid_at: string | null
           water_type: Database["public"]["Enums"]["water_type"]
         }
         SetofOptions: {

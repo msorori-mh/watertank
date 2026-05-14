@@ -16,11 +16,10 @@ function AdminFinance() {
 
   const load = async () => {
     const [{ data: orders }, { data: drivers }, { data: handovers }] = await Promise.all([
-      supabase.from("orders").select("id,price,app_commission,commission_status,status,payment_status,payment_collected_at,driver_id,city,created_at").order("created_at", { ascending: false }).limit(500),
+      supabase.from("orders").select("id,price,app_commission,commission_status,status,payment_status,payment_method,payment_collected_at,driver_id,city,created_at,driver_payout_amount,driver_payout_status,wallet_paid_at").order("created_at", { ascending: false }).limit(500),
       supabase.from("drivers").select("id,name,balance,phone"),
       supabase.from("cash_handovers").select("id,driver_id,amount,received_by,notes,created_at").order("created_at", { ascending: false }).limit(200),
     ]);
-    // Resolve receiver names from profiles
     const receiverIds = Array.from(new Set((handovers || []).map((h: any) => h.received_by).filter(Boolean)));
     let receivers: Record<string, string> = {};
     if (receiverIds.length) {
@@ -34,24 +33,37 @@ function AdminFinance() {
 
   if (loading || !data) return <AdminShell title="المالية والتحصيل"><div className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-primary" /></div></AdminShell>;
 
-  // قيمة الطلبات التي حصّلها السائقون من العملاء (نقدية بالكامل تذهب للسائق)
-  const collectedOrders = data.orders.filter((o: any) => o.payment_status === "paid");
-  const totalOrdersValue = collectedOrders.reduce((a: number, o: any) => a + Number(o.price), 0);
+  const cashOrders = data.orders.filter((o: any) => o.payment_method === "cash");
+  const walletOrders = data.orders.filter((o: any) => o.payment_method === "wallet");
 
-  // عمولات التطبيق
-  const totalCommissionsDue = data.orders
+  // ==== Cash ====
+  const cashCollected = cashOrders.filter((o: any) => o.payment_status === "paid");
+  const cashTotalCollected = cashCollected.reduce((a: number, o: any) => a + Number(o.price), 0);
+  const cashCommissionsDue = cashOrders
     .filter((o: any) => Number(o.app_commission || 0) > 0)
     .reduce((a: number, o: any) => a + Number(o.app_commission), 0);
-  const unpaidCommissions = data.orders
+  const cashCommissionsUnpaid = cashOrders
     .filter((o: any) => o.commission_status === "unpaid" && Number(o.app_commission || 0) > 0)
     .reduce((a: number, o: any) => a + Number(o.app_commission), 0);
-  const driverBalances = data.drivers.reduce((a: number, d: any) => a + Number(d.balance || 0), 0);
   const totalHandovers = data.handovers.reduce((a: number, h: any) => a + Number(h.amount || 0), 0);
 
-  // اليوم
-  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
-  const todayHandovers = data.handovers.filter((h: any) => new Date(h.created_at) >= startOfToday);
-  const todayHandoversTotal = todayHandovers.reduce((a: number, h: any) => a + Number(h.amount || 0), 0);
+  // ==== Wallet ====
+  const walletPaidTotal = walletOrders
+    .filter((o: any) => !["pending","rejected","cancelled"].includes(o.status))
+    .reduce((a: number, o: any) => a + Number(o.price), 0);
+  const walletCommissionsCollected = walletOrders
+    .filter((o: any) => o.commission_status === "collected")
+    .reduce((a: number, o: any) => a + Number(o.app_commission || 0), 0);
+  const walletDriverPayoutsTotal = walletOrders
+    .reduce((a: number, o: any) => a + Number(o.driver_payout_amount || 0), 0);
+  const walletDriverPayoutsAvailable = walletOrders
+    .filter((o: any) => o.driver_payout_status === "available")
+    .reduce((a: number, o: any) => a + Number(o.driver_payout_amount || 0), 0);
+  const walletDriverPayoutsPending = walletOrders
+    .filter((o: any) => o.driver_payout_status === "pending")
+    .reduce((a: number, o: any) => a + Number(o.driver_payout_amount || 0), 0);
+
+  const driverBalances = data.drivers.reduce((a: number, d: any) => a + Number(d.balance || 0), 0);
 
   const driverNameById: Record<string, string> = Object.fromEntries(data.drivers.map((d: any) => [d.id, d.name]));
 
@@ -73,18 +85,26 @@ function AdminFinance() {
     load();
   };
 
-  const cards = [
-    { label: "قيمة الطلبات (لدى السائقين)", value: totalOrdersValue, icon: Wallet, color: "bg-primary/10 text-primary" },
-    { label: "إجمالي عمولات التطبيق", value: totalCommissionsDue, icon: Percent, color: "bg-emerald-50 text-emerald-700" },
-    { label: "عمولات غير مسددة", value: unpaidCommissions, icon: AlertCircle, color: "bg-rose-50 text-rose-700" },
+  const cashCards = [
+    { label: "إجمالي قيمة الطلبات النقدية", value: cashTotalCollected, icon: Wallet, color: "bg-primary/10 text-primary" },
+    { label: "عمولات على السائقين", value: cashCommissionsDue, icon: Percent, color: "bg-emerald-50 text-emerald-700" },
+    { label: "غير مسدد من العمولات", value: cashCommissionsUnpaid, icon: AlertCircle, color: "bg-rose-50 text-rose-700" },
     { label: "أرصدة العمولة على السائقين", value: driverBalances, icon: Truck, color: "bg-blue-50 text-blue-700" },
     { label: "إجمالي عمولات مسددة", value: totalHandovers, icon: HandCoins, color: "bg-violet-50 text-violet-700" },
-    { label: "تسديدات اليوم", value: todayHandoversTotal, icon: Banknote, color: "bg-amber-50 text-amber-700" },
   ];
 
-  return (
-    <AdminShell title="المالية والتحصيل">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-6">
+  const walletCards = [
+    { label: "إجمالي مدفوعات المحفظة", value: walletPaidTotal, icon: Wallet, color: "bg-primary/10 text-primary" },
+    { label: "عمولات التطبيق المحصّلة", value: walletCommissionsCollected, icon: Percent, color: "bg-emerald-50 text-emerald-700" },
+    { label: "مستحقات السائقين (إجمالي)", value: walletDriverPayoutsTotal, icon: Truck, color: "bg-blue-50 text-blue-700" },
+    { label: "متاح للسحب", value: walletDriverPayoutsAvailable, icon: HandCoins, color: "bg-emerald-50 text-emerald-700" },
+    { label: "معلّق (قيد التنفيذ)", value: walletDriverPayoutsPending, icon: Banknote, color: "bg-amber-50 text-amber-700" },
+  ];
+
+  const SectionCards = ({ title, cards }: { title: string; cards: typeof cashCards }) => (
+    <div className="mb-8">
+      <h2 className="font-display font-bold text-lg mb-3">{title}</h2>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((c) => {
           const Icon = c.icon;
           return (
@@ -98,6 +118,13 @@ function AdminFinance() {
           );
         })}
       </div>
+    </div>
+  );
+
+  return (
+    <AdminShell title="المالية والتحصيل">
+      <SectionCards title="أولاً: الطلبات النقدية" cards={cashCards} />
+      <SectionCards title="ثانياً: طلبات المحفظة" cards={walletCards} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="bg-white rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">

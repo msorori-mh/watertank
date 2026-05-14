@@ -184,7 +184,11 @@ function DriverHome() {
               <div className="text-left">
                 <p className="font-display font-bold text-lg">{Number(active.price).toLocaleString("ar-EG")}</p>
                 <p className="text-xs text-muted-foreground">ر.ي{active.payment_method === "wallet" ? " • مدفوع مسبقاً" : " • تستلمها كاملة"}</p>
-                {active.payment_method !== "wallet" && Number(active.app_commission || 0) > 0 && (
+                {active.payment_method === "wallet" ? (
+                  <p className="text-[11px] text-emerald-700 mt-1 font-semibold">
+                    مستحقك: {Number(active.driver_payout_amount || Math.max(Number(active.price) - Number(active.app_commission || 0), 0)).toLocaleString("ar-EG")} ر.ي
+                  </p>
+                ) : Number(active.app_commission || 0) > 0 && (
                   <p className="text-[11px] text-rose-600 mt-1 font-semibold">
                     عمولة التطبيق: {Number(active.app_commission).toLocaleString("ar-EG")} ر.ي
                   </p>
@@ -192,9 +196,14 @@ function DriverHome() {
               </div>
             </div>
             {active.payment_method === "wallet" ? (
-              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-[12px] text-emerald-900 leading-5 flex items-center gap-2">
-                <Wallet className="h-4 w-4" />
-                <span className="font-semibold">مدفوع من محفظة العميل — لا تحصّل أي مبلغ نقدي.</span>
+              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-[12px] text-emerald-900 leading-5 space-y-1">
+                <div className="flex items-center gap-2 font-semibold"><Wallet className="h-4 w-4" /> مدفوع من محفظة العميل — لا تحصّل أي مبلغ نقدي.</div>
+                <div className="grid grid-cols-3 gap-1 text-center text-[11px]">
+                  <div className="bg-white/60 rounded p-1"><div className="text-emerald-900/70">قيمة الطلب</div><div className="font-bold">{Number(active.price).toLocaleString("ar-EG")}</div></div>
+                  <div className="bg-white/60 rounded p-1"><div className="text-emerald-900/70">عمولة التطبيق</div><div className="font-bold">{Number(active.app_commission || 0).toLocaleString("ar-EG")}</div></div>
+                  <div className="bg-white/60 rounded p-1"><div className="text-emerald-900/70">مستحقك</div><div className="font-bold">{Number(active.driver_payout_amount || Math.max(Number(active.price) - Number(active.app_commission || 0), 0)).toLocaleString("ar-EG")}</div></div>
+                </div>
+                {active.driver_payout_status === "available" && <div className="text-[11px] font-semibold">المستحق متاح للسحب لاحقاً ✅</div>}
               </div>
             ) : (
               <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-900 leading-5">
