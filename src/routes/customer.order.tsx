@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronRight, MapPin, Loader2, Droplets, Crosshair, Wallet, Banknote } from "lucide-react";
+import { ChevronRight, MapPin, Loader2, Droplets, Wallet, Banknote, Plus, Star, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/customer/order")({
   component: NewOrder,
@@ -13,87 +13,85 @@ const WATER_TYPES = [
   { id: "well", name: "ماء آبار", desc: "للاستخدام العام" },
 ];
 
+type Address = {
+  id: string; user_id: string; title: string; city: string;
+  description: string | null; lat: number; lng: number; is_default: boolean;
+};
+
 function NewOrder() {
   const nav = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [cities, setCities] = useState<{ id: string; name: string }[]>([]);
   const [pricing, setPricing] = useState<{ city: string; capacity: number; price: number }[]>([]);
-  const [city, setCity] = useState("");
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddrId, setSelectedAddrId] = useState<string>("");
   const [capacity, setCapacity] = useState<number>(5000);
   const [waterType, setWaterType] = useState("sweet");
-  const [addressTitle, setAddressTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
   const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) { nav({ to: "/customer/login" }); return; }
-      setUser(data.session.user);
-      const [{ data: prof }, { data: w }] = await Promise.all([
-        supabase.from("profiles").select("city").eq("id", data.session.user.id).maybeSingle(),
-        supabase.from("wallets").select("balance").eq("user_id", data.session.user.id).maybeSingle(),
+    (async () => {
+      const { data: s } = await supabase.auth.getSession();
+      if (!s.session) { nav({ to: "/customer/login" }); return; }
+      setUser(s.session.user);
+      const uid = s.session.user.id;
+      const [{ data: prof }, { data: w }, { data: c }, { data: p }, { data: a }] = await Promise.all([
+        supabase.from("profiles").select("city").eq("id", uid).maybeSingle(),
+        supabase.from("wallets").select("balance").eq("user_id", uid).maybeSingle(),
+        supabase.from("cities").select("id,name").eq("is_active", true).order("name"),
+        supabase.from("pricing").select("city,capacity,price"),
+        supabase.from("addresses").select("*").eq("user_id", uid)
+          .order("is_default", { ascending: false }).order("created_at", { ascending: false }),
       ]);
       if (!prof?.city) { nav({ to: "/customer/profile/complete" }); return; }
       setWalletBalance(Number(w?.balance ?? 0));
-    });
-  }, [nav]);
-
-  useEffect(() => {
-    (async () => {
-      const [{ data: c }, { data: p }] = await Promise.all([
-        supabase.from("cities").select("id,name").eq("is_active", true).order("name"),
-        supabase.from("pricing").select("city,capacity,price"),
-      ]);
       setCities(c || []);
       setPricing(p || []);
-      if (c && c.length && !city) setCity(c[0].name);
+      const list = (a as any as Address[]) || [];
+      setAddresses(list);
+      if (list.length) setSelectedAddrId(list[0].id);
+      setLoading(false);
     })();
-  }, []);
+  }, [nav]);
 
+  const selected = addresses.find((x) => x.id === selectedAddrId) || null;
+  const city = selected?.city || "";
   const capacities = Array.from(new Set(pricing.filter(p => p.city === city).map(p => p.capacity))).sort((a, b) => a - b);
   const price = pricing.find(p => p.city === city && p.capacity === capacity)?.price ?? 0;
 
-  const useGeo = () => {
-    if (!navigator.geolocation) return setError("المتصفح لا يدعم تحديد الموقع");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => setError("تعذّر تحديد الموقع. تأكد من السماح بالوصول."),
-    );
-  };
+  // ensure capacity is valid for the selected city
+  useEffect(() => {
+    if (capacities.length && !capacities.includes(capacity)) setCapacity(capacities[0]);
+  }, [city]); // eslint-disable-line
 
   const submit = async () => {
     setError("");
     if (!user) return;
-    if (!addressTitle.trim()) return setError("ادخل اسم العنوان (مثل: المنزل)");
-    if (!coords) return setError("حدّد موقعك على الخريطة أو استخدم تحديد الموقع");
+    if (!selected) return setError("اختر عنوان التسليم أولاً");
+    if (!selected.lat || !selected.lng) return setError("العنوان لا يحتوي على إحداثيات صالحة");
+    if (!cities.find((c) => c.name === selected.city)) return setError("مدينة العنوان غير مفعّلة، عدّل العنوان");
     if (price === 0) return setError("لا يوجد سعر متاح لهذا الحجم في هذه المدينة");
     if (paymentMethod === "wallet" && walletBalance < price) {
       return setError("رصيد المحفظة غير كافٍ، يرجى تعبئة المحفظة.");
     }
     setSubmitting(true);
     try {
-      // Save address
-      const { data: addr, error: addrErr } = await supabase.from("addresses").insert({
-        user_id: user.id,
-        title: addressTitle,
-        city,
-        lat: coords.lat,
-        lng: coords.lng,
-        description: description || null,
-      }).select().single();
-      if (addrErr) throw addrErr;
-
-      const snapshot = { title: addressTitle, description, lat: coords.lat, lng: coords.lng };
+      const snapshot = {
+        title: selected.title,
+        description: selected.description,
+        lat: selected.lat,
+        lng: selected.lng,
+      };
 
       if (paymentMethod === "wallet") {
         const { data: order, error: rpcErr } = await supabase.rpc("create_wallet_order", {
-          _city: city,
-          _address_id: addr.id,
+          _city: selected.city,
+          _address_id: selected.id,
           _address_snapshot: snapshot as any,
           _water_type: waterType as any,
           _capacity: capacity,
@@ -105,8 +103,8 @@ function NewOrder() {
       } else {
         const { data: order, error: ordErr } = await supabase.from("orders").insert({
           customer_id: user.id,
-          city,
-          address_id: addr.id,
+          city: selected.city,
+          address_id: selected.id,
           address_snapshot: snapshot,
           water_type: waterType as any,
           capacity,
@@ -125,6 +123,10 @@ function NewOrder() {
     }
   };
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  }
+
   return (
     <div className="min-h-screen bg-background pb-32">
       <header className="px-5 py-4 flex items-center gap-3 bg-card border-b border-border sticky top-0 z-10">
@@ -135,39 +137,69 @@ function NewOrder() {
       </header>
 
       <main className="px-5 py-6 space-y-6 max-w-md mx-auto">
-        {/* City */}
+        {/* Address selection */}
         <section>
-          <label className="text-xs font-semibold text-muted-foreground mb-2 block">المدينة</label>
-          <select
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 font-medium focus:border-primary focus:outline-none"
-          >
-            {cities.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-          </select>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-semibold text-muted-foreground">عنوان التسليم</label>
+            <Link to="/customer/addresses" className="text-xs font-bold text-primary inline-flex items-center gap-1">
+              <Plus className="h-3 w-3" /> إدارة العناوين
+            </Link>
+          </div>
+
+          {addresses.length === 0 ? (
+            <Link to="/customer/addresses"
+              className="block rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 text-center">
+              <MapPin className="h-6 w-6 text-primary mx-auto" />
+              <p className="mt-2 font-bold text-sm text-deep">لا توجد عناوين محفوظة</p>
+              <p className="text-xs text-muted-foreground mt-1">أضف عنواناً واحداً لإكمال الطلب</p>
+              <span className="inline-block mt-3 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-xs font-bold">
+                إضافة عنوان جديد
+              </span>
+            </Link>
+          ) : (
+            <div className="space-y-2">
+              {addresses.map((a) => {
+                const sel = selectedAddrId === a.id;
+                return (
+                  <button key={a.id} onClick={() => setSelectedAddrId(a.id)}
+                    className={`w-full text-right rounded-xl p-3 border-2 transition flex items-start gap-3 ${sel ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+                    <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${sel ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {sel ? <CheckCircle2 className="h-5 w-5" /> : <MapPin className="h-4 w-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-sm">{a.title}</p>
+                        {a.is_default && <Star className="h-3 w-3 text-primary fill-primary" />}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{a.city}</p>
+                      {a.description && <p className="text-xs text-muted-foreground truncate">{a.description}</p>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Capacity */}
         <section>
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">حجم الوايت</label>
-          <div className="grid grid-cols-2 gap-2">
-            {capacities.map(c => {
-              const p = pricing.find(x => x.city === city && x.capacity === c)?.price ?? 0;
-              const sel = capacity === c;
-              return (
-                <button
-                  key={c}
-                  onClick={() => setCapacity(c)}
-                  className={`rounded-xl p-3 text-right border-2 transition ${sel ? "border-primary bg-primary/5" : "border-border bg-card"}`}
-                >
-                  <div className="font-bold">{c.toLocaleString("ar-EG")} لتر</div>
-                  <div className="text-xs text-muted-foreground mt-1">{p.toLocaleString("ar-EG")} ر.ي</div>
-                </button>
-              );
-            })}
-          </div>
-          {capacities.length === 0 && (
-            <p className="text-xs text-muted-foreground mt-2">لا توجد أسعار متاحة لهذه المدينة بعد.</p>
+          {capacities.length === 0 ? (
+            <p className="text-xs text-muted-foreground bg-muted rounded-xl p-3">لا توجد أسعار متاحة لمدينة العنوان المختار.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {capacities.map(c => {
+                const p = pricing.find(x => x.city === city && x.capacity === c)?.price ?? 0;
+                const sel = capacity === c;
+                return (
+                  <button key={c} onClick={() => setCapacity(c)}
+                    className={`rounded-xl p-3 text-right border-2 transition ${sel ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+                    <div className="font-bold">{c.toLocaleString("ar-EG")} لتر</div>
+                    <div className="text-xs text-muted-foreground mt-1">{p.toLocaleString("ar-EG")} ر.ي</div>
+                  </button>
+                );
+              })}
+            </div>
           )}
         </section>
 
@@ -189,40 +221,6 @@ function NewOrder() {
               );
             })}
           </div>
-        </section>
-
-        {/* Address */}
-        <section className="space-y-2">
-          <label className="text-xs font-semibold text-muted-foreground block">عنوان التسليم</label>
-          <input
-            value={addressTitle}
-            onChange={(e) => setAddressTitle(e.target.value)}
-            placeholder="مثال: المنزل، المكتب"
-            className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none"
-          />
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={2}
-            placeholder="وصف تفصيلي (الحي، علامة مميزة)"
-            className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none resize-none"
-          />
-          <button
-            onClick={useGeo}
-            className="w-full rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-3 flex items-center justify-center gap-2 text-sm font-semibold text-primary"
-          >
-            <Crosshair className="h-4 w-4" />
-            {coords ? `موقعك محدد (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})` : "تحديد موقعي تلقائياً"}
-          </button>
-          {coords && (
-            <a
-              href={`https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}&zoom=16`}
-              target="_blank" rel="noreferrer"
-              className="text-xs text-primary inline-flex items-center gap-1"
-            >
-              <MapPin className="h-3 w-3" /> عرض على الخريطة
-            </a>
-          )}
         </section>
 
         {/* Payment method */}
@@ -264,13 +262,9 @@ function NewOrder() {
         {/* Notes */}
         <section>
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">ملاحظات (اختياري)</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={2}
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
             placeholder="أي تعليمات للسائق"
-            className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none resize-none"
-          />
+            className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none resize-none" />
         </section>
 
         {error && <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{error}</p>}
@@ -282,11 +276,8 @@ function NewOrder() {
             <p className="text-xs text-muted-foreground">الإجمالي • {paymentMethod === "wallet" ? "خصم من المحفظة" : "نقداً عند الاستلام"}</p>
             <p className="font-display font-bold text-xl">{price.toLocaleString("ar-EG")} ر.ي</p>
           </div>
-          <button
-            onClick={submit}
-            disabled={submitting || price === 0}
-            className="rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground shadow-[var(--shadow-glow)] disabled:opacity-50 flex items-center gap-2"
-          >
+          <button onClick={submit} disabled={submitting || price === 0 || !selected}
+            className="rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground shadow-[var(--shadow-glow)] disabled:opacity-50 flex items-center gap-2">
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             تأكيد الطلب
           </button>
