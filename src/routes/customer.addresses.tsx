@@ -314,8 +314,12 @@ function AddressEditor({
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">المدينة</label>
             <select value={city} onChange={(e) => setCity(e.target.value)}
               className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 font-medium focus:border-primary focus:outline-none">
+              <option value="">— اختر المدينة —</option>
               {cities.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
             </select>
+            {cities.length === 0 && (
+              <p className="text-[11px] text-amber-700 mt-1">لا توجد مدن مفعّلة. تواصل مع الإدارة.</p>
+            )}
           </div>
 
           <div>
