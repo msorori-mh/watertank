@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronRight, MapPin, Loader2, Droplets, Crosshair } from "lucide-react";
+import { ChevronRight, MapPin, Loader2, Droplets, Crosshair, Wallet, Banknote } from "lucide-react";
 
 export const Route = createFileRoute("/customer/order")({
   component: NewOrder,
