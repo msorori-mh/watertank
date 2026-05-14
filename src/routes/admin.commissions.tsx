@@ -29,6 +29,8 @@ function AdminCommissions() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Omit<Rule, "id">>(empty);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
 
   const load = async () => {
     const [{ data: r }, { data: c }] = await Promise.all([
@@ -41,6 +43,21 @@ function AdminCommissions() {
   };
   useEffect(() => { load(); }, []);
 
+  const resetForm = () => { setForm(empty); setEditingId(null); };
+
+  const startEdit = (r: Rule) => {
+    setEditingId(r.id);
+    setForm({
+      city: r.city,
+      capacity: r.capacity,
+      commission_type: r.commission_type,
+      commission_value: Number(r.commission_value),
+      free_until: r.free_until,
+      is_active: r.is_active,
+    });
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+
   const save = async () => {
     setSaving(true);
     const payload = {
@@ -50,10 +67,12 @@ function AdminCommissions() {
       free_until: form.free_until || null,
       city: form.city || null,
     };
-    const { error } = await supabase.from("commission_settings").insert(payload);
+    const { error } = editingId
+      ? await supabase.from("commission_settings").update(payload).eq("id", editingId)
+      : await supabase.from("commission_settings").insert(payload);
     setSaving(false);
     if (error) { alert("تعذر الحفظ: " + error.message); return; }
-    setForm(empty);
+    resetForm();
     load();
   };
 
