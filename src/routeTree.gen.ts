@@ -19,6 +19,7 @@ import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
 import { Route as DriverLoginRouteImport } from './routes/driver.login'
 import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
 import { Route as CustomerWalletRouteImport } from './routes/customer.wallet'
+import { Route as CustomerSettingsRouteImport } from './routes/customer.settings'
 import { Route as CustomerReportsRouteImport } from './routes/customer.reports'
 import { Route as CustomerOrderRouteImport } from './routes/customer.order'
 import { Route as CustomerLoginRouteImport } from './routes/customer.login'
@@ -86,6 +87,11 @@ const DriverEarningsRoute = DriverEarningsRouteImport.update({
 const CustomerWalletRoute = CustomerWalletRouteImport.update({
   id: '/customer/wallet',
   path: '/customer/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerSettingsRoute = CustomerSettingsRouteImport.update({
+  id: '/customer/settings',
+  path: '/customer/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomerReportsRoute = CustomerReportsRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/reports': typeof CustomerReportsRoute
+  '/customer/settings': typeof CustomerSettingsRoute
   '/customer/wallet': typeof CustomerWalletRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/reports': typeof CustomerReportsRoute
+  '/customer/settings': typeof CustomerSettingsRoute
   '/customer/wallet': typeof CustomerWalletRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/customer/login': typeof CustomerLoginRoute
   '/customer/order': typeof CustomerOrderRoute
   '/customer/reports': typeof CustomerReportsRoute
+  '/customer/settings': typeof CustomerSettingsRoute
   '/customer/wallet': typeof CustomerWalletRoute
   '/driver/earnings': typeof DriverEarningsRoute
   '/driver/login': typeof DriverLoginRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/reports'
+    | '/customer/settings'
     | '/customer/wallet'
     | '/driver/earnings'
     | '/driver/login'
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/reports'
+    | '/customer/settings'
     | '/customer/wallet'
     | '/driver/earnings'
     | '/driver/login'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/customer/login'
     | '/customer/order'
     | '/customer/reports'
+    | '/customer/settings'
     | '/customer/wallet'
     | '/driver/earnings'
     | '/driver/login'
@@ -381,6 +393,7 @@ export interface RootRouteChildren {
   CustomerLoginRoute: typeof CustomerLoginRoute
   CustomerOrderRoute: typeof CustomerOrderRoute
   CustomerReportsRoute: typeof CustomerReportsRoute
+  CustomerSettingsRoute: typeof CustomerSettingsRoute
   CustomerWalletRoute: typeof CustomerWalletRoute
   DriverEarningsRoute: typeof DriverEarningsRoute
   DriverLoginRoute: typeof DriverLoginRoute
@@ -464,6 +477,13 @@ declare module '@tanstack/react-router' {
       path: '/customer/wallet'
       fullPath: '/customer/wallet'
       preLoaderRoute: typeof CustomerWalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/settings': {
+      id: '/customer/settings'
+      path: '/customer/settings'
+      fullPath: '/customer/settings'
+      preLoaderRoute: typeof CustomerSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customer/reports': {
@@ -613,6 +633,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomerLoginRoute: CustomerLoginRoute,
   CustomerOrderRoute: CustomerOrderRoute,
   CustomerReportsRoute: CustomerReportsRoute,
+  CustomerSettingsRoute: CustomerSettingsRoute,
   CustomerWalletRoute: CustomerWalletRoute,
   DriverEarningsRoute: DriverEarningsRoute,
   DriverLoginRoute: DriverLoginRoute,
