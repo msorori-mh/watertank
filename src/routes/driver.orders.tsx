@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { driverRouteGuard } from "@/lib/route-guards";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { MapPin, Loader2, Truck } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
 
 export const Route = createFileRoute("/driver/orders")({
+  ...driverRouteGuard,
   component: DriverAvailableOrders,
 });
 
@@ -63,11 +65,7 @@ function DriverAvailableOrders() {
         return;
       }
       const order = orders.find((o) => o.id === id);
-      const { error } = await supabase.from("orders")
-        .update({ driver_id: driver.id, status: "accepted" })
-        .eq("id", id)
-        .is("driver_id", null)
-        .eq("status", "approved");
+      const { error } = await supabase.rpc("claim_approved_order", { _order_id: id });
       if (error) { alert("تعذر قبول الطلب: " + error.message); return; }
       if (order?.customer_id) {
         const msg = ORDER_EVENT_MESSAGES.order_accepted!;

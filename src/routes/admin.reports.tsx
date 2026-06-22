@@ -2,10 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
+import { adminRouteGuard } from "@/lib/route-guards";
 import { Loader2, Download } from "lucide-react";
 import { downloadCSV } from "@/lib/csv";
 
 export const Route = createFileRoute("/admin/reports")({
+  ...adminRouteGuard,
   component: AdminReports,
 });
 

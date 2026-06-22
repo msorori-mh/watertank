@@ -2,9 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
+import { adminRouteGuard } from "@/lib/route-guards";
 import { ClipboardList, Truck, Wallet, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
+  ...adminRouteGuard,
   component: AdminDashboard,
 });
 

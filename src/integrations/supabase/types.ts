@@ -722,6 +722,37 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      advance_driver_order_status: {
+        Args: { _new_status: Database["public"]["Enums"]["order_status"]; _order_id: string }
+        Returns: Database["public"]["Tables"]["orders"]["Row"]
+      }
+      assign_initial_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
+      cancel_customer_order: {
+        Args: { _order_id: string }
+        Returns: Database["public"]["Tables"]["orders"]["Row"]
+      }
+      claim_approved_order: {
+        Args: { _order_id: string }
+        Returns: Database["public"]["Tables"]["orders"]["Row"]
+      }
+      create_cash_order: {
+        Args: {
+          _address_id: string
+          _address_snapshot: Json
+          _capacity: number
+          _city: string
+          _notes?: string
+          _water_type: Database["public"]["Enums"]["water_type"]
+        }
+        Returns: Database["public"]["Tables"]["orders"]["Row"]
+      }
+      promote_to_admin: {
+        Args: { _setup_code: string }
+        Returns: undefined
+      }
       calculate_app_commission: {
         Args: { _capacity: number; _city: string; _price: number }
         Returns: Record<string, unknown>

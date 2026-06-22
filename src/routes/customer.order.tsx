@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { customerRouteGuard } from "@/lib/route-guards";
 import { ChevronRight, MapPin, Loader2, Droplets, Wallet, Banknote, Plus, Star, CheckCircle2 } from "lucide-react";
 import { WATER_TYPES } from "@/lib/water-types";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
 export const Route = createFileRoute("/customer/order")({
+  ...customerRouteGuard,
   component: NewOrder,
 });
 
@@ -97,20 +99,16 @@ function NewOrder() {
         if (rpcErr) throw rpcErr;
         nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
       } else {
-        const { data: order, error: ordErr } = await supabase.from("orders").insert({
-          customer_id: user.id,
-          city: selected.city,
-          address_id: selected.id,
-          address_snapshot: snapshot,
-          water_type: waterType as any,
-          capacity,
-          quantity: 1,
-          price,
-          payment_method: "cash" as any,
-          notes: notes || null,
-        }).select().single();
+        const { data: order, error: ordErr } = await supabase.rpc("create_cash_order", {
+          _city: selected.city,
+          _address_id: selected.id,
+          _address_snapshot: snapshot as any,
+          _water_type: waterType as any,
+          _capacity: capacity,
+          _notes: notes || undefined,
+        });
         if (ordErr) throw ordErr;
-        nav({ to: "/customer/orders/$id", params: { id: order.id } });
+        nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
       }
     } catch (e: any) {
       setError(e.message);

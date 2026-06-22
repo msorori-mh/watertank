@@ -1,42 +1,103 @@
 import { supabase } from "@/integrations/supabase/client";
 
+const DEMO_MODE = import.meta.env.VITE_DEMO_AUTH === "true";
 const DEMO_OTP = "1234";
-const ADMIN_SETUP_CODE = "WAYET2025";
+const PHONE_PWD_PREFIX = "wayet_pwd_";
 
-const phoneToCreds = (phone: string) => {
-  const clean = phone.replace(/[^0-9]/g, "");
-  return {
-    email: `phone-${clean}@wayet.local`,
-    password: `wayet-pwd-${clean}-secure`,
-  };
+const normalizePhone = (phone: string) => {
+  const digits = phone.replace(/[^0-9+]/g, "");
+  if (digits.startsWith("+")) return digits;
+  if (digits.startsWith("967")) return `+${digits}`;
+  if (digits.startsWith("0")) return `+967${digits.slice(1)}`;
+  return `+967${digits}`;
+};
+
+const phoneDigits = (phone: string) => normalizePhone(phone).replace(/[^0-9]/g, "");
+
+const demoEmail = (phone: string) => `phone-${phoneDigits(phone)}@wayet.local`;
+
+const getDemoPassword = (phone: string) => {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(`${PHONE_PWD_PREFIX}${phoneDigits(phone)}`);
+  } catch {
+    return null;
+  }
+};
+
+const setDemoPassword = (phone: string, password: string) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(`${PHONE_PWD_PREFIX}${phoneDigits(phone)}`, password);
+  } catch {
+    /* ignore */
+  }
+};
+
+const ensureDriverRole = async () => {
+  const { error } = await supabase.rpc("assign_initial_role", { _role: "driver" });
+  if (error) throw error;
 };
 
 export const sendOtp = async (phone: string) => {
   if (!phone.trim()) throw new Error("ادخل رقم الهاتف");
-  // Simulated — return demo code hint
-  await new Promise((r) => setTimeout(r, 500));
+  const formatted = normalizePhone(phone);
+
+  if (DEMO_MODE) {
+    await new Promise((r) => setTimeout(r, 400));
+    return { sent: true };
+  }
+
+  const { error } = await supabase.auth.signInWithOtp({ phone: formatted });
+  if (error) throw error;
   return { sent: true };
 };
 
-export const verifyOtpAndLogin = async (phone: string, code: string) => {
-  if (code !== DEMO_OTP) throw new Error("الرمز غير صحيح. الرمز التجريبي: 1234");
-  const { email, password } = phoneToCreds(phone);
-  // Try sign in, else sign up
-  const signIn = await supabase.auth.signInWithPassword({ email, password });
-  if (!signIn.error) return signIn.data;
-  const signUp = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { phone, type: "customer", role: "customer" },
-      emailRedirectTo: `${window.location.origin}/customer`,
-    },
+export const verifyOtpAndLogin = async (
+  phone: string,
+  code: string,
+  portal: "customer" | "driver" = "customer",
+) => {
+  const formatted = normalizePhone(phone);
+
+  if (DEMO_MODE) {
+    if (code !== DEMO_OTP) throw new Error("الرمز غير صحيح");
+    const email = demoEmail(phone);
+    let password = getDemoPassword(phone);
+    if (!password) {
+      password = crypto.randomUUID() + crypto.randomUUID();
+      setDemoPassword(phone, password);
+    }
+
+    const signIn = await supabase.auth.signInWithPassword({ email, password });
+    if (!signIn.error && signIn.data.user) {
+      if (portal === "driver") await ensureDriverRole();
+      return signIn.data;
+    }
+
+    const signUp = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { phone: formatted, name: "", type: portal },
+      },
+    });
+    if (signUp.error) throw signUp.error;
+
+    const retry = await supabase.auth.signInWithPassword({ email, password });
+    if (retry.error) throw retry.error;
+    if (portal === "driver") await ensureDriverRole();
+    return retry.data;
+  }
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    phone: formatted,
+    token: code.trim(),
+    type: "sms",
   });
-  if (signUp.error) throw signUp.error;
-  // Auto-confirm is on, but session may not exist; sign in again
-  const retry = await supabase.auth.signInWithPassword({ email, password });
-  if (retry.error) throw retry.error;
-  return retry.data;
+  if (error) throw error;
+  if (portal === "driver") await ensureDriverRole();
+  return data;
 };
 
 export const adminLogin = async (email: string, password: string) => {
@@ -51,25 +112,34 @@ export const adminSignup = async (
   name: string,
   setupCode: string,
 ) => {
-  if (setupCode !== ADMIN_SETUP_CODE)
-    throw new Error("رمز إعداد المدير غير صحيح");
-  const { data, error } = await supabase.auth.signUp({
+  const { error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { name, type: "admin", role: "admin" },
+      data: { name, type: "admin" },
       emailRedirectTo: `${window.location.origin}/admin`,
     },
   });
-  if (error) throw error;
-  // Sign in
-  const retry = await supabase.auth.signInWithPassword({ email, password });
-  if (retry.error) throw retry.error;
-  return retry.data;
+  if (signUpError) throw signUpError;
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (signInError) throw signInError;
+
+  const { error: promoteError } = await supabase.rpc("promote_to_admin", {
+    _setup_code: setupCode,
+  });
+  if (promoteError) {
+    await supabase.auth.signOut();
+    throw promoteError;
+  }
+
+  const { data } = await supabase.auth.getSession();
+  return data;
 };
 
 export const signOut = async () => {
   await supabase.auth.signOut();
 };
 
-export const DEMO_OTP_CODE = DEMO_OTP;
+export const isDemoAuth = () => DEMO_MODE;
+export const demoOtpHint = () => (DEMO_MODE ? DEMO_OTP : null);

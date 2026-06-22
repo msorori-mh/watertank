@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { driverRouteGuard } from "@/lib/route-guards";
 import { Truck, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/driver/register")({
+  ...driverRouteGuard,
   component: DriverRegister,
 });
 
@@ -43,8 +45,9 @@ function DriverRegister() {
       user_id: user.id,
       name, phone, city, vehicle_plate: plate, vehicle_capacity: capacity,
     });
+    if (e) { setLoading(false); setError(e.message); return; }
+    await supabase.rpc("assign_initial_role", { _role: "driver" });
     setLoading(false);
-    if (e) { setError(e.message); return; }
     nav({ to: "/driver" });
   };
 

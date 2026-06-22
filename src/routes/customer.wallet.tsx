@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { customerRouteGuard } from "@/lib/route-guards";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Wallet, Plus, Loader2, Upload, X, CheckCircle2, Clock, XCircle, CreditCard } from "lucide-react";
 
 export const Route = createFileRoute("/customer/wallet")({
+  ...customerRouteGuard,
   component: CustomerWallet,
 });
 
@@ -190,8 +192,7 @@ function TopupModal({ userId, onClose, onDone }: { userId: string; onClose: () =
     const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error: upErr } = await supabase.storage.from("wallet-receipts").upload(path, file, { upsert: false });
     if (upErr) { setError("فشل رفع الإيصال: " + upErr.message); setUploading(false); return; }
-    const { data: pub } = supabase.storage.from("wallet-receipts").getPublicUrl(path);
-    setReceiptUrl(pub.publicUrl);
+    setReceiptUrl(path);
     setUploading(false);
   };
 

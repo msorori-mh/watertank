@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Wallet, ClipboardList, CheckCircle2, XCircle, Banknote } from "lucide-react";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { customerRouteGuard } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/customer/reports")({
+  ...customerRouteGuard,
   component: CustomerReports,
 });
 

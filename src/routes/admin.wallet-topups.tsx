@@ -2,9 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
+import { adminRouteGuard } from "@/lib/route-guards";
+import { resolveStorageUrl } from "@/lib/storage-url";
 import { Loader2, CheckCircle2, XCircle, ExternalLink, Search, X, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/admin/wallet-topups")({
+  ...adminRouteGuard,
   component: AdminWalletTopups,
 });
 
@@ -197,14 +200,7 @@ function AdminWalletTopups() {
                 </div>
 
                 {t.receipt_url && (
-                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
-                    <button onClick={() => setPreviewUrl(t.receipt_url)} className="shrink-0">
-                      <img src={t.receipt_url} alt="receipt" className="h-16 w-16 rounded-lg object-cover border border-border" />
-                    </button>
-                    <a href={t.receipt_url} target="_blank" rel="noreferrer" className="text-sm text-primary inline-flex items-center gap-1 hover:underline">
-                      <ExternalLink className="h-3 w-3" /> فتح الإيصال
-                    </a>
-                  </div>
+                  <ReceiptPreview path={t.receipt_url} onPreview={setPreviewUrl} />
                 )}
 
                 {t.admin_notes && (
@@ -305,5 +301,26 @@ function AdminWalletTopups() {
       )}
 
     </AdminShell>
+  );
+}
+
+function ReceiptPreview({ path, onPreview }: { path: string; onPreview: (url: string) => void }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    resolveStorageUrl("wallet-receipts", path).then(setUrl);
+  }, [path]);
+
+  if (!url) return null;
+
+  return (
+    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+      <button type="button" onClick={() => onPreview(url)} className="shrink-0">
+        <img src={url} alt="receipt" className="h-16 w-16 rounded-lg object-cover border border-border" />
+      </button>
+      <a href={url} target="_blank" rel="noreferrer" className="text-sm text-primary inline-flex items-center gap-1 hover:underline">
+        <ExternalLink className="h-3 w-3" /> فتح الإيصال
+      </a>
+    </div>
   );
 }

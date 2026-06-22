@@ -2,8 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2, User, MapPin, Crosshair } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { customerRouteGuard } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/customer/profile/complete")({
+  ...customerRouteGuard,
   component: CompleteProfile,
 });
 

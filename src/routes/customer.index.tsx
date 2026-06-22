@@ -19,8 +19,10 @@ import {
 } from "lucide-react";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { customerRouteGuard } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/customer/")({
+  ...customerRouteGuard,
   component: CustomerHome,
 });
 

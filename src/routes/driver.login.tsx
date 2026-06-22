@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronRight, Phone, KeyRound, Loader2 } from "lucide-react";
-import { sendOtp, verifyOtpAndLogin, DEMO_OTP_CODE } from "@/lib/wayet-auth";
+import { sendOtp, verifyOtpAndLogin, demoOtpHint } from "@/lib/wayet-auth";
 import { signInWithGoogle } from "@/lib/google-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,7 +30,7 @@ function DriverLogin() {
   const verify = async () => {
     setError(""); setLoading(true);
     try {
-      const { user } = await verifyOtpAndLogin(phone, code.trim());
+      const { user } = await verifyOtpAndLogin(phone, code.trim(), "driver");
       // Check if driver row exists
       const { data: d } = await supabase.from("drivers").select("id").eq("user_id", user!.id).maybeSingle();
       nav({ to: d ? "/driver" : "/driver/register" });
@@ -88,9 +88,11 @@ function DriverLogin() {
               </div>
               <h2 className="font-display text-2xl font-bold">أدخل الرمز</h2>
               <p className="text-sm text-muted-foreground mt-2">أرسلنا رمزاً مكوناً من ٤ أرقام إلى <span dir="ltr">{phone}</span></p>
-              <div className="mt-3 inline-block rounded-lg bg-accent/30 px-3 py-1 text-xs font-semibold text-deep">
-                رمز تجريبي: {DEMO_OTP_CODE}
-              </div>
+              {demoOtpHint() && (
+                <div className="mt-3 inline-block rounded-lg bg-accent/30 px-3 py-1 text-xs font-semibold text-deep">
+                  رمز تجريبي: {demoOtpHint()}
+                </div>
+              )}
             </div>
             <input dir="ltr" inputMode="numeric" maxLength={4} value={code} onChange={(e) => setCode(e.target.value)}
               placeholder="••••"

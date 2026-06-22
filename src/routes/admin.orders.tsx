@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId, type NotificationType } from "@/lib/notifications";
+import { adminRouteGuard } from "@/lib/route-guards";
 
 const STATUS_TO_NOTIF: Record<string, NotificationType | undefined> = {
   approved: "order_approved",
@@ -17,6 +18,7 @@ const STATUS_TO_NOTIF: Record<string, NotificationType | undefined> = {
 };
 
 export const Route = createFileRoute("/admin/orders")({
+  ...adminRouteGuard,
   component: AdminOrders,
 });
 

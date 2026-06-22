@@ -2,9 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
+import { driverRouteGuard } from "@/lib/route-guards";
 import { Loader2, ArrowRight, ClipboardList, CheckCircle2, Banknote, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/driver/reports")({
+  ...driverRouteGuard,
   component: DriverReports,
 });
 

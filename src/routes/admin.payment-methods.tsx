@@ -2,9 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
+import { adminRouteGuard } from "@/lib/route-guards";
 import { Loader2, Plus, Trash2, Upload, Pencil, X, Landmark, Send, Smartphone } from "lucide-react";
 
 export const Route = createFileRoute("/admin/payment-methods")({
+  ...adminRouteGuard,
   component: AdminPaymentMethods,
 });
 

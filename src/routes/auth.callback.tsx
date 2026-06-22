@@ -34,14 +34,11 @@ function AuthCallback() {
         return;
       }
 
-      // Conflict detection
-      if (existing.length > 0 && !existing.includes(intended)) {
+      // Driver-only account cannot use customer Google login
+      if (intended === "customer" && existing.includes("driver") && !existing.includes("customer")) {
         clearPendingRole();
         await supabase.auth.signOut();
-        const otherLabel = existing.includes("customer") ? "كعميل" : "كسائق";
-        setError(
-          `هذا الحساب مسجل ${otherLabel}. استخدم حساباً آخر أو تواصل مع الإدارة لتغيير الدور.`,
-        );
+        setError("هذا الحساب مسجل كسائق. استخدم بوابة السائق أو حساباً آخر.");
         return;
       }
 
@@ -74,12 +71,15 @@ function AuthCallback() {
         }
       }
 
-      // Assign role if not yet present
-      if (existing.length === 0) {
-        await supabase.from("user_roles").insert({
-          user_id: userId,
-          role: intended,
-        } as any);
+      // Assign portal role securely (trigger already added customer for new users)
+      if (intended === "driver" && !existing.includes("driver")) {
+        const { error: roleErr } = await supabase.rpc("assign_initial_role", { _role: "driver" });
+        if (roleErr) {
+          clearPendingRole();
+          await supabase.auth.signOut();
+          setError(roleErr.message || "تعذّر تعيين دور السائق.");
+          return;
+        }
       }
 
       clearPendingRole();

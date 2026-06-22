@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronRight, Phone, KeyRound, Loader2 } from "lucide-react";
-import { sendOtp, verifyOtpAndLogin, DEMO_OTP_CODE } from "@/lib/wayet-auth";
+import { sendOtp, verifyOtpAndLogin, demoOtpHint } from "@/lib/wayet-auth";
 import { signInWithGoogle } from "@/lib/google-auth";
 
 export const Route = createFileRoute("/customer/login")({
@@ -100,9 +100,11 @@ function CustomerLogin() {
               <p className="text-sm text-muted-foreground mt-2">
                 أرسلنا رمزاً مكوناً من ٤ أرقام إلى <span dir="ltr">{phone}</span>
               </p>
-              <div className="mt-3 inline-block rounded-lg bg-accent/30 px-3 py-1 text-xs font-semibold text-deep">
-                رمز تجريبي: {DEMO_OTP_CODE}
-              </div>
+              {demoOtpHint() && (
+                <div className="mt-3 inline-block rounded-lg bg-accent/30 px-3 py-1 text-xs font-semibold text-deep">
+                  رمز تجريبي: {demoOtpHint()}
+                </div>
+              )}
             </div>
             <input
               dir="ltr"

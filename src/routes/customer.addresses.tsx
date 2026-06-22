@@ -7,8 +7,10 @@ import {
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { customerRouteGuard } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/customer/addresses")({
+  ...customerRouteGuard,
   component: AddressesPage,
 });
 
