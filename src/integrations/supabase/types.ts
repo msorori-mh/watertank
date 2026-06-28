@@ -697,6 +697,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_driver_order_status: {
+        Args: {
+          _new_status: Database["public"]["Enums"]["order_status"]
+          _order_id: string
+        }
+        Returns: {
+          address_id: string | null
+          address_snapshot: Json | null
+          app_commission: number
+          capacity: number
+          city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
+          created_at: string
+          customer_id: string
+          driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
+          id: string
+          notes: string | null
+          payment_collected_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          price: number
+          quantity: number
+          refund_reason: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          wallet_paid_at: string | null
+          wallet_refunded_at: string | null
+          water_type: Database["public"]["Enums"]["water_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_wallet_topup: {
         Args: { _approved_amount?: number; _topup_id: string }
         Returns: {
@@ -722,12 +762,135 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      assert_active_customer: { Args: { _uid: string }; Returns: undefined }
+      assign_initial_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
       calculate_app_commission: {
         Args: { _capacity: number; _city: string; _price: number }
         Returns: Record<string, unknown>
       }
+      cancel_customer_order: {
+        Args: { _order_id: string }
+        Returns: {
+          address_id: string | null
+          address_snapshot: Json | null
+          app_commission: number
+          capacity: number
+          city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
+          created_at: string
+          customer_id: string
+          driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
+          id: string
+          notes: string | null
+          payment_collected_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          price: number
+          quantity: number
+          refund_reason: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          wallet_paid_at: string | null
+          wallet_refunded_at: string | null
+          water_type: Database["public"]["Enums"]["water_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      claim_approved_order: {
+        Args: { _order_id: string }
+        Returns: {
+          address_id: string | null
+          address_snapshot: Json | null
+          app_commission: number
+          capacity: number
+          city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
+          created_at: string
+          customer_id: string
+          driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
+          id: string
+          notes: string | null
+          payment_collected_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          price: number
+          quantity: number
+          refund_reason: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          wallet_paid_at: string | null
+          wallet_refunded_at: string | null
+          water_type: Database["public"]["Enums"]["water_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       collect_order_payment: {
         Args: { _order_id: string }
+        Returns: {
+          address_id: string | null
+          address_snapshot: Json | null
+          app_commission: number
+          capacity: number
+          city: string
+          commission_rule_snapshot: Json | null
+          commission_status: string
+          created_at: string
+          customer_id: string
+          driver_id: string | null
+          driver_payout_amount: number
+          driver_payout_status: string
+          id: string
+          notes: string | null
+          payment_collected_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          price: number
+          quantity: number
+          refund_reason: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          wallet_paid_at: string | null
+          wallet_refunded_at: string | null
+          water_type: Database["public"]["Enums"]["water_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_cash_order: {
+        Args: {
+          _address_id: string
+          _address_snapshot: Json
+          _capacity: number
+          _city: string
+          _notes?: string
+          _water_type: Database["public"]["Enums"]["water_type"]
+        }
         Returns: {
           address_id: string | null
           address_snapshot: Json | null
@@ -843,6 +1006,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      promote_to_admin: { Args: { _setup_code: string }; Returns: undefined }
       record_cash_handover: {
         Args: { _amount: number; _driver_id: string; _notes?: string }
         Returns: {
@@ -942,6 +1106,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      resolve_order_price: {
+        Args: { _capacity: number; _city: string }
+        Returns: number
+      }
+      validate_order_address: {
+        Args: { _address_id: string; _city: string; _uid: string }
+        Returns: undefined
       }
     }
     Enums: {
