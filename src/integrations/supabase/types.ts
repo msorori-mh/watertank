@@ -722,6 +722,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      assign_initial_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
       calculate_app_commission: {
         Args: { _capacity: number; _city: string; _price: number }
         Returns: Record<string, unknown>
@@ -843,6 +847,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      promote_to_admin: { Args: { _setup_code: string }; Returns: undefined }
       record_cash_handover: {
         Args: { _amount: number; _driver_id: string; _notes?: string }
         Returns: {
