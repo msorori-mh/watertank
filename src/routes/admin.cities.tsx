@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { adminRouteGuard } from "@/lib/route-guards";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { TANK_CAPACITIES } from "@/lib/capacities";
 
 export const Route = createFileRoute("/admin/cities")({
   ...adminRouteGuard,
   component: AdminCities,
 });
 
-const SIZES = [1000, 3000, 5000, 10000];
+const SIZES = [...TANK_CAPACITIES];
 
 function AdminCities() {
   const [cities, setCities] = useState<any[]>([]);
