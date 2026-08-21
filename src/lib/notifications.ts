@@ -10,6 +10,8 @@ export type NotificationType =
   | "order_payment_collected"
   | "order_completed"
   | "order_cancelled"
+  | "driver_approved"
+  | "driver_rejected"
   | "general";
 
 export async function notifyUser(
