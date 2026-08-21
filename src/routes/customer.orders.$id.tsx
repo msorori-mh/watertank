@@ -11,17 +11,8 @@ export const Route = createFileRoute("/customer/orders/$id")({
   component: OrderDetail,
 });
 
-const STEPS = [
-  { id: "pending", label: "بانتظار الاعتماد" },
-  { id: "approved", label: "اعتُمد الطلب" },
-  { id: "assigned", label: "تعيين سائق" },
-  { id: "accepted", label: "قبله السائق" },
-  { id: "on_the_way", label: "في الطريق" },
-  { id: "arrived", label: "وصل الموقع" },
-  { id: "delivering", label: "يصب الماء" },
-  { id: "payment_collected", label: "تم الدفع" },
-  { id: "completed", label: "اكتمل" },
-];
+// MVP-FIELD-PILOT-01: unified Arabic status wording.
+const STEPS = ORDER_TIMELINE.map((s) => ({ id: s.key, label: s.label }));
 
 function OrderDetail() {
   const { id } = Route.useParams();
