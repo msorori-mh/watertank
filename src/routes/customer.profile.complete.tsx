@@ -16,7 +16,8 @@ function CompleteProfile() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
-  const [addrTitle, setAddrTitle] = useState("");
+  const [addrTitle, setAddrTitle] = useState("المنزل");
+  const [description, setDescription] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -52,26 +53,32 @@ function CompleteProfile() {
   const save = async () => {
     setError("");
     if (!name.trim()) return setError("ادخل اسمك");
+    if (!phone.trim()) return setError("ادخل رقم الهاتف");
     if (!city) return setError("اختر المدينة");
+    if (!addrTitle.trim()) return setError("اكتب اسم العنوان");
+    if (!description.trim()) return setError("اكتب وصف العنوان");
+    if (!coords) return setError("حدد موقعك قبل المتابعة");
     setSaving(true);
     try {
       const { error: pErr } = await supabase.from("profiles").update({
         name: name.trim(),
-        phone: phone.trim() || null,
+        phone: phone.trim(),
         city,
+        lat: coords.lat,
+        lng: coords.lng,
       } as any).eq("id", user.id);
       if (pErr) throw pErr;
 
-      if (addrTitle.trim() && coords) {
-        await supabase.from("addresses").insert({
+      const { error: addressError } = await supabase.from("addresses").insert({
           user_id: user.id,
           title: addrTitle.trim(),
           city,
+          description: description.trim(),
           lat: coords.lat,
           lng: coords.lng,
           is_default: true,
         });
-      }
+      if (addressError) throw addressError;
       nav({ to: "/customer" });
     } catch (e: any) { setError(e.message); }
     finally { setSaving(false); }
@@ -102,7 +109,7 @@ function CompleteProfile() {
         </div>
 
         <div>
-          <label className="text-xs font-semibold text-muted-foreground mb-1 block">الهاتف (اختياري)</label>
+          <label className="text-xs font-semibold text-muted-foreground mb-1 block">رقم الهاتف</label>
           <input dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)}
             placeholder="+967 7XX XXX XXX"
             className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none" />
@@ -120,14 +127,18 @@ function CompleteProfile() {
         </div>
 
         <div className="rounded-xl border border-dashed border-border p-4 space-y-3">
-          <p className="text-xs font-semibold text-muted-foreground">عنوان افتراضي (اختياري)</p>
+          <p className="text-xs font-semibold text-muted-foreground">موقع التوصيل الأساسي</p>
           <input value={addrTitle} onChange={(e) => setAddrTitle(e.target.value)}
             placeholder="مثل: المنزل"
             className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none" />
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)}
+            placeholder="الحي، الشارع، وأقرب علامة مميزة"
+            rows={3}
+            className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none resize-none" />
           <button type="button" onClick={useGeo}
             className="w-full rounded-xl bg-muted px-4 py-3 text-sm font-semibold flex items-center justify-center gap-2">
             <Crosshair className="h-4 w-4" />
-            {coords ? `تم التحديد (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})` : "حدد موقعي الحالي"}
+            {coords ? `تم التحديد (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})` : "حدد موقعي الحالي على الخريطة"}
           </button>
         </div>
 

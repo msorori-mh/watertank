@@ -6,10 +6,13 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-// @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
+const isAndroidBuild = process.env.ANDROID_BUILD === "1";
+
+// Keep the production web build SSR-enabled. Android uses TanStack Start's
+// official SPA shell so Capacitor can bundle a complete client bootstrap.
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
+    ...(isAndroidBuild ? { spa: { enabled: true } } : {}),
   },
 });

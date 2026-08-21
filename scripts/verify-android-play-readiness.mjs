@@ -99,6 +99,23 @@ const pkg = JSON.parse(read("package.json"));
 expect(pkg.scripts["android:sync"], "package.json must define android:sync");
 expect(pkg.scripts["android:verify"], "package.json must define android:verify");
 expect(pkg.scripts.build === "vite build", "existing build script must stay unchanged");
+expect(
+  pkg.scripts["build:android"] === "vite build --config vite.android.config.ts",
+  "Android build must explicitly enable the SPA build mode",
+);
+expect(
+  pkg.scripts["android:sync"].startsWith("bun run build:android"),
+  "android:sync must build the official SPA shell first",
+);
+
+const viteConfig = read("vite.android.config.ts");
+const assetPrep = read("scripts/prepare-android-web-assets.mjs");
+expect(existsSync("vite.android.config.ts"), "Android must use an isolated Vite config");
+expect(viteConfig.includes('nitro({ preset: "node-server" })'), "Android SPA prerender must use a Node-compatible adapter");
+expect(/spa:\s*\{\s*enabled:\s*true/.test(viteConfig), "Android build must enable TanStack SPA mode");
+expect(assetPrep.includes(".output/public/_shell.html"), "asset preparation must require TanStack _shell.html");
+expect(assetPrep.includes('copyFileSync(shell, "dist/index.html")'), "Capacitor root must use the official SPA shell");
+expect(!assetPrep.includes('<div id="root"></div>'), "asset preparation must not synthesize an HTML bootstrap");
 
 report();
 function report() {

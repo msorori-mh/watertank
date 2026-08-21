@@ -1,9 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { DEMO_AUTH_ENABLED } from "@/lib/demo-flag";
 
-// الوضع التجريبي مُفعّل مؤقتاً لفترة التجربة (يشمل الإنتاج) عبر DEMO_AUTH_ENABLED.
+// MVP: الوضع التجريبي متاح فقط في التطوير، ولا يعمل إطلاقاً في الإنتاج.
 const DEMO_MODE = DEMO_AUTH_ENABLED === true || import.meta.env.VITE_DEMO_AUTH === "true";
-
+// Limited production pilot: the UI remains phone/password, while Auth uses an internal
+// deterministic email because SMS/WhatsApp verification is temporarily unavailable.
+const PHONE_PASSWORD_PILOT = import.meta.env.VITE_PHONE_PASSWORD_PILOT === "true";
 const DEMO_OTP = "1234";
 const PHONE_PWD_PREFIX = "wayet_pwd_";
 
@@ -101,6 +103,51 @@ export const verifyOtpAndLogin = async (
   if (error) throw error;
   if (portal === "driver") await ensureDriverRole();
   return data;
+};
+
+export const signInWithPhonePassword = async (phone: string, password: string) => {
+  const formatted = normalizePhone(phone);
+  const credentials = PHONE_PASSWORD_PILOT
+    ? { email: demoEmail(formatted), password }
+    : { phone: formatted, password };
+  const { data, error } = await supabase.auth.signInWithPassword(credentials);
+  if (error) throw error;
+  return data;
+};
+
+export const signUpWithPhonePassword = async (
+  phone: string,
+  password: string,
+  name: string,
+  portal: "customer" | "driver" = "customer",
+) => {
+  const formatted = normalizePhone(phone);
+  const credentials = PHONE_PASSWORD_PILOT
+    ? { email: demoEmail(formatted), password }
+    : { phone: formatted, password };
+  const { data, error } = await supabase.auth.signUp({
+    ...credentials,
+    options: {
+      data: { phone: formatted, name: name.trim(), type: portal },
+    },
+  });
+  if (error) throw error;
+
+  // The limited pilot must have phone confirmation disabled in Supabase.
+  // Fail closed instead of pretending registration succeeded without a session.
+  let sessionData = data;
+  if (!sessionData.session) {
+    const retry = await supabase.auth.signInWithPassword(credentials);
+    if (retry.error || !retry.data.session) {
+      throw new Error(
+        "تم إنشاء الحساب لكنه يحتاج تفعيل إعداد الدخول التجريبي من الإدارة قبل استخدامه.",
+      );
+    }
+    sessionData = retry.data;
+  }
+
+  if (portal === "driver") await ensureDriverRole();
+  return sessionData;
 };
 
 export const adminLogin = async (email: string, password: string) => {

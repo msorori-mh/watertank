@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Truck, Shield, Droplets } from "lucide-react";
+import { Truck, Home, Droplets } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/")({
@@ -18,8 +18,8 @@ function Landing() {
       to: "/customer/login" as const,
       title: "عميل",
       desc: "اطلب وايت ماء، تتبع طلبك، واحفظ عناوينك المفضّلة.",
-      cta: "دخول العميل",
-      icon: Shield,
+      cta: "دخول أو إنشاء حساب",
+      icon: Home,
       style: "bg-card border-2 border-primary/15 text-deep",
       iconWrap: "bg-primary/10 text-primary",
       ctaCls: "text-primary",
@@ -28,7 +28,7 @@ function Landing() {
       to: "/driver/login" as const,
       title: "سائق",
       desc: "استلم الطلبات، وصّل الماء، وتابع حالة التوصيل.",
-      cta: "دخول السائق",
+      cta: "دخول أو إنشاء حساب",
       icon: Truck,
       style: "bg-[#1a5276] text-white border-2 border-transparent",
       iconWrap: "bg-white/15 text-white",
@@ -37,15 +37,15 @@ function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f0f9ff] via-background to-background font-body text-deep flex flex-col">
-      <header className="px-6 pt-10 pb-8 text-center max-w-3xl mx-auto">
+    <div className="min-h-screen pb-[env(safe-area-inset-bottom)] bg-gradient-to-b from-[#f0f9ff] via-background to-background font-body text-deep flex flex-col">
+      <header className="px-6 pt-7 pb-6 text-center max-w-3xl mx-auto">
         <div className="flex justify-center mb-4">
           <Logo size={72} />
         </div>
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
           <Droplets className="h-3.5 w-3.5" /> منصة وايت ماء — اليمن
         </div>
-        <h1 className="mt-6 font-display text-4xl font-bold leading-tight md:text-5xl">
+        <h1 className="mt-4 font-display text-4xl font-bold leading-tight md:text-5xl">
           مياه عذبة تصلك
           <br />
           <span className="text-primary">في أقل من ساعة</span>
@@ -63,16 +63,16 @@ function Landing() {
               <Link
                 key={c.to}
                 to={c.to}
-                className={`group relative overflow-hidden rounded-3xl p-7 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-glow)] ${c.style}`}
+                className={`group relative overflow-hidden rounded-3xl p-6 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-glow)] ${c.style}`}
               >
                 <div className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl ${c.iconWrap}`}>
                   <Icon className="h-7 w-7" />
                 </div>
-                <h2 className="mt-5 font-display text-2xl font-bold">{c.title}</h2>
+                <h2 className="mt-4 font-display text-2xl font-bold">{c.title}</h2>
                 <p className={`mt-2 text-sm ${c.style.includes("text-white") ? "text-white/85" : "text-muted-foreground"}`}>
                   {c.desc}
                 </p>
-                <span className={`mt-6 inline-flex items-center gap-1 text-sm font-semibold ${c.ctaCls}`}>
+                <span className={`mt-5 inline-flex items-center gap-1 text-sm font-semibold ${c.ctaCls}`}>
                   {c.cta} ←
                 </span>
               </Link>
