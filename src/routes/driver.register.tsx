@@ -125,7 +125,7 @@ function DriverRegister() {
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">سعة الوايت (لتر)</label>
             <select value={capacity} onChange={(e) => setCapacity(Number(e.target.value))}
               className="w-full rounded-xl border-2 border-input px-4 py-3 focus:border-[#1a5276] focus:outline-none">
-              {[1000, 3000, 5000, 10000].map(c => <option key={c} value={c}>{c.toLocaleString("ar-EG")} لتر</option>)}
+              {TANK_CAPACITIES.map(c => <option key={c} value={c}>{formatCapacity(c)}</option>)}
             </select>
           </div>
           <div className="rounded-xl border-2 border-dashed border-[#1a5276]/30 p-3 space-y-2">
