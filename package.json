@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
+    "android:sync": "vite build && node scripts/prepare-android-web-assets.mjs && cap sync android",
+    "android:verify": "node scripts/verify-android-play-readiness.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {
