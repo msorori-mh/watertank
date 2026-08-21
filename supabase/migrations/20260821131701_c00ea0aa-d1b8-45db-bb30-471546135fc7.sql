@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.get_order_driver_public(uuid) FROM anon;
