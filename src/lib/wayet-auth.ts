@@ -5,7 +5,11 @@ import { DEMO_AUTH_ENABLED } from "@/lib/demo-flag";
 const DEMO_MODE = DEMO_AUTH_ENABLED === true || import.meta.env.VITE_DEMO_AUTH === "true";
 // Limited production pilot: the UI remains phone/password, while Auth uses an internal
 // deterministic email because SMS/WhatsApp verification is temporarily unavailable.
-const PHONE_PASSWORD_PILOT = import.meta.env.VITE_PHONE_PASSWORD_PILOT === "true";
+// E2E-PROD-RELEASE-01: the pilot shim follows the demo flag, because the Auth phone
+// provider is disabled ("Phone signups are disabled") for the pilot project.
+const PHONE_PASSWORD_PILOT =
+  DEMO_MODE || import.meta.env.VITE_PHONE_PASSWORD_PILOT === "true";
+
 const DEMO_OTP = "1234";
 const PHONE_PWD_PREFIX = "wayet_pwd_";
 
