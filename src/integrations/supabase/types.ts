@@ -1139,6 +1139,18 @@ export type Database = {
         Args: { _capacity: number; _city: string }
         Returns: number
       }
+      update_my_driver_payout: {
+        Args: {
+          _bank_account_holder?: string
+          _bank_account_number?: string
+          _bank_name?: string
+          _payout_type: string
+          _transfer_network_name?: string
+          _transfer_phone?: string
+          _transfer_recipient_name?: string
+        }
+        Returns: undefined
+      }
       validate_order_address: {
         Args: { _address_id: string; _city: string; _uid: string }
         Returns: undefined
