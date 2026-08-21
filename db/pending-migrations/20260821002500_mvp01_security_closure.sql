@@ -114,7 +114,9 @@ FOR EACH ROW EXECUTE FUNCTION public.guard_driver_sensitive_columns();
 DROP POLICY IF EXISTS "driver creates own withdrawal" ON public.driver_withdrawal_requests;
 
 -- 7) wallet-receipts becomes private, owner/admin read only
+-- upload / update / delete policies on storage.objects are intentionally left untouched.
 UPDATE storage.buckets SET public = false WHERE id = 'wallet-receipts';
+DROP POLICY IF EXISTS "public read wallet-receipts" ON storage.objects;
 DROP POLICY IF EXISTS "public read wallet receipts" ON storage.objects;
 DROP POLICY IF EXISTS "Public read wallet-receipts" ON storage.objects;
 DROP POLICY IF EXISTS "wallet receipts public read" ON storage.objects;
@@ -122,10 +124,16 @@ DROP POLICY IF EXISTS "wallet receipts owner reads" ON storage.objects;
 CREATE POLICY "wallet receipts owner reads" ON storage.objects
 FOR SELECT TO authenticated USING (
   bucket_id = 'wallet-receipts'
-  AND (owner = auth.uid() OR public.has_role(auth.uid(), 'admin'))
+  AND (
+    auth.uid()::text = (storage.foldername(name))[1]
+    OR public.has_role(auth.uid(), 'admin')
+  )
 );
 
--- 8) notifications INSERT restricted to admin, self, or verified order counterparties
+-- 8) notifications INSERT restricted to admin, self, or the opposite party of the order
+DROP POLICY IF EXISTS "users create own notifications" ON public.notifications;
+DROP POLICY IF EXISTS "admin creates notifications" ON public.notifications;
+DROP POLICY IF EXISTS "order participants notify each other" ON public.notifications;
 DROP POLICY IF EXISTS "auth insert notifications" ON public.notifications;
 DROP POLICY IF EXISTS "user inserts notifications" ON public.notifications;
 DROP POLICY IF EXISTS "admin can insert" ON public.notifications;
@@ -138,6 +146,8 @@ FOR INSERT TO authenticated WITH CHECK (public.has_role(auth.uid(), 'admin'));
 CREATE POLICY "user can notify self" ON public.notifications
 FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
 
+-- customer sender -> recipient must be the assigned driver's user
+-- driver sender   -> recipient must be the order's customer
 CREATE POLICY "order parties can notify each other" ON public.notifications
 FOR INSERT TO authenticated WITH CHECK (
   order_id IS NOT NULL
@@ -145,7 +155,14 @@ FOR INSERT TO authenticated WITH CHECK (
     SELECT 1 FROM public.orders o
     LEFT JOIN public.drivers d ON d.id = o.driver_id
     WHERE o.id = notifications.order_id
-      AND (o.customer_id = auth.uid() OR d.user_id = auth.uid())
-      AND (notifications.user_id = o.customer_id OR notifications.user_id = d.user_id)
+      AND (
+        (o.customer_id = auth.uid()
+          AND d.user_id IS NOT NULL
+          AND notifications.user_id = d.user_id)
+        OR
+        (d.user_id = auth.uid()
+          AND notifications.user_id = o.customer_id)
+      )
   )
 );
+

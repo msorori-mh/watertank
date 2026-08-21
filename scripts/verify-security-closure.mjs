@@ -15,7 +15,7 @@ function fail(msg) { console.error("FAIL:", msg); process.exit(1); }
 
 expect(/REVOKE EXECUTE ON FUNCTION public\.promote_to_admin\(text\)/.test(sql), "missing REVOKE on promote_to_admin");
 expect(/DROP FUNCTION IF EXISTS public\.promote_to_admin\(text\)/.test(sql), "missing DROP promote_to_admin");
-for (const p of ["customer creates orders", "customer cancels own pending", "driver updates assigned orders", "driver claims approved order", "auth read drivers", "driver creates own withdrawal"]) {
+for (const p of ["customer creates orders", "customer cancels own pending", "driver updates assigned orders", "driver claims approved order", "auth read drivers", "driver creates own withdrawal", "users create own notifications", "admin creates notifications", "order participants notify each other", "public read wallet-receipts"]) {
   expect(sql.includes(`DROP POLICY IF EXISTS "${p}"`), `missing DROP POLICY "${p}"`);
 }
 for (const p of ["driver reads own row", "admin reads drivers", "customer reads assigned driver", "wallet receipts owner reads", "admin can insert", "user can notify self", "order parties can notify each other"]) {
@@ -24,6 +24,12 @@ for (const p of ["driver reads own row", "admin reads drivers", "customer reads 
 expect(/resolve_order_price/.test(sql) && /_server_price/.test(sql), "create_wallet_order must use server-side price");
 expect(/guard_driver_sensitive_columns/.test(sql) && /trg_guard_driver_sensitive_columns/.test(sql), "missing driver column guard trigger");
 expect(/UPDATE storage\.buckets SET public = false WHERE id = 'wallet-receipts'/.test(sql), "wallet-receipts must be private");
+expect(/auth\.uid\(\)::text = \(storage\.foldername\(name\)\)\[1\]/.test(sql), "wallet receipts read must use folder-path ownership");
+expect(!/owner = auth\.uid\(\)/.test(sql), "wallet receipts read must not rely on owner column");
+expect(!/(INSERT|UPDATE|DELETE)[^\n]*ON storage\.objects/.test(sql), "must not touch storage upload/update/delete policies");
+expect(/o\.customer_id = auth\.uid\(\)[\s\S]{0,160}notifications\.user_id = d\.user_id/.test(sql), "customer sender must target the driver only");
+expect(/d\.user_id = auth\.uid\(\)[\s\S]{0,120}notifications\.user_id = o\.customer_id/.test(sql), "driver sender must target the customer only");
+expect(!/notifications\.user_id = o\.customer_id OR notifications\.user_id = d\.user_id/.test(sql), "recipient must be the opposite party, not any party");
 expect(!/DROP POLICY IF EXISTS "admin updates orders"/.test(sql), "admin updates orders policy must stay untouched");
 
 expect(!/adminSignup|setupCode|promote_to_admin/.test(login), "admin signup / setup code still present in admin.login.tsx");
