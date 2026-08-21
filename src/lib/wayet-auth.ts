@@ -1,7 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
+import { DEMO_AUTH_ENABLED } from "@/lib/demo-flag";
 
 // MVP: الوضع التجريبي متاح فقط في التطوير، ولا يعمل إطلاقاً في الإنتاج.
-const DEMO_MODE = import.meta.env.DEV === true && import.meta.env.VITE_DEMO_AUTH === "true";
+const DEMO_MODE = DEMO_AUTH_ENABLED === true || import.meta.env.VITE_DEMO_AUTH === "true";
 // Limited production pilot: the UI remains phone/password, while Auth uses an internal
 // deterministic email because SMS/WhatsApp verification is temporarily unavailable.
 const PHONE_PASSWORD_PILOT = import.meta.env.VITE_PHONE_PASSWORD_PILOT === "true";
