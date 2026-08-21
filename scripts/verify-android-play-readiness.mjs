@@ -38,6 +38,8 @@ expect(/versionCode 1\b/.test(appGradle), "versionCode must be 1");
 expect(/versionName "1\.0\.0"/.test(appGradle), 'versionName must be "1.0.0"');
 
 // 3) permissions
+const declaredPermissions = (m) =>
+  [...m.matchAll(/uses-permission\s+android:name="android\.permission\.([A-Z_]+)"/g)].map((x) => x[1]);
 expect(manifest.includes("android.permission.INTERNET"), "INTERNET permission required");
 expect(manifest.includes("android.permission.ACCESS_COARSE_LOCATION"), "ACCESS_COARSE_LOCATION required");
 expect(manifest.includes("android.permission.ACCESS_FINE_LOCATION"), "ACCESS_FINE_LOCATION required");
@@ -50,8 +52,8 @@ for (const banned of [
   "READ_MEDIA_AUDIO",
   "MANAGE_EXTERNAL_STORAGE",
   "QUERY_ALL_PACKAGES",
-]) expect(!manifest.includes(banned), `manifest must not request ${banned}`);
-const declared = [...manifest.matchAll(/uses-permission android:name="android\.permission\.([A-Z_]+)"/g)].map((m) => m[1]);
+]) expect(!declaredPermissions(manifest).includes(banned), `manifest must not request ${banned}`);
+const declared = declaredPermissions(manifest);
 const allowed = new Set(["INTERNET", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]);
 for (const p of declared) expect(allowed.has(p), `unexpected permission declared: ${p}`);
 
