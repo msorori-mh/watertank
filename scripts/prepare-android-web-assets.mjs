@@ -23,7 +23,9 @@ if (!manifestFile) {
   process.exit(1);
 }
 const manifest = readFileSync(`${SERVER}/${manifestFile}`, "utf8");
-const rootBlock = manifest.slice(manifest.indexOf("__root__"), manifest.indexOf('"/"'));
+const rootIdx = manifest.indexOf("__root__");
+const preloadsIdx = manifest.indexOf("preloads:", rootIdx);
+const rootBlock = manifest.slice(preloadsIdx, preloadsIdx + 2000);
 const entry = (rootBlock.match(/\/assets\/[A-Za-z0-9._-]+\.js/) || [])[0];
 if (!entry) {
   console.error("could not resolve the root client entry from the manifest");
