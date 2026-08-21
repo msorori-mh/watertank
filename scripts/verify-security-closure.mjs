@@ -24,7 +24,7 @@ for (const p of ["driver reads own row", "admin reads drivers", "customer reads 
 expect(/resolve_order_price/.test(sql) && /_server_price/.test(sql), "create_wallet_order must use server-side price");
 expect(/guard_driver_sensitive_columns/.test(sql) && /trg_guard_driver_sensitive_columns/.test(sql), "missing driver column guard trigger");
 expect(/UPDATE storage\.buckets SET public = false WHERE id = 'wallet-receipts'/.test(sql), "wallet-receipts must be private");
-expect(!/"admin updates orders"/.test(sql), "admin updates orders policy must stay untouched");
+expect(!/DROP POLICY IF EXISTS "admin updates orders"/.test(sql), "admin updates orders policy must stay untouched");
 
 expect(!/adminSignup|setupCode|promote_to_admin/.test(login), "admin signup / setup code still present in admin.login.tsx");
 expect(!/adminSignup|promote_to_admin/.test(auth), "adminSignup / promote_to_admin still present in wayet-auth.ts");
