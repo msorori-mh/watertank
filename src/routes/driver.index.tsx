@@ -45,6 +45,11 @@ const STATUS_TIMELINE: { key: OrderStatus; label: string }[] = [
   { key: "completed", label: ORDER_STATUS_LABELS.completed },
 ];
 
+const DRIVER_TIMELINE_INDEX: Partial<Record<OrderStatus, number>> = {
+  assigned: 0, accepted: 0, on_the_way: 1, arrived: 2,
+  delivering: 3, payment_collected: 3, completed: 4,
+};
+
 function DriverHome() {
   const nav = useNavigate();
   const gate = useDriverGate();
