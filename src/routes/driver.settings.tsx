@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import { useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { driverRouteGuard } from "@/lib/route-guards";
+import { DeleteAccountCard } from "@/components/DeleteAccountCard";
 import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, Truck, Banknote, Power, Building2, Smartphone, Phone } from "lucide-react";
 
 
