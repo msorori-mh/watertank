@@ -38,10 +38,9 @@ function CustomerSettings() {
       if (!s.session) { nav({ to: "/customer/login" }); return; }
       const uid = s.session.user.id;
       setUserId(uid);
-      const [{ data: prof }, { data: c }, { data: w }] = await Promise.all([
+      const [{ data: prof }, { data: c }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
         supabase.from("cities").select("id,name").eq("is_active", true).order("name"),
-        supabase.from("wallets" as any).select("balance").eq("user_id", uid).maybeSingle(),
       ]);
       setCities(c || []);
       if (prof) {
@@ -51,7 +50,6 @@ function CustomerSettings() {
         setCity(prof.city || "");
         setNotif(prof.notifications_enabled !== false);
       }
-      setWalletBalance(Number((w as any)?.balance || 0));
       setLoading(false);
     })();
   }, [nav]);
