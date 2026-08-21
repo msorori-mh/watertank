@@ -35,13 +35,13 @@ const WALLET_LABEL_OVERRIDES: Record<string, string> = {
   delivering: "تم التسليم",
 };
 
+// MVP-FIELD-PILOT-01: unified Arabic status wording (@/lib/order-status).
 const STATUS_TIMELINE: { key: OrderStatus; label: string }[] = [
-  { key: "accepted", label: "تم القبول" },
-  { key: "on_the_way", label: "في الطريق" },
-  { key: "arrived", label: "وصل" },
-  { key: "delivering", label: "يصب" },
-  { key: "payment_collected", label: "تم الدفع" },
-  { key: "completed", label: "اكتمل" },
+  { key: "accepted", label: ORDER_STATUS_LABELS.accepted },
+  { key: "on_the_way", label: ORDER_STATUS_LABELS.on_the_way },
+  { key: "arrived", label: ORDER_STATUS_LABELS.arrived },
+  { key: "delivering", label: ORDER_STATUS_LABELS.delivering },
+  { key: "completed", label: ORDER_STATUS_LABELS.completed },
 ];
 
 function DriverHome() {
