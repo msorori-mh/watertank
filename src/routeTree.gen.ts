@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as AccountDeletionRouteImport } from './routes/account-deletion'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
@@ -44,6 +46,16 @@ import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountDeletionRoute = AccountDeletionRouteImport.update({
+  id: '/account-deletion',
+  path: '/account-deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -199,6 +211,8 @@ const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account-deletion': typeof AccountDeletionRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
@@ -232,6 +246,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account-deletion': typeof AccountDeletionRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
@@ -266,6 +282,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account-deletion': typeof AccountDeletionRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/cities': typeof AdminCitiesRoute
   '/admin/commissions': typeof AdminCommissionsRoute
@@ -301,6 +319,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account-deletion'
+    | '/privacy'
     | '/reset-password'
     | '/admin/cities'
     | '/admin/commissions'
@@ -334,6 +354,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account-deletion'
+    | '/privacy'
     | '/reset-password'
     | '/admin/cities'
     | '/admin/commissions'
@@ -367,6 +389,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account-deletion'
+    | '/privacy'
     | '/reset-password'
     | '/admin/cities'
     | '/admin/commissions'
@@ -401,6 +425,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountDeletionRoute: typeof AccountDeletionRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   AdminCitiesRoute: typeof AdminCitiesRoute
   AdminCommissionsRoute: typeof AdminCommissionsRoute
@@ -440,6 +466,20 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account-deletion': {
+      id: '/account-deletion'
+      path: '/account-deletion'
+      fullPath: '/account-deletion'
+      preLoaderRoute: typeof AccountDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -657,6 +697,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountDeletionRoute: AccountDeletionRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   AdminCitiesRoute: AdminCitiesRoute,
   AdminCommissionsRoute: AdminCommissionsRoute,

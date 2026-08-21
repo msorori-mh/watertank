@@ -2,8 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, MapPin, Wallet, MessageCircle, Phone, ChevronLeft, Pencil, X } from "lucide-react";
+import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, MapPin, MessageCircle, Phone, ChevronLeft, Pencil, X } from "lucide-react";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { DeleteAccountCard } from "@/components/DeleteAccountCard";
 import { customerRouteGuard } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/customer/settings")({
@@ -38,10 +39,9 @@ function CustomerSettings() {
       if (!s.session) { nav({ to: "/customer/login" }); return; }
       const uid = s.session.user.id;
       setUserId(uid);
-      const [{ data: prof }, { data: c }, { data: w }] = await Promise.all([
+      const [{ data: prof }, { data: c }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
         supabase.from("cities").select("id,name").eq("is_active", true).order("name"),
-        supabase.from("wallets" as any).select("balance").eq("user_id", uid).maybeSingle(),
       ]);
       setCities(c || []);
       if (prof) {
@@ -51,7 +51,6 @@ function CustomerSettings() {
         setCity(prof.city || "");
         setNotif(prof.notifications_enabled !== false);
       }
-      setWalletBalance(Number((w as any)?.balance || 0));
       setLoading(false);
     })();
   }, [nav]);
@@ -147,18 +146,6 @@ function CustomerSettings() {
           desc="إدارة عناوين التوصيل المحفوظة"
           color="from-emerald-400 to-teal-500"
         />
-        <LinkCard
-          to="/customer/wallet"
-          icon={Wallet}
-          title="المحفظة"
-          desc="الرصيد الحالي والتعبئات"
-          color="from-amber-400 to-orange-500"
-          right={
-            <span className="text-sm font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg whitespace-nowrap">
-              {walletBalance.toLocaleString()} ر.ي
-            </span>
-          }
-        />
 
         {/* Notifications */}
         <Card>
@@ -192,12 +179,18 @@ function CustomerSettings() {
         {/* App */}
         <Card>
           <SectionTitle icon={Info}>التطبيق</SectionTitle>
-          <Row label="إصدار التطبيق" value={APP_VERSION} last />
+          <Row label="إصدار التطبيق" value={APP_VERSION} />
+          <div className="flex items-center justify-between py-2.5 text-sm">
+            <span className="text-muted-foreground text-xs">سياسة الخصوصية</span>
+            <Link to="/privacy" className="font-semibold text-primary">عرض</Link>
+          </div>
           <button onClick={out}
             className="mt-3 w-full rounded-xl border border-destructive/30 text-destructive py-2.5 text-sm font-bold flex items-center justify-center gap-2 hover:bg-destructive/5 active:scale-95 transition">
             <LogOut className="h-4 w-4" /> تسجيل الخروج
           </button>
         </Card>
+
+        <DeleteAccountCard />
 
         {savedAt && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">

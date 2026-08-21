@@ -1,34 +1,30 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * إعدادات Capacitor — وايت ماء (نسخة MVP / Hot Reload المُحسّن)
- *
- * ⚠️ هذه نسخة تجريبية MVP وليست نسخة Production مستقلة.
+ * إعدادات Capacitor — وايت ماء (Production bundled app)
  *
  * كيف يعمل التطبيق:
- *   - APK لا يحتوي على ملفات الواجهة محلياً.
- *   - عند فتح التطبيق، يحمّل الواجهة من رابط Lovable الثابت المنشور:
- *       https://project--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app
- *   - أي تحديث يصل للمستخدم فوراً بعد النشر من Lovable
- *     بدون الحاجة لإعادة بناء APK.
+ *   - APK/AAB يحتوي على ملفات الواجهة محلياً داخل الحزمة (webDir = dist).
+ *   - لا يتم تحميل الواجهة من أي رابط خارجي (لا server.url) — متطلب Google Play.
+ *   - الاتصال بالخادم يتم عبر HTTPS فقط.
  *
  * المتطلبات:
- *   - يجب نشر المشروع أولاً من Lovable (زر Publish) قبل بناء APK.
- *   - اتصال إنترنت دائم مطلوب لتحميل الواجهة.
- *   - الإنترنت يبقى مطلوباً أيضاً لـ Supabase (Auth + REST + Realtime + GPS sync).
+ *   - تنفيذ build ثم npx cap sync قبل بناء الحزمة.
+ *   - الإنترنت مطلوب لعمل قاعدة البيانات والمصادقة والتحديثات الحيّة.
  */
 const config: CapacitorConfig = {
   appId: 'app.wayetmaa.mobile',
   appName: 'وايت ماء',
   webDir: 'dist',
 
-  // الواجهة تُحمَّل من رابط Lovable الثابت المنشور.
-  // الرابط لا يتغير حتى لو أعيدت تسمية المشروع.
+  // HTTPS فقط — لا يوجد أي رابط تحميل خارجي للواجهة
   server: {
-    url: 'https://project--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app',
-    cleartext: false, // HTTPS فقط — أكثر أماناً
     androidScheme: 'https',
+    cleartext: false,
   },
+
+
+
 
   android: {
     allowMixedContent: false,
