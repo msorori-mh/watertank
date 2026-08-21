@@ -36,18 +36,22 @@ type Order = {
   created_at: string;
 };
 
+// MVP-FIELD-PILOT-01: wording comes from @/lib/order-status (single source of truth).
 const STATUS_LABEL: Record<
   string,
   { text: string; chip: string; ring: string; icon: any; progress: number }
 > = {
-  pending:     { text: "قيد المراجعة",    chip: "bg-amber-100 text-amber-700",     ring: "from-amber-400 to-orange-400",   icon: Clock,        progress: 10 },
-  approved:    { text: "تم القبول",       chip: "bg-sky-100 text-sky-700",         ring: "from-sky-400 to-cyan-400",       icon: CheckCircle2, progress: 25 },
-  assigned:    { text: "تم تعيين سائق",   chip: "bg-blue-100 text-blue-700",       ring: "from-blue-400 to-cyan-400",      icon: Truck,        progress: 40 },
-  on_the_way:  { text: "في الطريق إليك",  chip: "bg-cyan-100 text-cyan-700",       ring: "from-cyan-400 to-teal-400",      icon: Truck,        progress: 65 },
-  arrived:     { text: "وصل الموقع",      chip: "bg-teal-100 text-teal-700",       ring: "from-teal-400 to-emerald-400",   icon: MapPin,       progress: 85 },
-  delivering:  { text: "بدأ الصب",        chip: "bg-emerald-100 text-emerald-700", ring: "from-emerald-400 to-green-400",  icon: Droplets,     progress: 95 },
-  completed:   { text: "تم التسليم",      chip: "bg-emerald-100 text-emerald-700", ring: "from-emerald-400 to-green-500",  icon: CheckCircle2, progress: 100 },
-  cancelled:   { text: "ملغى",            chip: "bg-rose-100 text-rose-700",       ring: "from-rose-400 to-red-400",       icon: Clock,        progress: 0 },
+  pending:           { text: ORDER_STATUS_LABELS.pending,           chip: "bg-amber-100 text-amber-700",     ring: "from-amber-400 to-orange-400",   icon: Clock,        progress: ORDER_STATUS_PROGRESS.pending },
+  approved:          { text: ORDER_STATUS_LABELS.approved,          chip: "bg-amber-100 text-amber-700",     ring: "from-sky-400 to-cyan-400",       icon: Clock,        progress: ORDER_STATUS_PROGRESS.approved },
+  assigned:          { text: ORDER_STATUS_LABELS.assigned,          chip: "bg-blue-100 text-blue-700",       ring: "from-blue-400 to-cyan-400",      icon: CheckCircle2, progress: ORDER_STATUS_PROGRESS.assigned },
+  accepted:          { text: ORDER_STATUS_LABELS.accepted,          chip: "bg-blue-100 text-blue-700",       ring: "from-blue-400 to-cyan-400",      icon: CheckCircle2, progress: ORDER_STATUS_PROGRESS.accepted },
+  on_the_way:        { text: ORDER_STATUS_LABELS.on_the_way,        chip: "bg-cyan-100 text-cyan-700",       ring: "from-cyan-400 to-teal-400",      icon: Truck,        progress: ORDER_STATUS_PROGRESS.on_the_way },
+  arrived:           { text: ORDER_STATUS_LABELS.arrived,           chip: "bg-teal-100 text-teal-700",       ring: "from-teal-400 to-emerald-400",   icon: MapPin,       progress: ORDER_STATUS_PROGRESS.arrived },
+  delivering:        { text: ORDER_STATUS_LABELS.delivering,        chip: "bg-emerald-100 text-emerald-700", ring: "from-emerald-400 to-green-400",  icon: Droplets,     progress: ORDER_STATUS_PROGRESS.delivering },
+  payment_collected: { text: ORDER_STATUS_LABELS.payment_collected, chip: "bg-emerald-100 text-emerald-700", ring: "from-emerald-400 to-green-500",  icon: CheckCircle2, progress: ORDER_STATUS_PROGRESS.payment_collected },
+  completed:         { text: ORDER_STATUS_LABELS.completed,         chip: "bg-emerald-100 text-emerald-700", ring: "from-emerald-400 to-green-500",  icon: CheckCircle2, progress: ORDER_STATUS_PROGRESS.completed },
+  cancelled:         { text: ORDER_STATUS_LABELS.cancelled,         chip: "bg-rose-100 text-rose-700",       ring: "from-rose-400 to-red-400",       icon: Clock,        progress: ORDER_STATUS_PROGRESS.cancelled },
+  rejected:          { text: ORDER_STATUS_LABELS.rejected,          chip: "bg-rose-100 text-rose-700",       ring: "from-rose-400 to-red-400",       icon: Clock,        progress: ORDER_STATUS_PROGRESS.rejected },
 };
 
 const ACTIVE_STATUSES = new Set([
