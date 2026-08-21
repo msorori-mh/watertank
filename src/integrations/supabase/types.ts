@@ -971,6 +971,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      delete_my_account: { Args: never; Returns: undefined }
       get_order_customer_contact: {
         Args: { _order_id: string }
         Returns: {
