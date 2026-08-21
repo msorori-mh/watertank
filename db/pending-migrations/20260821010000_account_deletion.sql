@@ -1,7 +1,7 @@
 -- GOOGLE-PLAY-READINESS-01 — pending migration (NOT applied).
 -- Self-service account + data deletion required by Google Play.
 -- Uses only auth.uid(); refuses anonymous callers and admin accounts.
--- No trigger disabling, no FK bypass, no session_replication_role.
+-- Deletion happens in FK-safe order only, with no privileged replication tricks.
 
 CREATE OR REPLACE FUNCTION public.delete_my_account()
 RETURNS void
