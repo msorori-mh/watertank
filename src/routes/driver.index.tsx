@@ -5,6 +5,7 @@ import { driverRouteGuard } from "@/lib/route-guards";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { CheckCircle2, Clock, Truck, Wallet, Star, MapPin, Loader2, BadgeDollarSign, Phone, MessageCircle, Navigation } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId, type NotificationType } from "@/lib/notifications";
+import { ORDER_STATUS_LABELS, orderStatusLabel } from "@/lib/order-status";
 
 const STEP_TO_NOTIF: Record<string, NotificationType | undefined> = {
   on_the_way: "order_on_way",
