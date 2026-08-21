@@ -5,6 +5,7 @@ import { driverRouteGuard } from "@/lib/route-guards";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { CheckCircle2, Clock, Truck, Wallet, Star, MapPin, Loader2, BadgeDollarSign, Phone, MessageCircle, Navigation } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId, type NotificationType } from "@/lib/notifications";
+import { ORDER_STATUS_LABELS, orderStatusLabel } from "@/lib/order-status";
 
 const STEP_TO_NOTIF: Record<string, NotificationType | undefined> = {
   on_the_way: "order_on_way",
@@ -35,14 +36,19 @@ const WALLET_LABEL_OVERRIDES: Record<string, string> = {
   delivering: "تم التسليم",
 };
 
+// MVP-FIELD-PILOT-01: unified Arabic status wording (@/lib/order-status).
 const STATUS_TIMELINE: { key: OrderStatus; label: string }[] = [
-  { key: "accepted", label: "تم القبول" },
-  { key: "on_the_way", label: "في الطريق" },
-  { key: "arrived", label: "وصل" },
-  { key: "delivering", label: "يصب" },
-  { key: "payment_collected", label: "تم الدفع" },
-  { key: "completed", label: "اكتمل" },
+  { key: "accepted", label: ORDER_STATUS_LABELS.accepted },
+  { key: "on_the_way", label: ORDER_STATUS_LABELS.on_the_way },
+  { key: "arrived", label: ORDER_STATUS_LABELS.arrived },
+  { key: "delivering", label: ORDER_STATUS_LABELS.delivering },
+  { key: "completed", label: ORDER_STATUS_LABELS.completed },
 ];
+
+const DRIVER_TIMELINE_INDEX: Partial<Record<OrderStatus, number>> = {
+  assigned: 0, accepted: 0, on_the_way: 1, arrived: 2,
+  delivering: 3, payment_collected: 3, completed: 4,
+};
 
 function DriverHome() {
   const nav = useNavigate();
@@ -263,9 +269,10 @@ function DriverHome() {
             </div>
 
             {/* Timeline */}
+            <p className="pt-1 text-xs font-bold text-primary">{orderStatusLabel(active.status)}</p>
             <div className="flex items-center justify-between gap-1 pt-1">
               {STATUS_TIMELINE.map((s, i) => {
-                const currentIdx = STATUS_TIMELINE.findIndex(x => x.key === active.status);
+                const currentIdx = DRIVER_TIMELINE_INDEX[active.status as OrderStatus] ?? -1;
                 const done = i <= currentIdx;
                 return (
                   <div key={s.key} className="flex-1 flex flex-col items-center">

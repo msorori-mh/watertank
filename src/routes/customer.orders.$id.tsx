@@ -5,23 +5,15 @@ import { customerRouteGuard } from "@/lib/route-guards";
 import { ChevronRight, MapPin, Truck, CheckCircle2, Clock, X, Loader2, Phone } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { ORDER_TIMELINE, orderStatusLabel, orderTimelineIndex } from "@/lib/order-status";
 
 export const Route = createFileRoute("/customer/orders/$id")({
   ...customerRouteGuard,
   component: OrderDetail,
 });
 
-const STEPS = [
-  { id: "pending", label: "بانتظار الاعتماد" },
-  { id: "approved", label: "اعتُمد الطلب" },
-  { id: "assigned", label: "تعيين سائق" },
-  { id: "accepted", label: "قبله السائق" },
-  { id: "on_the_way", label: "في الطريق" },
-  { id: "arrived", label: "وصل الموقع" },
-  { id: "delivering", label: "يصب الماء" },
-  { id: "payment_collected", label: "تم الدفع" },
-  { id: "completed", label: "اكتمل" },
-];
+// MVP-FIELD-PILOT-01: unified Arabic status wording.
+const STEPS = ORDER_TIMELINE.map((s) => ({ id: s.key, label: s.label }));
 
 function OrderDetail() {
   const { id } = Route.useParams();
@@ -77,8 +69,8 @@ function OrderDetail() {
     </div>;
   if (!order) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">الطلب غير موجود</div>;
 
-  const stepIdx = STEPS.findIndex(s => s.id === order.status);
-  const isCancelled = order.status === "cancelled";
+  const stepIdx = orderTimelineIndex(order.status);
+  const isCancelled = order.status === "cancelled" || order.status === "rejected";
 
   return (
     <div className="min-h-screen bg-background pb-10">
@@ -125,7 +117,12 @@ function OrderDetail() {
         {/* Tracker */}
         {!isCancelled ? (
           <div className="rounded-2xl bg-card shadow-[var(--shadow-soft)] p-5">
-            <h3 className="font-display font-bold mb-4">حالة الطلب</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold">حالة الطلب</h3>
+              <span className="rounded-full bg-primary/10 text-primary text-xs font-bold px-3 py-1">
+                {orderStatusLabel(order.status)}
+              </span>
+            </div>
             <ol className="space-y-3">
               {STEPS.map((s, i) => {
                 const done = i <= stepIdx;
@@ -143,7 +140,7 @@ function OrderDetail() {
           </div>
         ) : (
           <div className="rounded-2xl bg-rose-50 border border-rose-200 p-5 text-rose-700 flex items-center gap-3">
-            <X className="h-5 w-5" /> تم إلغاء هذا الطلب
+            <X className="h-5 w-5" /> {orderStatusLabel(order.status)}
           </div>
         )}
 

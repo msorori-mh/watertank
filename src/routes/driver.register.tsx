@@ -56,10 +56,13 @@ function DriverRegister() {
 
   const submit = async () => {
     setError("");
-    if (!name.trim() || !phone.trim() || !plate.trim() || !city || !coords) {
-      setError("جميع الحقول وتحديد الموقع مطلوبة");
-      return;
-    }
+    // MVP-FIELD-PILOT-01: explicit per-field validation for the vehicle data.
+    if (!name.trim()) return setError("الاسم الكامل مطلوب");
+    if (!phone.trim()) return setError("رقم الهاتف مطلوب");
+    if (!city) return setError("اختر المدينة / منطقة العمل");
+    if (!plate.trim()) return setError("رقم لوحة المركبة مطلوب");
+    if (!capacity || capacity <= 0) return setError("اختر سعة الوايت باللتر");
+    if (!coords) return setError("حدد موقع تمركز الوايت على الخريطة");
     setLoading(true);
     const { error: profileError } = await supabase.from("profiles").update({
       name: name.trim(), phone: phone.trim(), city, lat: coords.lat, lng: coords.lng,
@@ -97,8 +100,17 @@ function DriverRegister() {
             <input dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)}
               className="w-full rounded-xl border-2 border-input px-4 py-3 focus:border-[#1a5276] focus:outline-none" />
           </div>
+
+          {/* MVP-FIELD-PILOT-01: vehicle data section + approval gate notice */}
+          <div className="rounded-xl bg-amber-50 border border-amber-200 p-3">
+            <p className="text-xs font-bold text-amber-800">بيانات الوايت مطلوبة لاعتماد الحساب</p>
+            <p className="text-[11px] text-amber-700 mt-0.5">
+              بعد الإرسال ستكون حالتك «بانتظار موافقة الإدارة»، ولن تستقبل أي طلبات قبل الاعتماد.
+            </p>
+          </div>
+
           <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-1 block">المدينة</label>
+            <label className="text-xs font-semibold text-muted-foreground mb-1 block">المدينة / منطقة العمل</label>
             <select value={city} onChange={(e) => setCity(e.target.value)}
               className="w-full rounded-xl border-2 border-input px-4 py-3 focus:border-[#1a5276] focus:outline-none">
               {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}

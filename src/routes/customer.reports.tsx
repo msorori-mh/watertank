@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Wallet, ClipboardList, CheckCircle2, XCircle, Banknote } from "lucide-react";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 import { customerRouteGuard } from "@/lib/route-guards";
+import { orderStatusLabel } from "@/lib/order-status";
 
 export const Route = createFileRoute("/customer/reports")({
   ...customerRouteGuard,
@@ -103,7 +104,7 @@ function CustomerReports() {
 }
 
 function statusLabel(s: string) {
-  return ({ pending: "قيد المراجعة", approved: "معتمد", accepted: "مقبول", on_the_way: "في الطريق", arrived: "وصل", delivering: "يصب", payment_collected: "تم التحصيل", completed: "مكتمل", cancelled: "ملغى", rejected: "مرفوض" } as any)[s] || s;
+  return orderStatusLabel(s);
 }
 function txLabel(t: string) {
   return ({ topup: "تعبئة محفظة", order_payment: "دفع طلب", refund: "استرداد" } as any)[t] || t;
