@@ -103,7 +103,7 @@ function CustomerReports() {
 }
 
 function statusLabel(s: string) {
-  return ({ pending: "قيد المراجعة", approved: "معتمد", accepted: "مقبول", on_the_way: "في الطريق", arrived: "وصل", delivering: "يصب", payment_collected: "تم التحصيل", completed: "مكتمل", cancelled: "ملغى", rejected: "مرفوض" } as any)[s] || s;
+  return orderStatusLabel(s);
 }
 function txLabel(t: string) {
   return ({ topup: "تعبئة محفظة", order_payment: "دفع طلب", refund: "استرداد" } as any)[t] || t;
