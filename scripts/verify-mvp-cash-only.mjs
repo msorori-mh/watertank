@@ -11,7 +11,7 @@ const order = read("src/routes/customer.order.tsx");
 expect(order.includes("create_cash_order"), "customer.order must use create_cash_order");
 expect(!order.includes("create_wallet_order"), "customer.order must not call create_wallet_order");
 expect(!/from\("wallets"\)/.test(order), "customer.order must not load wallets");
-expect(!/paymentMethod/.test(order), "customer.order must not keep a paymentMethod选项 state");
+expect(!/paymentMethod/.test(order), "customer.order must not keep a paymentMethod state");
 expect(!/walletBalance/.test(order), "customer.order must not keep walletBalance state");
 expect(!/\/customer\/wallet/.test(order), "customer.order must not link to /customer/wallet");
 expect(/الدفع نقداً عند التسليم/.test(order) && /ادفع للسائق مباشرة/.test(order),
