@@ -117,7 +117,12 @@ function OrderDetail() {
         {/* Tracker */}
         {!isCancelled ? (
           <div className="rounded-2xl bg-card shadow-[var(--shadow-soft)] p-5">
-            <h3 className="font-display font-bold mb-4">حالة الطلب</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold">حالة الطلب</h3>
+              <span className="rounded-full bg-primary/10 text-primary text-xs font-bold px-3 py-1">
+                {orderStatusLabel(order.status)}
+              </span>
+            </div>
             <ol className="space-y-3">
               {STEPS.map((s, i) => {
                 const done = i <= stepIdx;
@@ -135,7 +140,7 @@ function OrderDetail() {
           </div>
         ) : (
           <div className="rounded-2xl bg-rose-50 border border-rose-200 p-5 text-rose-700 flex items-center gap-3">
-            <X className="h-5 w-5" /> تم إلغاء هذا الطلب
+            <X className="h-5 w-5" /> {orderStatusLabel(order.status)}
           </div>
         )}
 
