@@ -192,12 +192,18 @@ function CustomerSettings() {
         {/* App */}
         <Card>
           <SectionTitle icon={Info}>التطبيق</SectionTitle>
-          <Row label="إصدار التطبيق" value={APP_VERSION} last />
+          <Row label="إصدار التطبيق" value={APP_VERSION} />
+          <div className="flex items-center justify-between py-2.5 text-sm">
+            <span className="text-muted-foreground text-xs">سياسة الخصوصية</span>
+            <Link to="/privacy" className="font-semibold text-primary">عرض</Link>
+          </div>
           <button onClick={out}
             className="mt-3 w-full rounded-xl border border-destructive/30 text-destructive py-2.5 text-sm font-bold flex items-center justify-center gap-2 hover:bg-destructive/5 active:scale-95 transition">
             <LogOut className="h-4 w-4" /> تسجيل الخروج
           </button>
         </Card>
+
+        <DeleteAccountCard />
 
         {savedAt && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
