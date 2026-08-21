@@ -47,3 +47,14 @@ export async function requireDriverSession() {
 export const adminRouteGuard = { beforeLoad: requireAdmin };
 export const customerRouteGuard = { beforeLoad: requireCustomer };
 export const driverRouteGuard = { beforeLoad: requireDriverSession };
+
+/**
+ * MVP-02-CASH-ONLY-SCOPE
+ * Deferred (post-MVP) finance/wallet features: block direct access before any
+ * query runs. Files, backend logic and historical data are intentionally kept.
+ */
+export function deferredFeatureGuard(to: string) {
+  return () => {
+    throw redirect({ to: to as never });
+  };
+}

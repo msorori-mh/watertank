@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
-import { adminRouteGuard } from "@/lib/route-guards";
+import { deferredFeatureGuard } from "@/lib/route-guards";
 import { resolveStorageUrl } from "@/lib/storage-url";
 import { Loader2, CheckCircle2, XCircle, ExternalLink, Search, X, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/admin/wallet-topups")({
-  ...adminRouteGuard,
+  // MVP-02-CASH-ONLY-SCOPE: deferred feature, redirect before any query runs.
+  beforeLoad: deferredFeatureGuard("/admin"),
   component: AdminWalletTopups,
 });
 

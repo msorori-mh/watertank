@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
-import { customerRouteGuard } from "@/lib/route-guards";
+import { deferredFeatureGuard } from "@/lib/route-guards";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Wallet, Plus, Loader2, Upload, X, CheckCircle2, Clock, XCircle, CreditCard } from "lucide-react";
 
 export const Route = createFileRoute("/customer/wallet")({
-  ...customerRouteGuard,
+  // MVP-02-CASH-ONLY-SCOPE: deferred feature, redirect before any query runs.
+  beforeLoad: deferredFeatureGuard("/customer"),
   component: CustomerWallet,
 });
 
