@@ -69,8 +69,8 @@ function OrderDetail() {
     </div>;
   if (!order) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">الطلب غير موجود</div>;
 
-  const stepIdx = STEPS.findIndex(s => s.id === order.status);
-  const isCancelled = order.status === "cancelled";
+  const stepIdx = orderTimelineIndex(order.status);
+  const isCancelled = order.status === "cancelled" || order.status === "rejected";
 
   return (
     <div className="min-h-screen bg-background pb-10">
