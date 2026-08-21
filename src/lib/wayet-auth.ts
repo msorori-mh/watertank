@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const DEMO_MODE = import.meta.env.VITE_DEMO_AUTH === "true";
+// MVP: الوضع التجريبي متاح فقط في التطوير، ولا يعمل إطلاقاً في الإنتاج.
+const DEMO_MODE = import.meta.env.DEV === true && import.meta.env.VITE_DEMO_AUTH === "true";
 const DEMO_OTP = "1234";
 const PHONE_PWD_PREFIX = "wayet_pwd_";
 

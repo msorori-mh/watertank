@@ -35,6 +35,12 @@ expect(!/DROP POLICY IF EXISTS "admin updates orders"/.test(sql), "admin updates
 expect(!/adminSignup|setupCode|promote_to_admin/.test(login), "admin signup / setup code still present in admin.login.tsx");
 expect(!/adminSignup|promote_to_admin/.test(auth), "adminSignup / promote_to_admin still present in wayet-auth.ts");
 
+// DEMO_MODE must be dev-only: requires import.meta.env.DEV === true AND VITE_DEMO_AUTH === "true"
+const demoLine = auth.split("\n").find((l) => /const DEMO_MODE\s*=/.test(l)) ?? "";
+expect(/import\.meta\.env\.DEV === true/.test(demoLine), "DEMO_MODE must require import.meta.env.DEV === true");
+expect(/import\.meta\.env\.VITE_DEMO_AUTH === "true"/.test(demoLine), "DEMO_MODE must require VITE_DEMO_AUTH === \"true\"");
+expect(/&&/.test(demoLine), "DEMO_MODE must AND both conditions (dev + VITE_DEMO_AUTH)");
+
 if (failures.length) {
   console.error("MVP-01-SECURITY-CLOSURE verification FAILED:");
   for (const f of failures) console.error(" -", f);
