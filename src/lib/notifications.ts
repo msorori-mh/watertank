@@ -74,4 +74,16 @@ export const ORDER_EVENT_MESSAGES: Partial<
   },
 };
 
+/** رسائل اعتماد/رفض حساب السائق */
+export const DRIVER_ACCOUNT_MESSAGES = {
+  driver_approved: {
+    title: "تم اعتماد حسابك",
+    body: "تم اعتماد حسابك من الإدارة — يمكنك الآن استلام الطلبات.",
+  },
+  driver_rejected: {
+    title: "لم يتم اعتماد حسابك",
+    body: "لم يتم اعتماد حسابك. تواصل مع إدارة المنصة لمعرفة التفاصيل.",
+  },
+} as const;
+
 export const shortId = (id: string) => id.slice(0, 8).toUpperCase();
