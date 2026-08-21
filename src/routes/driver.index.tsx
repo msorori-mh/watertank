@@ -264,9 +264,10 @@ function DriverHome() {
             </div>
 
             {/* Timeline */}
+            <p className="pt-1 text-xs font-bold text-primary">{orderStatusLabel(active.status)}</p>
             <div className="flex items-center justify-between gap-1 pt-1">
               {STATUS_TIMELINE.map((s, i) => {
-                const currentIdx = STATUS_TIMELINE.findIndex(x => x.key === active.status);
+                const currentIdx = DRIVER_TIMELINE_INDEX[active.status as OrderStatus] ?? -1;
                 const done = i <= currentIdx;
                 return (
                   <div key={s.key} className="flex-1 flex flex-col items-center">
