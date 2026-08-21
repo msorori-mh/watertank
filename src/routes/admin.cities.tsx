@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { adminRouteGuard } from "@/lib/route-guards";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { TANK_CAPACITIES } from "@/lib/capacities";
 
 export const Route = createFileRoute("/admin/cities")({
   ...adminRouteGuard,
