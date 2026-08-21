@@ -986,6 +986,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_caller_approved_driver_for_city: {
+        Args: { _city: string }
+        Returns: boolean
+      }
+      is_caller_customer_of_driver: {
+        Args: { _driver_id: string }
+        Returns: boolean
+      }
+      is_caller_order_driver: { Args: { _driver_id: string }; Returns: boolean }
+      is_caller_order_participant: {
+        Args: { _order_id: string }
+        Returns: boolean
+      }
       process_driver_withdrawal: {
         Args: { _action: string; _admin_notes?: string; _request_id: string }
         Returns: {
