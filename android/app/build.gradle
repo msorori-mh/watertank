@@ -1,5 +1,20 @@
 apply plugin: 'com.android.application'
 
+// Optional release signing. Keys are NEVER committed: they come from
+// android/keystore.properties (git-ignored) or environment variables.
+// See android/keystore.properties.example. Without keys, `bundleRelease`
+// still builds an UNSIGNED artifact.
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+def ksPath = keystoreProps['storeFile'] ?: System.getenv('WAYETMAA_KEYSTORE_PATH')
+def ksPassword = keystoreProps['storePassword'] ?: System.getenv('WAYETMAA_KEYSTORE_PASSWORD')
+def ksAlias = keystoreProps['keyAlias'] ?: System.getenv('WAYETMAA_KEY_ALIAS')
+def ksAliasPassword = keystoreProps['keyPassword'] ?: System.getenv('WAYETMAA_KEY_PASSWORD')
+def hasReleaseSigning = ksPath && ksPassword && ksAlias && ksAliasPassword && rootProject.file(ksPath).exists()
+
 android {
     namespace = "app.wayetmaa.mobile"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -8,7 +23,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +31,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile rootProject.file(ksPath)
+                storePassword ksPassword
+                keyAlias ksAlias
+                keyPassword ksAliasPassword
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
