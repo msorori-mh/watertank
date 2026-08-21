@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin/cities")({
   component: AdminCities,
 });
 
-const SIZES = [1000, 3000, 5000, 10000];
+const SIZES = [...TANK_CAPACITIES];
 
 function AdminCities() {
   const [cities, setCities] = useState<any[]>([]);
