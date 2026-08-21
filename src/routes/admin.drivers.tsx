@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { adminRouteGuard } from "@/lib/route-guards";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { notifyUser, DRIVER_ACCOUNT_MESSAGES } from "@/lib/notifications";
 
 export const Route = createFileRoute("/admin/drivers")({
   ...adminRouteGuard,
@@ -75,13 +76,13 @@ function AdminDrivers() {
                   <td className="p-3">{Number(d.rating).toFixed(1)} ⭐</td>
                   <td className="p-3 flex gap-1">
                     {d.license_status !== "approved" && (
-                      <button onClick={() => update(d.id, { license_status: "approved" })}
+                      <button onClick={() => update(d, { license_status: "approved" })}
                         className="rounded-lg bg-emerald-100 text-emerald-700 px-2 py-1 text-xs font-semibold hover:bg-emerald-200">
                         <CheckCircle2 className="h-3.5 w-3.5 inline" /> موافقة
                       </button>
                     )}
                     {d.license_status !== "rejected" && (
-                      <button onClick={() => update(d.id, { license_status: "rejected" })}
+                      <button onClick={() => update(d, { license_status: "rejected" })}
                         className="rounded-lg bg-rose-100 text-rose-700 px-2 py-1 text-xs font-semibold hover:bg-rose-200">
                         <XCircle className="h-3.5 w-3.5 inline" /> حظر
                       </button>
