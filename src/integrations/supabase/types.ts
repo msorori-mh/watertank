@@ -1006,7 +1006,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      promote_to_admin: { Args: { _setup_code: string }; Returns: undefined }
       record_cash_handover: {
         Args: { _amount: number; _driver_id: string; _notes?: string }
         Returns: {
