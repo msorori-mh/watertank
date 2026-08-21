@@ -5,6 +5,7 @@ import { customerRouteGuard } from "@/lib/route-guards";
 import { ChevronRight, MapPin, Truck, CheckCircle2, Clock, X, Loader2, Phone } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { ORDER_TIMELINE, orderStatusLabel, orderTimelineIndex } from "@/lib/order-status";
 
 export const Route = createFileRoute("/customer/orders/$id")({
   ...customerRouteGuard,
