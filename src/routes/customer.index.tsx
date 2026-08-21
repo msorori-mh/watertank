@@ -11,7 +11,7 @@ import {
   LogOut,
   ChevronLeft,
   Droplets,
-  Wallet,
+  
   BarChart3,
   Settings,
   Sparkles,
