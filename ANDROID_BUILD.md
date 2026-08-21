@@ -1,226 +1,89 @@
 # بناء تطبيق Android — وايت ماء
 
-## ⚠️ ملاحظة مهمة: هذه نسخة MVP تجريبية
+## نظرة عامة
 
-هذه النسخة تستخدم آلية **Hot Reload المُحسّن**، وليست نسخة Production مستقلة بعد.
+- التطبيق **مُحزَّم (bundled)**: ملفات الواجهة تُنسخ داخل الحزمة (`webDir = dist`)، ولا يوجد أي `server.url` أو تحميل واجهة من رابط خارجي.
+- الاتصال بالخادم عبر HTTPS فقط (`usesCleartextTraffic=false`).
+- الإنترنت مطلوب لعمل قاعدة البيانات والمصادقة والتحديثات الحيّة.
 
-### كيف يعمل التطبيق حالياً
+| البند | القيمة |
+|-------|--------|
+| applicationId / package | `app.wayetmaa.mobile` |
+| اسم التطبيق | وايت ماء |
+| compileSdk / targetSdk | 36 |
+| minSdk | 24 (الحد المدعوم مع Capacitor 8) |
+| versionCode / versionName | 1 / 1.0.0 |
+| الصلاحيات | `INTERNET`, `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION` فقط |
 
-- APK لا يحتوي على ملفات الواجهة (HTML/CSS/JS) محلياً.
-- عند تشغيل التطبيق، يحمّل الواجهة من رابط Lovable الثابت المنشور:
-  ```
-  https://project--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app
-  ```
-- أي تحديث للواجهة يصل للمستخدم **فوراً** بعد نشره من Lovable (بدون إعادة بناء APK).
+الصلاحيات غير المطلوبة (وممنوعة): `ACCESS_BACKGROUND_LOCATION` وأي صلاحيات تخزين/وسائط.
 
-### المتطلبات الحرجة
+## المتطلبات المحلية (مرة واحدة)
 
-| المتطلب | الحالة |
-|---------|--------|
-| نشر المشروع من Lovable (زر Publish) | **إلزامي قبل بناء APK** |
-| اتصال إنترنت دائم على الجهاز | **إلزامي لتشغيل التطبيق** |
-| Supabase (Auth + Realtime + Database) | يعمل عبر الإنترنت |
-| GPS الجغرافي | يعمل (صلاحيات تلقائية) |
+- Node.js 18+
+- JDK 17
+- Android Studio + Android SDK (API 36) مع ضبط `ANDROID_HOME`
 
-### مزايا هذه النسخة
-
-- ✅ تحديثات فورية بدون إعادة بناء/توزيع APK جديد
-- ✅ لا تكسر معاينة Lovable ولا تطوير الميزات
-- ✅ نشر سريع للاختبار والتجربة الأولية
-- ✅ المنطق الكامل (طلبات/سائق/إدارة/مالية) يعمل كما في Web
-
-### قيود هذه النسخة
-
-- ❌ لا يعمل بدون إنترنت (لا يوجد offline mode)
-- ❌ بطء أول تحميل حسب سرعة الاتصال
-- ❌ غير مناسب للنشر النهائي على Google Play
-
----
-
-## خطوات بناء APK
-
-### 1. تجهيز البيئة المحلية (مرة واحدة)
+## المزامنة
 
 ```bash
-# يجب توفر:
-# - Node.js 18+
-# - JDK 17
-# - Android Studio + Android SDK
-# - متغير ANDROID_HOME مضبوط
+npm run android:sync    # build للويب + تجهيز dist/index.html + cap sync android
+npm run android:verify  # فحص جاهزية Google Play للمشروع الأصلي
 ```
 
-### 2. تصدير المشروع من Lovable
+`npm run build` لم يتغيّر ويُستخدم كما هو لنشر الويب.
 
-1. اضغط **GitHub → Connect to GitHub** في Lovable
-2. استنسخ المستودع محلياً:
-   ```bash
-   git clone <your-repo-url>
-   cd <project-folder>
-   npm install
-   ```
+## بناء Debug
 
-### 3. نشر المشروع من Lovable (إلزامي)
-
-قبل بناء APK، اضغط **Publish** في Lovable للتأكد أن الرابط الثابت يعمل:
-```
-https://project--7237f033-42da-4c9f-8040-97b19f995dbb.lovable.app
-```
-
-اختبر الرابط في المتصفح أولاً للتأكد أنه يفتح التطبيق.
-
-### 4. إضافة منصة Android
-
-```bash
-npx cap add android
-npx cap sync android
-```
-
-### 5. بناء نسخة Debug (للاختبار)
-
-```bash
-npx cap open android
-# داخل Android Studio: Build → Build APK
-```
-
-أو عبر CLI:
 ```bash
 cd android
 ./gradlew assembleDebug
 # الناتج: android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### 6. بناء نسخة Release (للتوزيع)
+## بناء Release
 
-#### أ) إنشاء keystore (مرة واحدة)
+لا يوجد أي ملف مفاتيح أو أسرار داخل المستودع. التوقيع **اختياري** ويُقرأ من:
+
+1. `android/keystore.properties` (مُستثنى من git) — انسخه من `android/keystore.properties.example`، أو
+2. متغيرات البيئة:
+   - `WAYETMAA_KEYSTORE_PATH` (مسار نسبةً إلى مجلد `android/`)
+   - `WAYETMAA_KEYSTORE_PASSWORD`
+   - `WAYETMAA_KEY_ALIAS`
+   - `WAYETMAA_KEY_PASSWORD`
+
+إذا لم تتوفر القيم الأربع، ينتج البناء ملفاً **غير موقّع (unsigned)**.
+
+```bash
+cd android
+./gradlew bundleRelease    # AAB لـ Google Play
+./gradlew assembleRelease  # APK
+```
+
+إنشاء keystore محلياً (لا تضعه في المستودع):
 
 ```bash
 keytool -genkey -v -keystore wayetmaa-release.keystore \
   -alias wayetmaa -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-احتفظ بالملف وكلمة المرور في مكان آمن — فقدانهما يعني عدم قدرتك على تحديث التطبيق لاحقاً.
+احتفظ بالملف وكلمة المرور في مكان آمن — فقدانهما يعني عدم القدرة على تحديث التطبيق لاحقاً.
 
-#### ب) إعداد التوقيع في `android/app/build.gradle`
-
-```gradle
-android {
-    signingConfigs {
-        release {
-            storeFile file('../../wayetmaa-release.keystore')
-            storePassword 'YOUR_PASSWORD'
-            keyAlias 'wayetmaa'
-            keyPassword 'YOUR_PASSWORD'
-        }
-    }
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            minifyEnabled false
-        }
-    }
-}
-```
-
-#### ج) بناء APK موقّع
-
-```bash
-cd android
-./gradlew assembleRelease
-# الناتج: android/app/build/outputs/apk/release/app-release.apk
-```
-
-#### د) أو AAB لـ Google Play
-
-```bash
-./gradlew bundleRelease
-# الناتج: android/app/build/outputs/bundle/release/app-release.aab
-```
-
----
-
-## الاختبار على جهاز حقيقي
-
-### قائمة فحص قبل التسليم
+## قائمة فحص قبل التسليم
 
 - [ ] التطبيق يفتح ويعرض شاشة البداية (عميل + سائق)
-- [ ] لا تظهر بطاقة "الإدارة" في تطبيق الجوال
-- [ ] تسجيل دخول عميل / سائق جديد يعمل
-- [ ] إنشاء طلب من العميل ينجح (نقدي ومحفظة)
-- [ ] الطلب لا يظهر للسائق قبل اعتماد الإدارة
+- [ ] تسجيل دخول عميل / سائق يعمل
+- [ ] إنشاء طلب نقدي ينجح، والطلب لا يظهر للسائق قبل اعتماد الإدارة
 - [ ] Realtime يعمل (تحديث الحالة فوري)
-- [ ] صلاحية GPS تُطلب وتعمل، وروابط الخرائط تفتح
-- [ ] Bottom Navigation يعمل في صفحات العميل والسائق
-- [ ] لا يوجد Bottom Nav داخل صفحات الإدارة
-- [ ] الأزرار كبيرة ومريحة للمس (≥ 44px)
-- [ ] لا zoom غير مقصود — viewport مضبوط
-- [ ] Safe-area محترم (لا قطع نصوص أعلى/أسفل)
-- [ ] لا overflow أفقي
-- [ ] الصفحات الطويلة scroll سلس
-
-### الصلاحيات المطلوبة (تُضاف تلقائياً عبر Capacitor plugins)
-
-- `INTERNET`
-- `ACCESS_NETWORK_STATE`
-- `ACCESS_FINE_LOCATION` (من plugin @capacitor/geolocation)
-- `ACCESS_COARSE_LOCATION` (من plugin @capacitor/geolocation)
-
-تحقق من ملف `android/app/src/main/AndroidManifest.xml` بعد `npx cap sync android`.
-
-### اختبار GPS
-
-- افتح صفحة السائق
-- اقبل صلاحية الموقع عند الطلب
-- تأكد أن `navigator.geolocation` يرجع إحداثيات صحيحة
-
-### اختبار Realtime
-
-- افتح التطبيق على جهازين (عميل + سائق)
-- أنشئ طلباً من العميل
-- اعتمد الطلب من لوحة الإدارة (web)
-- يجب أن يظهر للسائق فوراً بدون refresh
-
----
-
-## ملاحظات مهمة
-
-### تغيير App ID لاحقاً (للنشر التجاري)
-
-عند الجاهزية للنشر النهائي، غيّر `appId` من:
-```
-app.wayetmaa.mobile
-```
-إلى اسم تجاري رسمي مثل:
-```
-sa.yourcompany.wayetmaa
-```
-
-⚠️ **تحذير**: تغيير `appId` بعد النشر على Google Play يُعتبر تطبيقاً جديداً ولا يمكن للمستخدمين الترقية.
-
-### الانتقال من MVP إلى Production
-
-عندما يكتمل النظام ويُختبر بالكامل، يمكن إنشاء **نسخة SPA مستقلة** بإحدى طريقتين:
-
-1. **مشروع منفصل** — استنساخ المشروع الحالي وتحويله إلى Vite SPA نقي.
-2. **تحويل كامل** — إعادة هيكلة المشروع الحالي (سيكسر معاينة Lovable).
-
-النسخة المستقلة ستعمل دون الحاجة لتحميل الواجهة من Lovable، وتدعم offline mode.
-
-### إذا تغيّر الرابط المنشور
-
-الرابط `project--{project-id}.lovable.app` ثابت ولا يتغير حتى لو أعدت تسمية المشروع. لكن إذا انتقل المشروع لمعرّف آخر، حدّث `server.url` في `capacitor.config.ts` ثم:
-```bash
-npx cap sync android
-```
-وأعد بناء APK.
-
----
+- [ ] صلاحية الموقع تُطلب أثناء الاستخدام فقط، وروابط الخرائط تفتح
+- [ ] Bottom Navigation يعمل للعميل والسائق، ولا يظهر في صفحات الإدارة
+- [ ] Safe-area محترم، لا zoom غير مقصود، لا overflow أفقي
+- [ ] صفحتا `/privacy` و `/account-deletion` تفتحان، وحذف الحساب يعمل من الإعدادات
 
 ## استكشاف الأخطاء
 
 | المشكلة | الحل |
 |---------|------|
-| شاشة بيضاء عند فتح التطبيق | تأكد أن المشروع منشور وأن الرابط يفتح في المتصفح |
-| `net::ERR_INTERNET_DISCONNECTED` | لا يوجد إنترنت — هذه النسخة تتطلبه |
+| `The web assets directory (./dist) must contain an index.html` | نفّذ `npm run android:sync` (يجهّز `dist/index.html`) |
+| شاشة بيضاء | تحقّق من Logcat وأن `cap sync` نُفّذ بعد آخر build |
+| `JAVA_HOME` غير مضبوط | ثبّت JDK 17 واضبط المتغير |
 | GPS لا يعمل | افحص صلاحيات التطبيق في إعدادات Android |
-| Realtime متقطع | افحص جودة الاتصال (WebSocket يحتاج اتصالاً مستقراً) |
-| تسجيل الدخول لا يحفظ | افحص أن localStorage مفعّل في WebView |
