@@ -20,6 +20,7 @@ import {
 import { NotificationsCenter } from "@/components/NotificationsCenter";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 import { customerRouteGuard } from "@/lib/route-guards";
+import { ORDER_STATUS_LABELS, ORDER_STATUS_PROGRESS } from "@/lib/order-status";
 
 export const Route = createFileRoute("/customer/")({
   ...customerRouteGuard,
