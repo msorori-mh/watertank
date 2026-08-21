@@ -17,6 +17,14 @@ const config: CapacitorConfig = {
   appName: 'وايت ماء',
   webDir: 'dist',
 
+  // HTTPS فقط — لا يوجد أي رابط تحميل خارجي للواجهة
+  server: {
+    androidScheme: 'https',
+    cleartext: false,
+  },
+
+
+
 
   android: {
     allowMixedContent: false,
