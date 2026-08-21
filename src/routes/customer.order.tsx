@@ -223,6 +223,29 @@ function NewOrder() {
             className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none resize-none" />
         </section>
 
+        {/* MVP-FIELD-PILOT-01: pre-confirmation summary (capacity, expected cash price, address/landmark) */}
+        <section className="rounded-2xl border-2 border-border bg-card p-4 space-y-2">
+          <h2 className="font-display font-bold text-sm">ملخص الطلب قبل التأكيد</h2>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground text-xs">سعة الوايت</span>
+            <span className="font-bold">{capacity.toLocaleString("ar-EG")} لتر</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground text-xs">نوع الماء</span>
+            <span className="font-bold">{WATER_TYPES.find(w => w.id === waterType)?.name}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground text-xs">السعر النقدي المتوقع</span>
+            <span className="font-bold">{price.toLocaleString("ar-EG")} ر.ي</span>
+          </div>
+          <div className="pt-2 border-t border-border">
+            <p className="text-muted-foreground text-xs">العنوان / أقرب معلم</p>
+            <p className="font-bold text-sm mt-0.5">{selected ? `${selected.title} — ${selected.city}` : "لم يتم اختيار عنوان"}</p>
+            {selected?.description && <p className="text-xs text-muted-foreground mt-0.5">{selected.description}</p>}
+          </div>
+          <p className="text-[11px] text-muted-foreground">الدفع نقداً عند التسليم — السعر النهائي يُحسب من أسعار المدينة.</p>
+        </section>
+
         {error && <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{error}</p>}
       </main>
 
