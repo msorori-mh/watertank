@@ -27,7 +27,7 @@ function Landing() {
     {
       to: "/driver/login" as const,
       title: "سائق",
-      desc: "استلم طلباتك، وصّل الماء، وتابع أرباحك.",
+      desc: "استلم الطلبات، وصّل الماء، وتابع حالة التوصيل.",
       cta: "دخول السائق",
       icon: Truck,
       style: "bg-[#1a5276] text-white border-2 border-transparent",
