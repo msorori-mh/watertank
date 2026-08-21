@@ -82,7 +82,7 @@ function Landing() {
       </main>
 
       <footer className="px-6 py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} وايت ماء • مأرب وكل اليمن
+        © {new Date().getFullYear()} وايت ماء • سيستراك للأنظمة والحلول الرقمية SysTrac
       </footer>
     </div>
   );
