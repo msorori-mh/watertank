@@ -142,6 +142,12 @@ function DriverHome() {
               ? "سيتم إشعارك حال الموافقة على طلبك."
               : "تواصل مع إدارة المنصة لمزيد من التفاصيل."}
           </p>
+          <button
+            onClick={() => gate.refresh()}
+            className="mt-5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold"
+          >
+            تحديث الحالة
+          </button>
         </div>
       </DriverShell>
     );
