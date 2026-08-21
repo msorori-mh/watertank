@@ -979,6 +979,21 @@ export type Database = {
           phone: string
         }[]
       }
+      get_order_driver_public: {
+        Args: { _order_id: string }
+        Returns: {
+          availability: Database["public"]["Enums"]["driver_availability"]
+          city: string
+          id: string
+          name: string
+          phone: string
+          rating: number
+          status: Database["public"]["Enums"]["driver_status"]
+          user_id: string
+          vehicle_capacity: number
+          vehicle_plate: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
