@@ -35,9 +35,11 @@ function OrderDetail() {
     const { data } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
     setOrder(data);
     if (data?.driver_id) {
-      const { data: d } = await supabase.from("drivers").select("*").eq("id", data.driver_id).maybeSingle();
-      setDriver(d);
+      // Customers no longer read public.drivers directly (payout/balance columns).
+      const { data: d } = await supabase.rpc("get_order_driver_public", { _order_id: id });
+      setDriver(Array.isArray(d) ? d[0] ?? null : d ?? null);
     }
+
     setLoading(false);
   };
 
