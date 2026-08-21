@@ -42,7 +42,7 @@ function AdminDashboard() {
     { label: "طلبات اليوم", value: stats.today, icon: ClipboardList, color: "bg-blue-50 text-blue-700" },
     { label: "قيد المراجعة", value: stats.pending, icon: Activity, color: "bg-amber-50 text-amber-700" },
     { label: "سائقون متاحون", value: stats.drivers, icon: Truck, color: "bg-emerald-50 text-emerald-700" },
-    { label: "إيرادات اليوم (ر.ي)", value: stats.revenue.toLocaleString("ar-EG"), icon: Wallet, color: "bg-primary/10 text-primary" },
+    { label: "قيمة الطلبات المكتملة اليوم (ر.ي)", value: stats.revenue.toLocaleString("ar-EG"), icon: Wallet, color: "bg-primary/10 text-primary" },
   ];
 
   return (
