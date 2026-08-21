@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Wallet, ClipboardList, CheckCircle2, XCircle, Banknote } from "lucide-react";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 import { customerRouteGuard } from "@/lib/route-guards";
+import { orderStatusLabel } from "@/lib/order-status";
 
 export const Route = createFileRoute("/customer/reports")({
   ...customerRouteGuard,
