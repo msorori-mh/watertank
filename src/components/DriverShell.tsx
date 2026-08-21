@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
 import { LayoutDashboard, ListOrdered, LogOut, Loader2, Truck, BarChart3, Settings } from "lucide-react";
@@ -89,20 +89,53 @@ export function DriverShell({
 export function useDriverGate() {
   const nav = useNavigate();
   const [state, setState] = useState<{ loading: true } | { loading: false; user: any; driver: DriverInfo | null }>({ loading: true });
+  const [tick, setTick] = useState(0);
+
+  const refresh = useCallback(() => setTick(t => t + 1), []);
 
   useEffect(() => {
     let active = true;
+    let channel: any = null;
+
     const load = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { nav({ to: "/driver/login" }); return; }
       const { data: d } = await supabase.from("drivers").select("*").eq("user_id", session.user.id).maybeSingle();
-      if (active) setState({ loading: false, user: session.user, driver: (d as any) || null });
-    };
-    load();
-    return () => { active = false; };
-  }, [nav]);
+      if (!active) return;
+      setState({ loading: false, user: session.user, driver: (d as any) || null });
 
-  return state;
+      // Keep the driver status live: admin approval must flip the screen
+      // without a manual sign-out/sign-in.
+      if (d && !channel) {
+        channel = supabase
+          .channel(`driver-row-${(d as any).id}`)
+          .on(
+            "postgres_changes",
+            { event: "UPDATE", schema: "public", table: "drivers", filter: `id=eq.${(d as any).id}` },
+            () => { if (active) load(); },
+          )
+          .subscribe();
+      }
+    };
+
+    load();
+
+    const interval = setInterval(load, 30000);
+    const onVisible = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [nav, tick]);
+
+  return { ...state, refresh } as (
+    | { loading: true; refresh: () => void }
+    | { loading: false; user: any; driver: DriverInfo | null; refresh: () => void }
+  );
 }
 
 export function DriverLoading() {

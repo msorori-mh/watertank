@@ -10,6 +10,8 @@ export type NotificationType =
   | "order_payment_collected"
   | "order_completed"
   | "order_cancelled"
+  | "driver_approved"
+  | "driver_rejected"
   | "general";
 
 export async function notifyUser(
@@ -71,5 +73,17 @@ export const ORDER_EVENT_MESSAGES: Partial<
     body: (n) => `الطلب #${n} تم إلغاؤه.`,
   },
 };
+
+/** رسائل اعتماد/رفض حساب السائق */
+export const DRIVER_ACCOUNT_MESSAGES = {
+  driver_approved: {
+    title: "تم اعتماد حسابك",
+    body: "تم اعتماد حسابك من الإدارة — يمكنك الآن استلام الطلبات.",
+  },
+  driver_rejected: {
+    title: "لم يتم اعتماد حسابك",
+    body: "لم يتم اعتماد حسابك. تواصل مع إدارة المنصة لمعرفة التفاصيل.",
+  },
+} as const;
 
 export const shortId = (id: string) => id.slice(0, 8).toUpperCase();

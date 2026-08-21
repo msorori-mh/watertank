@@ -1174,6 +1174,8 @@ export type Database = {
         | "general"
         | "wallet_topup_approved"
         | "wallet_topup_rejected"
+        | "driver_approved"
+        | "driver_rejected"
       order_status:
         | "pending"
         | "approved"
@@ -1338,6 +1340,8 @@ export const Constants = {
         "general",
         "wallet_topup_approved",
         "wallet_topup_rejected",
+        "driver_approved",
+        "driver_rejected",
       ],
       order_status: [
         "pending",
