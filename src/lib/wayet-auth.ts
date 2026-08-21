@@ -106,36 +106,9 @@ export const adminLogin = async (email: string, password: string) => {
   return data;
 };
 
-export const adminSignup = async (
-  email: string,
-  password: string,
-  name: string,
-  setupCode: string,
-) => {
-  const { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { name, type: "admin" },
-      emailRedirectTo: `${window.location.origin}/admin`,
-    },
-  });
-  if (signUpError) throw signUpError;
+// MVP-01-SECURITY-CLOSURE: admin self-signup / self-promotion removed.
+// Admin accounts are provisioned by an existing admin only.
 
-  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-  if (signInError) throw signInError;
-
-  const { error: promoteError } = await supabase.rpc("promote_to_admin", {
-    _setup_code: setupCode,
-  });
-  if (promoteError) {
-    await supabase.auth.signOut();
-    throw promoteError;
-  }
-
-  const { data } = await supabase.auth.getSession();
-  return data;
-};
 
 export const signOut = async () => {
   await supabase.auth.signOut();
