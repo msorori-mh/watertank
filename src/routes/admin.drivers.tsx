@@ -20,8 +20,19 @@ function AdminDrivers() {
   };
   useEffect(() => { load(); }, []);
 
-  const update = async (id: string, patch: any) => {
-    await supabase.from("drivers").update(patch).eq("id", id);
+  const update = async (driver: any, patch: any) => {
+    const { error } = await supabase.from("drivers").update(patch).eq("id", driver.id);
+    if (error) { alert("تعذر التحديث: " + error.message); return; }
+
+    // إشعار السائق بقرار الإدارة
+    const decision =
+      patch.license_status === "approved" ? "driver_approved"
+      : patch.license_status === "rejected" ? "driver_rejected"
+      : null;
+    if (decision && driver.user_id) {
+      const msg = DRIVER_ACCOUNT_MESSAGES[decision];
+      await notifyUser(driver.user_id, null, decision, msg.title, msg.body);
+    }
     load();
   };
 
