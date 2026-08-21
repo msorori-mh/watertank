@@ -56,10 +56,13 @@ function DriverRegister() {
 
   const submit = async () => {
     setError("");
-    if (!name.trim() || !phone.trim() || !plate.trim() || !city || !coords) {
-      setError("جميع الحقول وتحديد الموقع مطلوبة");
-      return;
-    }
+    // MVP-FIELD-PILOT-01: explicit per-field validation for the vehicle data.
+    if (!name.trim()) return setError("الاسم الكامل مطلوب");
+    if (!phone.trim()) return setError("رقم الهاتف مطلوب");
+    if (!city) return setError("اختر المدينة / منطقة العمل");
+    if (!plate.trim()) return setError("رقم لوحة المركبة مطلوب");
+    if (!capacity || capacity <= 0) return setError("اختر سعة الوايت باللتر");
+    if (!coords) return setError("حدد موقع تمركز الوايت على الخريطة");
     setLoading(true);
     const { error: profileError } = await supabase.from("profiles").update({
       name: name.trim(), phone: phone.trim(), city, lat: coords.lat, lng: coords.lng,
