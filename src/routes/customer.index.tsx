@@ -186,11 +186,12 @@ function CustomerHome() {
 
         {/* Quick actions grid */}
         <section className="grid grid-cols-2 gap-3">
+          {/* MVP-02-CASH-ONLY-SCOPE: wallet shortcut removed; first release is cash on delivery. */}
           <QuickCard
-            to="/customer/wallet"
-            label="المحفظة"
-            sub="رصيدك وتعبئته"
-            icon={Wallet}
+            to="/customer/order"
+            label="طلب جديد"
+            sub="وايت ماء نقداً"
+            icon={Droplets}
             gradient="from-emerald-400 to-teal-600"
           />
           <QuickCard
