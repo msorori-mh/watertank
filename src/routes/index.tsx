@@ -82,7 +82,10 @@ function Landing() {
       </main>
 
       <footer className="px-6 py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} وايت ماء • سيستراك للأنظمة والحلول الرقمية SysTrac
+        © {new Date().getFullYear()} وايت ماء • سيستراك للأنظمة والحلول الرقمية{" "}
+        <a href="https://systrac.lovable.app" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground hover:underline">
+          SysTrac
+        </a>
       </footer>
     </div>
   );
