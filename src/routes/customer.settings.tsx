@@ -147,18 +147,6 @@ function CustomerSettings() {
           desc="إدارة عناوين التوصيل المحفوظة"
           color="from-emerald-400 to-teal-500"
         />
-        <LinkCard
-          to="/customer/wallet"
-          icon={Wallet}
-          title="المحفظة"
-          desc="الرصيد الحالي والتعبئات"
-          color="from-amber-400 to-orange-500"
-          right={
-            <span className="text-sm font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg whitespace-nowrap">
-              {walletBalance.toLocaleString()} ر.ي
-            </span>
-          }
-        />
 
         {/* Notifications */}
         <Card>
