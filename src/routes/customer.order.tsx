@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { customerRouteGuard } from "@/lib/route-guards";
-import { ChevronRight, MapPin, Loader2, Droplets, Wallet, Banknote, Plus, Star, CheckCircle2 } from "lucide-react";
+import { ChevronRight, MapPin, Loader2, Droplets, Banknote, Plus, Star, CheckCircle2 } from "lucide-react";
 import { WATER_TYPES } from "@/lib/water-types";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 
@@ -26,8 +26,6 @@ function NewOrder() {
   const [capacity, setCapacity] = useState<number>(5000);
   const [waterType, setWaterType] = useState("normal");
   const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
-  const [walletBalance, setWalletBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -38,16 +36,14 @@ function NewOrder() {
       if (!s.session) { nav({ to: "/customer/login" }); return; }
       setUser(s.session.user);
       const uid = s.session.user.id;
-      const [{ data: prof }, { data: w }, { data: c }, { data: p }, { data: a }] = await Promise.all([
+      const [{ data: prof }, { data: c }, { data: p }, { data: a }] = await Promise.all([
         supabase.from("profiles").select("city").eq("id", uid).maybeSingle(),
-        supabase.from("wallets").select("balance").eq("user_id", uid).maybeSingle(),
         supabase.from("cities").select("id,name").eq("is_active", true).order("name"),
         supabase.from("pricing").select("city,capacity,price"),
         supabase.from("addresses").select("*").eq("user_id", uid)
           .order("is_default", { ascending: false }).order("created_at", { ascending: false }),
       ]);
       if (!prof?.city) { nav({ to: "/customer/profile/complete" }); return; }
-      setWalletBalance(Number(w?.balance ?? 0));
       setCities(c || []);
       setPricing(p || []);
       const list = (a as any as Address[]) || [];
@@ -74,9 +70,6 @@ function NewOrder() {
     if (!selected.lat || !selected.lng) return setError("العنوان لا يحتوي على إحداثيات صالحة");
     if (!cities.find((c) => c.name === selected.city)) return setError("مدينة العنوان غير مفعّلة، عدّل العنوان");
     if (price === 0) return setError("لا يوجد سعر متاح لهذا الحجم في هذه المدينة");
-    if (paymentMethod === "wallet" && walletBalance < price) {
-      return setError("رصيد المحفظة غير كافٍ، يرجى تعبئة المحفظة.");
-    }
     setSubmitting(true);
     try {
       const snapshot = {
@@ -86,30 +79,17 @@ function NewOrder() {
         lng: selected.lng,
       };
 
-      if (paymentMethod === "wallet") {
-        const { data: order, error: rpcErr } = await supabase.rpc("create_wallet_order", {
-          _city: selected.city,
-          _address_id: selected.id,
-          _address_snapshot: snapshot as any,
-          _water_type: waterType as any,
-          _capacity: capacity,
-          _price: price,
-          _notes: notes || undefined,
-        });
-        if (rpcErr) throw rpcErr;
-        nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
-      } else {
-        const { data: order, error: ordErr } = await supabase.rpc("create_cash_order", {
-          _city: selected.city,
-          _address_id: selected.id,
-          _address_snapshot: snapshot as any,
-          _water_type: waterType as any,
-          _capacity: capacity,
-          _notes: notes || undefined,
-        });
-        if (ordErr) throw ordErr;
-        nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
-      }
+      // MVP-02-CASH-ONLY-SCOPE: first release is cash on delivery only.
+      const { data: order, error: ordErr } = await supabase.rpc("create_cash_order", {
+        _city: selected.city,
+        _address_id: selected.id,
+        _address_snapshot: snapshot as any,
+        _water_type: waterType as any,
+        _capacity: capacity,
+        _notes: notes || undefined,
+      });
+      if (ordErr) throw ordErr;
+      nav({ to: "/customer/orders/$id", params: { id: (order as any).id } });
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -221,40 +201,18 @@ function NewOrder() {
           </div>
         </section>
 
-        {/* Payment method */}
+        {/* Payment — cash only in this release */}
         <section>
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">طريقة الدفع</label>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setPaymentMethod("cash")}
-              className={`rounded-xl p-3 text-right border-2 ${paymentMethod === "cash" ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
-              <div className="flex items-center gap-2">
-                <Banknote className={`h-5 w-5 ${paymentMethod === "cash" ? "text-primary" : "text-muted-foreground"}`} />
-                <div>
-                  <div className="font-bold text-sm">نقداً عند التسليم</div>
-                  <div className="text-[11px] text-muted-foreground">ادفع للسائق مباشرة</div>
-                </div>
-              </div>
-            </button>
-            <button onClick={() => setPaymentMethod("wallet")}
-              className={`rounded-xl p-3 text-right border-2 ${paymentMethod === "wallet" ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
-              <div className="flex items-center gap-2">
-                <Wallet className={`h-5 w-5 ${paymentMethod === "wallet" ? "text-primary" : "text-muted-foreground"}`} />
-                <div>
-                  <div className="font-bold text-sm">من المحفظة</div>
-                  <div className="text-[11px] text-muted-foreground">رصيدك: {walletBalance.toLocaleString("ar-EG")} ر.ي</div>
-                </div>
-              </div>
-            </button>
-          </div>
-          {paymentMethod === "wallet" && walletBalance < price && price > 0 && (
-            <div className="mt-2 rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-700">
-              <p className="font-semibold">رصيد المحفظة غير كافٍ</p>
-              <p className="text-xs mt-1">المطلوب {price.toLocaleString("ar-EG")} ر.ي ورصيدك {walletBalance.toLocaleString("ar-EG")} ر.ي</p>
-              <Link to="/customer/wallet" className="inline-block mt-2 rounded-lg bg-rose-600 text-white px-3 py-1.5 text-xs font-bold">
-                تعبئة المحفظة
-              </Link>
+          <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Banknote className="h-5 w-5 text-primary" />
             </div>
-          )}
+            <div>
+              <p className="font-bold text-sm text-deep">الدفع نقداً عند التسليم</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">ادفع للسائق مباشرة</p>
+            </div>
+          </div>
         </section>
 
         {/* Notes */}
@@ -271,7 +229,7 @@ function NewOrder() {
       <div className="fixed bottom-0 inset-x-0 bg-card border-t border-border p-4">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">الإجمالي • {paymentMethod === "wallet" ? "خصم من المحفظة" : "نقداً عند الاستلام"}</p>
+            <p className="text-xs text-muted-foreground">الإجمالي • نقداً عند الاستلام</p>
             <p className="font-display font-bold text-xl">{price.toLocaleString("ar-EG")} ر.ي</p>
           </div>
           <button onClick={submit} disabled={submitting || price === 0 || !selected}

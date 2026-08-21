@@ -1,12 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, ListOrdered, Wallet, MapPin, Settings } from "lucide-react";
+import { Home, ListOrdered, MapPin, Settings } from "lucide-react";
 
-type Tab = { to: "/customer" | "/customer/reports" | "/customer/wallet" | "/customer/addresses" | "/customer/settings"; label: string; icon: any; exact?: boolean };
+type Tab = { to: "/customer" | "/customer/reports" | "/customer/addresses" | "/customer/settings"; label: string; icon: any; exact?: boolean };
 
 const tabs: Tab[] = [
   { to: "/customer", label: "الرئيسية", icon: Home, exact: true },
   { to: "/customer/reports", label: "طلباتي", icon: ListOrdered },
-  { to: "/customer/wallet", label: "المحفظة", icon: Wallet },
   { to: "/customer/addresses", label: "العناوين", icon: MapPin },
   { to: "/customer/settings", label: "الإعدادات", icon: Settings },
 ];

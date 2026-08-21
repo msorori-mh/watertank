@@ -2,12 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
-import { driverRouteGuard } from "@/lib/route-guards";
+import { deferredFeatureGuard } from "@/lib/route-guards";
 import { Loader2, Wallet, Clock, CheckCircle2, XCircle, Banknote, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/driver/earnings")({
-  ...driverRouteGuard,
+  // MVP-02-CASH-ONLY-SCOPE: deferred feature, redirect before any query runs.
+  beforeLoad: deferredFeatureGuard("/driver"),
   component: DriverEarnings,
 });
 
