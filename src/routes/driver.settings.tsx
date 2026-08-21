@@ -245,11 +245,17 @@ function DriverSettings() {
             <span className="text-muted-foreground">إصدار التطبيق</span>
             <span className="font-semibold">{APP_VERSION}</span>
           </div>
+          <div className="flex items-center justify-between text-sm py-2">
+            <span className="text-muted-foreground">سياسة الخصوصية</span>
+            <Link to="/privacy" className="font-semibold text-primary">عرض</Link>
+          </div>
           <button onClick={out}
             className="w-full mt-3 rounded-xl border border-destructive/30 text-destructive py-2.5 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-destructive/5">
             <LogOut className="h-4 w-4" /> تسجيل الخروج
           </button>
         </Section>
+
+        <DeleteAccountCard />
       </main>
     </div>
   );
