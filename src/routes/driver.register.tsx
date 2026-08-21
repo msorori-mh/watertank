@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { driverRouteGuard } from "@/lib/route-guards";
 import { Truck, Loader2, Crosshair, MapPin } from "lucide-react";
+import { TANK_CAPACITIES, formatCapacity } from "@/lib/capacities";
 
 export const Route = createFileRoute("/driver/register")({
   ...driverRouteGuard,
