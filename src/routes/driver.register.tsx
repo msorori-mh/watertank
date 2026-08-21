@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { driverRouteGuard } from "@/lib/route-guards";
-import { Truck, Loader2 } from "lucide-react";
+import { Truck, Loader2, Crosshair, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/driver/register")({
   ...driverRouteGuard,
@@ -18,6 +18,8 @@ function DriverRegister() {
   const [city, setCity] = useState("");
   const [plate, setPlate] = useState("");
   const [capacity, setCapacity] = useState(5000);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -34,13 +36,35 @@ function DriverRegister() {
     });
   }, [nav]);
 
+
+  const useGeo = () => {
+    setError("");
+    if (!navigator.geolocation) return setError("الجهاز لا يدعم تحديد الموقع");
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      () => {
+        setError("تعذّر تحديد الموقع. فعّل GPS واسمح للتطبيق بالوصول.");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  };
+
   const submit = async () => {
     setError("");
-    if (!name.trim() || !phone.trim() || !plate.trim() || !city) {
-      setError("جميع الحقول مطلوبة");
+    if (!name.trim() || !phone.trim() || !plate.trim() || !city || !coords) {
+      setError("جميع الحقول وتحديد الموقع مطلوبة");
       return;
     }
     setLoading(true);
+    const { error: profileError } = await supabase.from("profiles").update({
+      name: name.trim(), phone: phone.trim(), city, lat: coords.lat, lng: coords.lng,
+    } as any).eq("id", user.id);
+    if (profileError) { setLoading(false); setError(profileError.message); return; }
     const { error: e } = await supabase.from("drivers").insert({
       user_id: user.id,
       name, phone, city, vehicle_plate: plate, vehicle_capacity: capacity,
@@ -91,6 +115,20 @@ function DriverRegister() {
               className="w-full rounded-xl border-2 border-input px-4 py-3 focus:border-[#1a5276] focus:outline-none">
               {[1000, 3000, 5000, 10000].map(c => <option key={c} value={c}>{c.toLocaleString("ar-EG")} لتر</option>)}
             </select>
+          </div>
+          <div className="rounded-xl border-2 border-dashed border-[#1a5276]/30 p-3 space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground block">موقع تمركز الوايت</label>
+            <button type="button" onClick={useGeo} disabled={locating}
+              className="w-full rounded-xl bg-[#1a5276]/10 px-4 py-3 text-sm font-semibold text-[#1a5276] flex items-center justify-center gap-2 disabled:opacity-50">
+              {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
+              {coords ? "إعادة تحديد الموقع" : "تحديد موقعي الحالي على الخريطة"}
+            </button>
+            {coords && (
+              <a href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`} target="_blank" rel="noreferrer"
+                className="flex items-center justify-center gap-1 text-xs text-emerald-700 underline">
+                <MapPin className="h-3 w-3" /> معاينة الموقع المحدد
+              </a>
+            )}
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <button onClick={submit} disabled={loading}
