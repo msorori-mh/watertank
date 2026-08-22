@@ -155,7 +155,7 @@ function AdminCities() {
               <tr key={c.id} className="border-t border-border">
                 <td className="p-3 font-medium">
                   {editing?.id === c.id ? <div className="flex gap-1">
-                    <input autoFocus value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })}
+                    <input autoFocus value={editing?.name ?? ""} onChange={e => setEditing(prev => (prev ? { ...prev, name: e.target.value } : prev))}
                       className="w-32 rounded border border-border px-2 py-1" />
                     <button onClick={renameCity} title="حفظ"><Save className="h-4 w-4 text-emerald-600" /></button>
                     <button onClick={() => setEditing(null)} title="إلغاء"><X className="h-4 w-4" /></button>
