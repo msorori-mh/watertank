@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/wayet-auth";
-import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, BarChart3, LogOut, Loader2 } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, BarChart3, LogOut, Loader2, Percent } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 export function AdminShell({ children, title }: { children: React.ReactNode; title: string }) {
@@ -34,12 +34,13 @@ export function AdminShell({ children, title }: { children: React.ReactNode; tit
   if (!ready) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
   // MVP-02-CASH-ONLY-SCOPE: finance/wallet tabs hidden until phase 2.
-  const tabs: { to: "/admin" | "/admin/orders" | "/admin/drivers" | "/admin/customers" | "/admin/cities" | "/admin/reports"; label: string; icon: any; exact?: boolean }[] = [
+  const tabs: { to: "/admin" | "/admin/orders" | "/admin/drivers" | "/admin/customers" | "/admin/cities" | "/admin/commissions" | "/admin/reports"; label: string; icon: any; exact?: boolean }[] = [
     { to: "/admin", label: "اللوحة", icon: LayoutDashboard, exact: true },
     { to: "/admin/orders", label: "الطلبات", icon: ClipboardList },
     { to: "/admin/drivers", label: "السائقون", icon: Truck },
     { to: "/admin/customers", label: "العملاء", icon: Users },
     { to: "/admin/cities", label: "المدن والأسعار", icon: MapPin },
+    { to: "/admin/commissions", label: "العمولات", icon: Percent },
     { to: "/admin/reports", label: "التقارير", icon: BarChart3 },
   ];
 
