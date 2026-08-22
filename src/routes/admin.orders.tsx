@@ -3,20 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
-import { notifyUser, ORDER_EVENT_MESSAGES, shortId, type NotificationType } from "@/lib/notifications";
 import { adminRouteGuard } from "@/lib/route-guards";
-
-const STATUS_TO_NOTIF: Record<string, NotificationType | undefined> = {
-  approved: "order_approved",
-  accepted: "order_accepted",
-  rejected: "order_rejected",
-  on_the_way: "order_on_way",
-  arrived: "order_arrived",
-  delivering: "order_unloading",
-  payment_collected: "order_payment_collected",
-  completed: "order_completed",
-  cancelled: "order_cancelled",
-};
 
 export const Route = createFileRoute("/admin/orders")({
   ...adminRouteGuard,
@@ -66,42 +53,6 @@ function AdminOrders() {
       return;
     }
 
-    // إشعارات تلقائية للعميل عند تغيّر الحالة
-    if (prev && patch.status && patch.status !== prev.status) {
-      const t = STATUS_TO_NOTIF[patch.status];
-      if (t) {
-        const msg = ORDER_EVENT_MESSAGES[t]!;
-        await notifyUser(prev.customer_id, id, t, msg.title, msg.body(shortId(id)));
-      }
-    }
-    // إشعار العميل فور إسناد الطلب حتى تبدأ المتابعة مباشرة
-    if (prev && patch.driver_id && patch.driver_id !== prev.driver_id) {
-      await notifyUser(
-        prev.customer_id,
-        id,
-        "general",
-        "تم تعيين سائق لطلبك",
-        `تم إسناد الطلب #${shortId(id)} إلى سائق، ويمكنك الآن متابعة مراحله من الصفحة الرئيسية.`,
-      );
-    }
-
-    // إشعار للسائق عند تعيينه لطلب
-    if (prev && patch.driver_id && patch.driver_id !== prev.driver_id) {
-      const { data: drv } = await supabase
-        .from("drivers")
-        .select("user_id")
-        .eq("id", patch.driver_id)
-        .maybeSingle();
-      if (drv?.user_id) {
-        await notifyUser(
-          drv.user_id,
-          id,
-          "general",
-          "طلب جديد مُسند إليك",
-          `تم تعيينك للطلب #${shortId(id)} في ${prev.city}.`,
-        );
-      }
-    }
     setUpdating(null);
     load();
   };
