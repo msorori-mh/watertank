@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { PhonePasswordAuth } from "@/components/PhonePasswordAuth";
+import { useSessionRestore } from "@/lib/session-restore";
 
 export const Route = createFileRoute("/customer/login")({
   component: CustomerLogin,
@@ -8,6 +9,11 @@ export const Route = createFileRoute("/customer/login")({
 
 function CustomerLogin() {
   const nav = useNavigate();
+  const restoring = useSessionRestore();
+
+  if (restoring) {
+    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">جارٍ استعادة الجلسة…</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

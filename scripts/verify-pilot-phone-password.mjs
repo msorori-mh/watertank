@@ -11,6 +11,9 @@ const driverLogin = read("src/routes/driver.login.tsx");
 const shared = read("src/components/PhonePasswordAuth.tsx");
 const customerProfile = read("src/routes/customer.profile.complete.tsx");
 const driverRegister = read("src/routes/driver.register.tsx");
+const supabaseClient = read("src/integrations/supabase/client.ts");
+const sessionRestore = read("src/lib/session-restore.ts");
+const landing = read("src/routes/index.tsx");
 
 expect(auth.includes("signInWithPhonePassword"), "missing phone/password login helper");
 expect(auth.includes("signUpWithPhonePassword"), "missing phone/password signup helper");
@@ -36,6 +39,15 @@ expect(
   "driver registration must require identity, vehicle, city and location fields",
 );
 expect(driverRegister.includes("lat: coords.lat, lng: coords.lng"), "driver location must be persisted");
+expect(supabaseClient.includes("persistSession: true"), "Supabase session persistence must stay enabled");
+expect(supabaseClient.includes("autoRefreshToken: true"), "Supabase token refresh must stay enabled");
+expect(sessionRestore.includes("supabase.auth.getSession()"), "app startup must restore the saved Supabase session");
+expect(sessionRestore.includes('return "/customer"'), "saved customer sessions must reopen the customer portal");
+expect(sessionRestore.includes('return "/driver"'), "saved driver sessions must reopen the driver portal");
+expect(sessionRestore.includes('return "/driver/register"'), "incomplete driver sessions must reopen registration");
+expect(landing.includes("useSessionRestore()"), "mobile landing route must restore the session before showing login choices");
+expect(customerLogin.includes("useSessionRestore()"), "customer login must bypass itself for a saved session");
+expect(driverLogin.includes("useSessionRestore()"), "driver login must bypass itself for a saved session");
 
 if (failures.length) {
   console.error("PILOT-PHONE-PASSWORD-01 FAILED");
