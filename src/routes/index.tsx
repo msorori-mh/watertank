@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Truck, Home, Droplets } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { useSessionRestore } from "@/lib/session-restore";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,6 +14,19 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const restoring = useSessionRestore();
+
+  if (restoring) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-6 text-center">
+        <div>
+          <div className="mx-auto h-10 w-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+          <p className="mt-4 text-sm text-muted-foreground">جارٍ استعادة جلستك…</p>
+        </div>
+      </div>
+    );
+  }
+
   const cards = [
     {
       to: "/customer/login" as const,
