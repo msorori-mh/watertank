@@ -8,6 +8,7 @@ import { adminRouteGuard } from "@/lib/route-guards";
 
 const STATUS_TO_NOTIF: Record<string, NotificationType | undefined> = {
   approved: "order_approved",
+  accepted: "order_accepted",
   rejected: "order_rejected",
   on_the_way: "order_on_way",
   arrived: "order_arrived",
@@ -42,7 +43,7 @@ function AdminOrders() {
   const load = async () => {
     const [{ data: o }, { data: d }] = await Promise.all([
       supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(200),
-      supabase.from("drivers").select("id,name,city,license_status").eq("license_status", "approved"),
+      supabase.from("drivers").select("id,name,city,license_status,availability,status").eq("license_status", "approved"),
     ]);
     setOrders(o || []); setDrivers(d || []); setLoading(false);
   };
@@ -58,7 +59,12 @@ function AdminOrders() {
   const update = async (id: string, patch: any) => {
     setUpdating(id);
     const prev = orders.find((o) => o.id === id);
-    await supabase.from("orders").update(patch).eq("id", id);
+    const { error } = await supabase.from("orders").update(patch).eq("id", id);
+    if (error) {
+      alert("تعذر تحديث الطلب: " + error.message);
+      setUpdating(null);
+      return;
+    }
 
     // إشعارات تلقائية للعميل عند تغيّر الحالة
     if (prev && patch.status && patch.status !== prev.status) {
@@ -68,6 +74,17 @@ function AdminOrders() {
         await notifyUser(prev.customer_id, id, t, msg.title, msg.body(shortId(id)));
       }
     }
+    // إشعار العميل فور إسناد الطلب حتى تبدأ المتابعة مباشرة
+    if (prev && patch.driver_id && patch.driver_id !== prev.driver_id) {
+      await notifyUser(
+        prev.customer_id,
+        id,
+        "general",
+        "تم تعيين سائق لطلبك",
+        `تم إسناد الطلب #${shortId(id)} إلى سائق، ويمكنك الآن متابعة مراحله من الصفحة الرئيسية.`,
+      );
+    }
+
     // إشعار للسائق عند تعيينه لطلب
     if (prev && patch.driver_id && patch.driver_id !== prev.driver_id) {
       const { data: drv } = await supabase
@@ -123,7 +140,7 @@ function AdminOrders() {
             </thead>
             <tbody>
               {filtered.map(o => {
-                const cityDrivers = drivers.filter(d => !d.city || d.city === o.city);
+                const cityDrivers = drivers.filter(d => (!d.city || d.city === o.city) && d.status !== "inactive" && d.availability !== "offline");
                 return (
                   <tr key={o.id} className="border-t border-border">
                     <td className="p-3 font-mono text-xs">#{o.id.slice(0,8).toUpperCase()}</td>
@@ -153,7 +170,7 @@ function AdminOrders() {
                         disabled={o.status === "pending" || o.status === "rejected" || o.status === "cancelled"}
                       >
                         <option value="">— غير مُعيَّن —</option>
-                        {cityDrivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        {cityDrivers.map(d => <option key={d.id} value={d.id}>{d.name}{d.availability === "busy" ? " — مشغول" : " — متاح"}</option>)}
                       </select>
                     </td>
                     <td className="p-3">
