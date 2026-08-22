@@ -27,8 +27,14 @@ expect(!customerLogin.includes("signInWithGoogle"), "customer pilot login must n
 expect(!driverLogin.includes("signInWithGoogle"), "driver pilot login must not expose Google");
 expect(customerProfile.includes('if (!coords)'), "customer location must be required");
 expect(customerProfile.includes("description: description.trim()"), "customer address description must be saved");
-expect(driverRegister.includes('if (!name.trim() || !phone.trim() || !plate.trim() || !city || !coords)'),
-  "driver registration must require location");
+expect(
+  driverRegister.includes('if (!name.trim())') &&
+  driverRegister.includes('if (!phone.trim())') &&
+  driverRegister.includes('if (!city)') &&
+  driverRegister.includes('if (!plate.trim())') &&
+  driverRegister.includes('if (!coords)'),
+  "driver registration must require identity, vehicle, city and location fields",
+);
 expect(driverRegister.includes("lat: coords.lat, lng: coords.lng"), "driver location must be persisted");
 
 if (failures.length) {

@@ -4,16 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { driverRouteGuard } from "@/lib/route-guards";
 import { DriverShell, useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { CheckCircle2, Clock, Truck, Wallet, Star, MapPin, Loader2, BadgeDollarSign, Phone, MessageCircle, Navigation } from "lucide-react";
-import { notifyUser, ORDER_EVENT_MESSAGES, shortId, type NotificationType } from "@/lib/notifications";
 import { ORDER_STATUS_LABELS, orderStatusLabel } from "@/lib/order-status";
-
-const STEP_TO_NOTIF: Record<string, NotificationType | undefined> = {
-  on_the_way: "order_on_way",
-  arrived: "order_arrived",
-  delivering: "order_unloading",
-  payment_collected: "order_payment_collected",
-  completed: "order_completed",
-};
 
 export const Route = createFileRoute("/driver/")({
   ...driverRouteGuard,
@@ -115,12 +106,6 @@ function DriverHome() {
         if (error) throw error;
       }
 
-      // إشعار العميل بكل تقدم
-      const t = STEP_TO_NOTIF[step.next];
-      if (t && active.customer_id) {
-        const msg = ORDER_EVENT_MESSAGES[t]!;
-        await notifyUser(active.customer_id, active.id, t, msg.title, msg.body(shortId(active.id)));
-      }
     } catch (e: any) {
       alert("تعذر تحديث الطلب: " + (e?.message || "خطأ غير متوقع"));
     } finally {

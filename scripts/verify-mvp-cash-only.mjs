@@ -22,7 +22,7 @@ const navChecks = [
   ["src/components/CustomerBottomNav.tsx", ["/customer/wallet"]],
   ["src/components/DriverShell.tsx", ["/driver/earnings"]],
   ["src/components/AdminShell.tsx", [
-    "/admin/commissions", "/admin/finance", "/admin/wallet-topups",
+    "/admin/finance", "/admin/wallet-topups",
     "/admin/payment-methods", "/admin/driver-withdrawals",
   ]],
 ];
@@ -48,7 +48,6 @@ for (const p of ["/admin\"", "/admin/orders", "/admin/drivers", "/admin/customer
 const redirects = [
   ["src/routes/customer.wallet.tsx", "/customer"],
   ["src/routes/driver.earnings.tsx", "/driver"],
-  ["src/routes/admin.commissions.tsx", "/admin"],
   ["src/routes/admin.finance.tsx", "/admin"],
   ["src/routes/admin.wallet-topups.tsx", "/admin"],
   ["src/routes/admin.payment-methods.tsx", "/admin"],
@@ -58,6 +57,14 @@ for (const [file, to] of redirects) {
   const src = read(file);
   expect(src.includes(`beforeLoad: deferredFeatureGuard("${to}")`), `${file} must redirect to ${to} in beforeLoad`);
 }
+// Driver commission accounting is operational even while customer wallet features stay deferred.
+const commissions = read("src/routes/admin.commissions.tsx");
+expect(commissions.includes("...adminRouteGuard"), "admin.commissions must remain admin-only");
+expect(commissions.includes('value="fixed"') && commissions.includes('value="percentage"'),
+  "admin.commissions must support fixed and percentage rules");
+expect(commissions.includes("free_until") && commissions.includes("commission_value: 0"),
+  "admin.commissions must support a free introductory period and zero commission");
+
 const guards = read("src/lib/route-guards.ts");
 expect(/export function deferredFeatureGuard/.test(guards) && /throw redirect/.test(guards),
   "deferredFeatureGuard must throw a redirect");
