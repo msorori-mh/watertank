@@ -56,7 +56,7 @@ const STATUS_LABEL: Record<
 };
 
 const ACTIVE_STATUSES = new Set([
-  "pending", "approved", "assigned", "on_the_way", "arrived", "delivering",
+  "pending", "approved", "assigned", "accepted", "on_the_way", "arrived", "delivering", "payment_collected",
 ]);
 
 function getGreeting(h: number) {
@@ -97,6 +97,27 @@ function CustomerHome() {
       setOrders(ords || []);
       setLoading(false);
     })();
+
+    const channel = supabase
+      .channel(`customer-home-orders-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders", filter: `customer_id=eq.${user.id}` },
+        async () => {
+          const { data } = await supabase
+            .from("orders")
+            .select("id,city,capacity,water_type,status,price,created_at")
+            .eq("customer_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(20);
+          setOrders(data || []);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const handleSignOut = async () => { await signOut(); nav({ to: "/" }); };
