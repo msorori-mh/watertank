@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { adminRouteGuard } from "@/lib/route-guards";
 import { Loader2, CheckCircle2, XCircle, Plus, KeyRound } from "lucide-react";
-import { notifyUser, DRIVER_ACCOUNT_MESSAGES } from "@/lib/notifications";
 
 export const Route = createFileRoute("/admin/drivers")({
   ...adminRouteGuard,
@@ -52,14 +51,6 @@ function AdminDrivers() {
     const { error } = await supabase.from("drivers").update(patch).eq("id", driver.id);
     if (error) { setMessage({ kind: "error", text: "تعذر التحديث: " + error.message }); return; }
 
-    const decision =
-      patch.license_status === "approved" ? "driver_approved"
-      : patch.license_status === "rejected" ? "driver_rejected"
-      : null;
-    if (decision && driver.user_id) {
-      const msg = DRIVER_ACCOUNT_MESSAGES[decision];
-      await notifyUser(driver.user_id, null, decision, msg.title, msg.body);
-    }
     await load();
   };
 
