@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_requests: {
+        Row: {
+          completed_at: string | null
+          id: string
+          phone: string
+          reason: string | null
+          requested_at: string
+          requester_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          phone: string
+          reason?: string | null
+          requested_at?: string
+          requester_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          phone?: string
+          reason?: string | null
+          requested_at?: string
+          requester_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       addresses: {
         Row: {
           city: string
@@ -1113,6 +1149,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      request_account_deletion: {
+        Args: { _phone: string; _reason?: string; _requester_type?: string }
+        Returns: string
       }
       request_driver_withdrawal: {
         Args: { _payment_method_notes?: string }
