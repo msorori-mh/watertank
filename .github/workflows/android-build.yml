@@ -75,15 +75,54 @@ jobs:
       - name: Build web assets and sync Android
         run: bun run android:sync
 
+      - name: Generate first Google Play upload key
+        if: github.event_name == 'pull_request' && github.head_ref == 'codex/first-signed-google-play-release'
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          STORE_PASSWORD="$(openssl rand -hex 24)"
+          KEY_ALIAS="wayetmaa-upload"
+          echo "::add-mask::$STORE_PASSWORD"
+          keytool -genkeypair -v \
+            -keystore upload-keystore.jks \
+            -storepass "$STORE_PASSWORD" \
+            -keypass "$STORE_PASSWORD" \
+            -alias "$KEY_ALIAS" \
+            -keyalg RSA \
+            -keysize 4096 \
+            -validity 10000 \
+            -dname "CN=Wayet Maa, OU=Mobile, O=SysTrac, L=Marib, C=YE"
+          {
+            echo "WAYETMAA_KEYSTORE_PATH=upload-keystore.jks"
+            echo "WAYETMAA_KEYSTORE_PASSWORD=$STORE_PASSWORD"
+            echo "WAYETMAA_KEY_ALIAS=$KEY_ALIAS"
+            echo "WAYETMAA_KEY_PASSWORD=$STORE_PASSWORD"
+          } >> "$GITHUB_ENV"
+          {
+            echo "App: وايت ماء"
+            echo "Application ID: app.wayetmaa.mobile"
+            echo "Key alias: $KEY_ALIAS"
+            echo "Keystore password: $STORE_PASSWORD"
+            echo "Key password: $STORE_PASSWORD"
+            echo "Keep this file and upload-keystore.jks secure. They are required for every update."
+          } > upload-key-credentials.txt
+          keytool -list -v -keystore upload-keystore.jks -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" > upload-key-certificate.txt
+
       - name: Build debug APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
 
-      - name: Build unsigned release AAB
+      - name: Build release AAB
         working-directory: android
         run: ./gradlew --no-daemon bundleRelease
+
+      - name: Verify signed Google Play AAB
+        if: github.event_name == 'pull_request' && github.head_ref == 'codex/first-signed-google-play-release'
+        working-directory: android
+        run: jarsigner -verify -verbose -certs app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -93,7 +132,21 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Upload signed Google Play release package
+        if: github.event_name == 'pull_request' && github.head_ref == 'codex/first-signed-google-play-release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayetmaa-google-play-signed-release
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/upload-keystore.jks
+            android/upload-key-credentials.txt
+            android/upload-key-certificate.txt
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Upload unsigned release AAB
+        if: github.event_name != 'pull_request' || github.head_ref != 'codex/first-signed-google-play-release'
         uses: actions/upload-artifact@v4
         with:
           name: wayetmaa-unsigned-release-aab
