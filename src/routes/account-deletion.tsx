@@ -173,7 +173,9 @@ function AccountDeletionPage() {
 
         <section className="rounded-2xl bg-card shadow-[var(--shadow-soft)] p-4">
           <h2 className="font-display font-bold text-base mb-2">روابط مهمة</h2>
-          <div className="grid gap-2">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Link to="/customer/login" className="rounded-xl bg-primary py-2.5 text-center font-bold text-primary-foreground">دخول العميل</Link>
+            <Link to="/driver/login" className="rounded-xl border-2 border-primary/20 py-2.5 text-center font-bold text-primary">دخول السائق</Link>
             <Link to="/privacy" className="rounded-xl border border-border py-2.5 text-center font-bold">سياسة الخصوصية</Link>
             <Link to="/" className="rounded-xl border border-border py-2.5 text-center font-bold">العودة إلى وايت ماء</Link>
           </div>
