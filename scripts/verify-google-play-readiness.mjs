@@ -34,36 +34,29 @@ for (const f of ["src/routes/customer.settings.tsx", "src/routes/driver.settings
   expect(src.includes("DeleteAccountCard"), `${f} must render DeleteAccountCard`);
 }
 
-// 3) pending (unapplied) migration
-const pendingDir = "db/pending-migrations";
-const file = readdirSync(pendingDir).find((f) => /2026082\d.*account_deletion/.test(f));
-expect(Boolean(file), "missing pending account deletion migration in db/pending-migrations");
-if (file) {
-  const sql = read(`${pendingDir}/${file}`);
-  expect(/CREATE OR REPLACE FUNCTION public\.delete_my_account\(\)/.test(sql), "migration must define public.delete_my_account()");
-  expect(/SECURITY DEFINER/.test(sql), "delete_my_account must be SECURITY DEFINER");
-  expect(/SET search_path =/.test(sql), "delete_my_account must set a safe search_path");
-  expect(/auth\.uid\(\)/.test(sql) && /uid IS NULL/.test(sql), "must use auth.uid() and reject null");
-  expect(/role = 'admin'/.test(sql) && /RAISE EXCEPTION/.test(sql), "must refuse admin accounts");
-  expect(/REVOKE ALL ON FUNCTION public\.delete_my_account\(\) FROM PUBLIC/.test(sql), "must revoke from PUBLIC");
-  expect(/GRANT EXECUTE ON FUNCTION public\.delete_my_account\(\) TO authenticated/.test(sql), "must grant execute to authenticated");
-  expect(/DELETE FROM auth\.users WHERE id = uid/.test(sql), "must delete the auth user");
-  for (const t of ["driver_withdrawal_requests", "drivers", "addresses", "notifications", "orders", "wallet_transactions", "wallet_topups", "wallets", "user_roles", "profiles"]) {
-    expect(sql.includes(t), `migration must handle ${t}`);
-  }
-  expect(!/session_replication_role|DISABLE TRIGGER|ALTER TABLE[^\n]*DROP CONSTRAINT/i.test(sql),
-    "migration must not disable triggers or bypass FKs");
-}
+// 3) applied migration contract for in-app and public web deletion
 const appliedDir = "supabase/migrations";
-if (existsSync(appliedDir)) {
-  const applied = readdirSync(appliedDir).filter((f) => /delete_my_account|account_deletion/.test(f));
-  expect(applied.length === 0, "account deletion migration must stay pending, not in supabase/migrations");
-  for (const f of readdirSync(appliedDir)) {
-    if (f.endsWith(".sql")) {
-      expect(!read(`${appliedDir}/${f}`).includes("delete_my_account"), `delete_my_account must not appear in applied migration ${f}`);
-    }
-  }
+const deletionMigration = readdirSync(appliedDir).find((f) => /google_play_account_deletion_web/.test(f));
+expect(Boolean(deletionMigration), "missing applied Google Play account-deletion migration");
+if (deletionMigration) {
+  const sql = read(`${appliedDir}/${deletionMigration}`);
+  expect(/CREATE TABLE IF NOT EXISTS public\.account_deletion_requests/.test(sql), "missing private deletion-request table");
+  expect(/ENABLE ROW LEVEL SECURITY/.test(sql), "deletion requests must enable RLS");
+  expect(/REVOKE ALL ON TABLE public\.account_deletion_requests FROM PUBLIC, anon, authenticated/.test(sql),
+    "deletion-request rows must not be readable by public clients");
+  expect(/CREATE OR REPLACE FUNCTION public\.request_account_deletion/.test(sql), "missing public web request RPC");
+  expect(/GRANT EXECUTE ON FUNCTION public\.request_account_deletion\(text, text, text\) TO anon, authenticated/.test(sql),
+    "web request RPC must be callable from the public page");
+  expect(/CREATE OR REPLACE FUNCTION public\.delete_my_account\(\)/.test(sql), "missing authenticated delete_my_account RPC");
+  expect(/SECURITY DEFINER/.test(sql) && /SET search_path =/.test(sql), "deletion RPCs must be security definer with safe search_path");
+  expect(/DELETE FROM auth\.users WHERE id = uid/.test(sql), "in-app deletion must remove the Auth identity");
+  expect(!/session_replication_role|DISABLE TRIGGER|ALTER TABLE[^\n]*DROP CONSTRAINT/i.test(sql),
+    "migration must not disable triggers or bypass foreign keys");
 }
+expect(deletion.includes("request_account_deletion"), "public deletion page must submit a web deletion request");
+expect(deletion.includes("إرسال طلب حذف الحساب"), "public deletion page must expose a prominent request action");
+expect(deletion.includes("إرسال الطلب لا يتطلب تثبيت التطبيق"), "public deletion page must work without reinstalling the app");
+expect(deletion.includes('maxLength={9}'), "public deletion page must validate Yemeni local phone length");
 
 // 4) capacitor: bundled production app, HTTPS only, no live-reload server url
 const cap = read("capacitor.config.ts");

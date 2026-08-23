@@ -73,8 +73,9 @@ function PrivacyPage() {
             الحساب المرتبطة بك نهائياً (الملف الشخصي، العناوين، الطلبات، الإشعارات، وبيانات السائق إن وُجدت).
           </p>
           <p className="mt-2">
-            تفاصيل الخطوات متاحة في صفحة{" "}
-            <Link to="/account-deletion" className="text-primary font-bold underline">حذف الحساب</Link>.
+            إذا لم يعد التطبيق مثبتاً أو تعذّر تسجيل الدخول، يمكنك تقديم الطلب مباشرةً من نموذج الويب في صفحة{" "}
+            <Link to="/account-deletion" className="text-primary font-bold underline">حذف الحساب والبيانات</Link>.
+            نتحقق من ملكية رقم الهاتف قبل معالجة الطلب، ولا نكشف عبر النموذج ما إذا كان الرقم مسجلاً.
           </p>
         </Block>
 

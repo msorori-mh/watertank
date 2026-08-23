@@ -13,7 +13,6 @@ export const Route = createFileRoute("/customer/settings")({
 });
 
 const APP_VERSION = "1.0.0";
-const SUPPORT_PHONE = "+967777000000";
 
 function CustomerSettings() {
   const nav = useNavigate();
@@ -162,18 +161,13 @@ function CustomerSettings() {
         {/* Support */}
         <Card>
           <SectionTitle icon={MessageCircle}>الدعم</SectionTitle>
-          <p className="text-xs text-muted-foreground mt-1 mb-3">نحن هنا لخدمتك في أي وقت 💙</p>
-          <div className="grid grid-cols-2 gap-2">
-            <a href={`https://wa.me/${SUPPORT_PHONE.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer"
-              className="rounded-xl bg-emerald-500 text-white py-2.5 text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition shadow-sm">
-              <MessageCircle className="h-4 w-4" /> واتساب
-            </a>
-            <a href={`tel:${SUPPORT_PHONE}`}
-              className="rounded-xl border-2 border-primary/20 text-primary py-2.5 text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition">
-              <Phone className="h-4 w-4" /> اتصال
-            </a>
-          </div>
-          <p className="text-[11px] text-center text-muted-foreground mt-2.5" dir="ltr">{SUPPORT_PHONE}</p>
+          <p className="mt-1 text-xs leading-6 text-muted-foreground">
+            للدعم التشغيلي استخدم مركز المساعدة داخل التطبيق. ولحذف الحساب دون تسجيل دخول استخدم صفحة حذف الحساب والبيانات.
+          </p>
+          <Link to="/account-deletion"
+            className="mt-3 flex items-center justify-center rounded-xl border-2 border-primary/20 py-2.5 text-sm font-bold text-primary">
+            حذف الحساب والبيانات
+          </Link>
         </Card>
 
         {/* App */}
