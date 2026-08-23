@@ -16,7 +16,7 @@ export function PhonePasswordAuth({
 }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("+967");
+  const [localPhone, setLocalPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,9 +28,19 @@ export function PhonePasswordAuth({
   const accent = driver ? "bg-[#1a5276]" : "bg-primary";
   const focus = driver ? "focus:border-[#1a5276]" : "focus:border-primary";
 
+  const fullPhone = `+967${localPhone}`;
+
+  const updateLocalPhone = (value: string) => {
+    let digits = value.replace(/\D/g, "");
+    if (digits.startsWith("00967")) digits = digits.slice(5);
+    else if (digits.startsWith("967")) digits = digits.slice(3);
+    if (digits.startsWith("0")) digits = digits.slice(1);
+    setLocalPhone(digits.slice(0, 9));
+  };
+
   const submit = async () => {
     setError("");
-    if (!/^\+?\d{9,15}$/.test(phone.replace(/\s/g, ""))) {
+    if (!/^7\d{8}$/.test(localPhone)) {
       setError("ادخل رقم هاتف صحيح");
       return;
     }
@@ -47,9 +57,9 @@ export function PhonePasswordAuth({
     setLoading(true);
     try {
       if (mode === "register") {
-        await signUpWithPhonePassword(phone, password, name.trim(), portal);
+        await signUpWithPhonePassword(fullPhone, password, name.trim(), portal);
       } else {
-        await signInWithPhonePassword(phone, password);
+        await signInWithPhonePassword(fullPhone, password);
       }
       await onAuthenticated(mode);
     } catch (e: any) {
@@ -112,18 +122,28 @@ export function PhonePasswordAuth({
           </div>
         )}
 
-        <div className="relative">
-          <Phone className="absolute right-4 top-4 h-5 w-5 text-muted-foreground" />
-          <input
-            dir="ltr"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+967 7XX XXX XXX"
-            className={`w-full rounded-2xl border-2 border-input bg-card py-4 pr-12 pl-4 text-left focus:outline-none ${focus}`}
-          />
+        <div className="relative" dir="ltr">
+          <Phone className="absolute left-4 top-4 z-10 h-5 w-5 text-muted-foreground" />
+          <div className={`flex w-full overflow-hidden rounded-2xl border-2 border-input bg-card focus-within:outline-none ${focus}`}>
+            <span
+              className="flex items-center border-r border-input bg-muted/60 px-4 font-semibold text-deep"
+              aria-label="رمز دولة اليمن الثابت"
+            >
+              +967
+            </span>
+            <input
+              dir="ltr"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              value={localPhone}
+              onChange={(e) => updateLocalPhone(e.target.value)}
+              placeholder="7XX XXX XXX"
+              maxLength={9}
+              aria-label="رقم الهاتف اليمني بدون رمز الدولة"
+              className="min-w-0 flex-1 bg-transparent py-4 pr-12 pl-4 text-left focus:outline-none"
+            />
+          </div>
         </div>
 
         <div className="relative">
