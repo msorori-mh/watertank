@@ -24,6 +24,11 @@ expect(/signUp\(\{[\s\S]*?phone: formatted,[\s\S]*?password/.test(auth),
 expect(shared.includes('portal: Portal'), "shared customer/driver auth form missing");
 expect(shared.includes("كلمة المرور يجب ألا تقل عن ٨ أحرف"), "password minimum missing");
 expect(shared.includes("كلمتا المرور غير متطابقتين"), "password confirmation missing");
+expect(shared.includes('aria-label="رمز دولة اليمن الثابت"'), "Yemen +967 prefix must be rendered as a fixed, non-editable element");
+expect(shared.includes('const fullPhone = `+967${localPhone}`;'), "authentication must compose the canonical +967 phone number internally");
+expect(shared.includes('maxLength={9}'), "local Yemeni phone input must be limited to nine digits");
+expect(shared.includes('/^7\\d{8}$/'), "local Yemeni mobile number must start with 7 and contain nine digits");
+expect(!shared.includes('value={phone}'), "country prefix must not be stored inside the editable input");
 expect(!customerLogin.includes("sendOtp"), "customer login must not call OTP");
 expect(!driverLogin.includes("sendOtp"), "driver login must not call OTP");
 expect(!customerLogin.includes("signInWithGoogle"), "customer pilot login must not expose Google");
