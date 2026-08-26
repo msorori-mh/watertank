@@ -1,1 +1,92 @@
+name: Security Scan
 
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semgrep:
+    name: Semgrep OWASP
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Semgrep
+        run: |
+          pip install --disable-pip-version-check \
+            opentelemetry-instrumentation-requests==0.58b0 \
+            opentelemetry-instrumentation-threading==0.58b0 \
+            opentelemetry-instrumentation==0.58b0 \
+            opentelemetry-semantic-conventions==0.58b0 \
+            opentelemetry-util-http==0.58b0 \
+            semgrep==1.174.0
+
+      - name: Scan application and workflows
+        env:
+          SEMGREP_SEND_METRICS: "off"
+          SEMGREP_ENABLE_VERSION_CHECK: "0"
+        run: |
+          curl --fail --silent --show-error --location \
+            https://semgrep.dev/c/p/owasp-top-ten \
+            --output /tmp/semgrep-owasp.yml
+          semgrep scan \
+            --config /tmp/semgrep-owasp.yml \
+            --json \
+            --output /tmp/semgrep-results.json \
+            .
+          node scripts/verify-semgrep-results.mjs /tmp/semgrep-results.json
+
+  gitleaks:
+    name: Gitleaks full history
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan Git history
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trivy:
+    name: Trivy dependencies and configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Fail on actionable critical or high findings
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
