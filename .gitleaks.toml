@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Supabase anon JWT deliberately embedded in the public client"
+regexTarget = "match"
+regexes = [
+  '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjdHlubmN0bW15eXNvY3F4d2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTcxMzYsImV4cCI6MjA5NDI3MzEzNn0\.s4x0s4pmbu5tZHtKFBYH8X9_0RccTm1trEp6nL8eJmU'''
+]

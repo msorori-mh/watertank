@@ -36,10 +36,10 @@ jobs:
           test -n "$SUPABASE_DB_PASSWORD" || { echo "::error::Missing SUPABASE_DB_PASSWORD"; exit 1; }
 
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@ad077b4817fff9ecc3c1fd20d271ec351e2d7244 # v1.7.1
         with:
           version: latest
 
