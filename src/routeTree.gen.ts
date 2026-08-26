@@ -9,48 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as AccountDeletionRouteImport } from './routes/account-deletion'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DriverIndexRouteImport } from './routes/driver.index'
-import { Route as CustomerIndexRouteImport } from './routes/customer.index'
+import { Route as AccountDeletionRouteImport } from './routes/account-deletion'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as DriverSettingsRouteImport } from './routes/driver.settings'
-import { Route as DriverReportsRouteImport } from './routes/driver.reports'
-import { Route as DriverRegisterRouteImport } from './routes/driver.register'
-import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
-import { Route as DriverLoginRouteImport } from './routes/driver.login'
-import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
-import { Route as CustomerWalletRouteImport } from './routes/customer.wallet'
-import { Route as CustomerSettingsRouteImport } from './routes/customer.settings'
-import { Route as CustomerReportsRouteImport } from './routes/customer.reports'
-import { Route as CustomerOrderRouteImport } from './routes/customer.order'
-import { Route as CustomerLoginRouteImport } from './routes/customer.login'
-import { Route as CustomerAddressesRouteImport } from './routes/customer.addresses'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as AdminWalletTopupsRouteImport } from './routes/admin.wallet-topups'
-import { Route as AdminReportsRouteImport } from './routes/admin.reports'
-import { Route as AdminPaymentMethodsRouteImport } from './routes/admin.payment-methods'
-import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
-import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
-import { Route as AdminDriverWithdrawalsRouteImport } from './routes/admin.driver-withdrawals'
-import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
-import { Route as AdminCommissionsRouteImport } from './routes/admin.commissions'
 import { Route as AdminCitiesRouteImport } from './routes/admin.cities'
-import { Route as CustomerProfileCompleteRouteImport } from './routes/customer.profile.complete'
+import { Route as AdminCommissionsRouteImport } from './routes/admin.commissions'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminDriverWithdrawalsRouteImport } from './routes/admin.driver-withdrawals'
+import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
+import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminPaymentMethodsRouteImport } from './routes/admin.payment-methods'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminWalletTopupsRouteImport } from './routes/admin.wallet-topups'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as CustomerIndexRouteImport } from './routes/customer.index'
+import { Route as CustomerAddressesRouteImport } from './routes/customer.addresses'
+import { Route as CustomerLoginRouteImport } from './routes/customer.login'
+import { Route as CustomerOrderRouteImport } from './routes/customer.order'
+import { Route as CustomerReportsRouteImport } from './routes/customer.reports'
+import { Route as CustomerSettingsRouteImport } from './routes/customer.settings'
+import { Route as CustomerWalletRouteImport } from './routes/customer.wallet'
+import { Route as DriverIndexRouteImport } from './routes/driver.index'
+import { Route as DriverEarningsRouteImport } from './routes/driver.earnings'
+import { Route as DriverLoginRouteImport } from './routes/driver.login'
+import { Route as DriverOrdersRouteImport } from './routes/driver.orders'
+import { Route as DriverRegisterRouteImport } from './routes/driver.register'
+import { Route as DriverReportsRouteImport } from './routes/driver.reports'
+import { Route as DriverSettingsRouteImport } from './routes/driver.settings'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
+import { Route as CustomerProfileCompleteRouteImport } from './routes/customer.profile.complete'
 
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountDeletionRoute = AccountDeletionRouteImport.update({
@@ -58,19 +53,14 @@ const AccountDeletionRoute = AccountDeletionRouteImport.update({
   path: '/account-deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DriverIndexRoute = DriverIndexRouteImport.update({
-  id: '/driver/',
-  path: '/driver/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomerIndexRoute = CustomerIndexRouteImport.update({
-  id: '/customer/',
-  path: '/customer/',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -78,114 +68,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DriverSettingsRoute = DriverSettingsRouteImport.update({
-  id: '/driver/settings',
-  path: '/driver/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DriverReportsRoute = DriverReportsRouteImport.update({
-  id: '/driver/reports',
-  path: '/driver/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DriverRegisterRoute = DriverRegisterRouteImport.update({
-  id: '/driver/register',
-  path: '/driver/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DriverOrdersRoute = DriverOrdersRouteImport.update({
-  id: '/driver/orders',
-  path: '/driver/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DriverLoginRoute = DriverLoginRouteImport.update({
-  id: '/driver/login',
-  path: '/driver/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DriverEarningsRoute = DriverEarningsRouteImport.update({
-  id: '/driver/earnings',
-  path: '/driver/earnings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomerWalletRoute = CustomerWalletRouteImport.update({
-  id: '/customer/wallet',
-  path: '/customer/wallet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomerSettingsRoute = CustomerSettingsRouteImport.update({
-  id: '/customer/settings',
-  path: '/customer/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomerReportsRoute = CustomerReportsRouteImport.update({
-  id: '/customer/reports',
-  path: '/customer/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomerOrderRoute = CustomerOrderRouteImport.update({
-  id: '/customer/order',
-  path: '/customer/order',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomerLoginRoute = CustomerLoginRouteImport.update({
-  id: '/customer/login',
-  path: '/customer/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomerAddressesRoute = CustomerAddressesRouteImport.update({
-  id: '/customer/addresses',
-  path: '/customer/addresses',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminWalletTopupsRoute = AdminWalletTopupsRouteImport.update({
-  id: '/admin/wallet-topups',
-  path: '/admin/wallet-topups',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminReportsRoute = AdminReportsRouteImport.update({
-  id: '/admin/reports',
-  path: '/admin/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPaymentMethodsRoute = AdminPaymentMethodsRouteImport.update({
-  id: '/admin/payment-methods',
-  path: '/admin/payment-methods',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminOrdersRoute = AdminOrdersRouteImport.update({
-  id: '/admin/orders',
-  path: '/admin/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFinanceRoute = AdminFinanceRouteImport.update({
-  id: '/admin/finance',
-  path: '/admin/finance',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminDriversRoute = AdminDriversRouteImport.update({
-  id: '/admin/drivers',
-  path: '/admin/drivers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminDriverWithdrawalsRoute = AdminDriverWithdrawalsRouteImport.update({
-  id: '/admin/driver-withdrawals',
-  path: '/admin/driver-withdrawals',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCustomersRoute = AdminCustomersRouteImport.update({
-  id: '/admin/customers',
-  path: '/admin/customers',
+const AdminCitiesRoute = AdminCitiesRouteImport.update({
+  id: '/admin/cities',
+  path: '/admin/cities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCommissionsRoute = AdminCommissionsRouteImport.update({
@@ -193,19 +78,134 @@ const AdminCommissionsRoute = AdminCommissionsRouteImport.update({
   path: '/admin/commissions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminCitiesRoute = AdminCitiesRouteImport.update({
-  id: '/admin/cities',
-  path: '/admin/cities',
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/admin/customers',
+  path: '/admin/customers',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CustomerProfileCompleteRoute = CustomerProfileCompleteRouteImport.update({
-  id: '/customer/profile/complete',
-  path: '/customer/profile/complete',
+const AdminDriverWithdrawalsRoute = AdminDriverWithdrawalsRouteImport.update({
+  id: '/admin/driver-withdrawals',
+  path: '/admin/driver-withdrawals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDriversRoute = AdminDriversRouteImport.update({
+  id: '/admin/drivers',
+  path: '/admin/drivers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/admin/finance',
+  path: '/admin/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPaymentMethodsRoute = AdminPaymentMethodsRouteImport.update({
+  id: '/admin/payment-methods',
+  path: '/admin/payment-methods',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWalletTopupsRoute = AdminWalletTopupsRouteImport.update({
+  id: '/admin/wallet-topups',
+  path: '/admin/wallet-topups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerIndexRoute = CustomerIndexRouteImport.update({
+  id: '/customer/',
+  path: '/customer/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerAddressesRoute = CustomerAddressesRouteImport.update({
+  id: '/customer/addresses',
+  path: '/customer/addresses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerLoginRoute = CustomerLoginRouteImport.update({
+  id: '/customer/login',
+  path: '/customer/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerOrderRoute = CustomerOrderRouteImport.update({
+  id: '/customer/order',
+  path: '/customer/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerReportsRoute = CustomerReportsRouteImport.update({
+  id: '/customer/reports',
+  path: '/customer/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerSettingsRoute = CustomerSettingsRouteImport.update({
+  id: '/customer/settings',
+  path: '/customer/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerWalletRoute = CustomerWalletRouteImport.update({
+  id: '/customer/wallet',
+  path: '/customer/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverIndexRoute = DriverIndexRouteImport.update({
+  id: '/driver/',
+  path: '/driver/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverEarningsRoute = DriverEarningsRouteImport.update({
+  id: '/driver/earnings',
+  path: '/driver/earnings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverLoginRoute = DriverLoginRouteImport.update({
+  id: '/driver/login',
+  path: '/driver/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverOrdersRoute = DriverOrdersRouteImport.update({
+  id: '/driver/orders',
+  path: '/driver/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverRegisterRoute = DriverRegisterRouteImport.update({
+  id: '/driver/register',
+  path: '/driver/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverReportsRoute = DriverReportsRouteImport.update({
+  id: '/driver/reports',
+  path: '/driver/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverSettingsRoute = DriverSettingsRouteImport.update({
+  id: '/driver/settings',
+  path: '/driver/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
   id: '/customer/orders/$id',
   path: '/customer/orders/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerProfileCompleteRoute = CustomerProfileCompleteRouteImport.update({
+  id: '/customer/profile/complete',
+  path: '/customer/profile/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -461,18 +461,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account-deletion': {
@@ -482,25 +475,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/driver/': {
-      id: '/driver/'
-      path: '/driver'
-      fullPath: '/driver/'
-      preLoaderRoute: typeof DriverIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customer/': {
-      id: '/customer/'
-      path: '/customer'
-      fullPath: '/customer/'
-      preLoaderRoute: typeof CustomerIndexRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -510,158 +496,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/driver/settings': {
-      id: '/driver/settings'
-      path: '/driver/settings'
-      fullPath: '/driver/settings'
-      preLoaderRoute: typeof DriverSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/driver/reports': {
-      id: '/driver/reports'
-      path: '/driver/reports'
-      fullPath: '/driver/reports'
-      preLoaderRoute: typeof DriverReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/driver/register': {
-      id: '/driver/register'
-      path: '/driver/register'
-      fullPath: '/driver/register'
-      preLoaderRoute: typeof DriverRegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/driver/orders': {
-      id: '/driver/orders'
-      path: '/driver/orders'
-      fullPath: '/driver/orders'
-      preLoaderRoute: typeof DriverOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/driver/login': {
-      id: '/driver/login'
-      path: '/driver/login'
-      fullPath: '/driver/login'
-      preLoaderRoute: typeof DriverLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/driver/earnings': {
-      id: '/driver/earnings'
-      path: '/driver/earnings'
-      fullPath: '/driver/earnings'
-      preLoaderRoute: typeof DriverEarningsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customer/wallet': {
-      id: '/customer/wallet'
-      path: '/customer/wallet'
-      fullPath: '/customer/wallet'
-      preLoaderRoute: typeof CustomerWalletRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customer/settings': {
-      id: '/customer/settings'
-      path: '/customer/settings'
-      fullPath: '/customer/settings'
-      preLoaderRoute: typeof CustomerSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customer/reports': {
-      id: '/customer/reports'
-      path: '/customer/reports'
-      fullPath: '/customer/reports'
-      preLoaderRoute: typeof CustomerReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customer/order': {
-      id: '/customer/order'
-      path: '/customer/order'
-      fullPath: '/customer/order'
-      preLoaderRoute: typeof CustomerOrderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customer/login': {
-      id: '/customer/login'
-      path: '/customer/login'
-      fullPath: '/customer/login'
-      preLoaderRoute: typeof CustomerLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customer/addresses': {
-      id: '/customer/addresses'
-      path: '/customer/addresses'
-      fullPath: '/customer/addresses'
-      preLoaderRoute: typeof CustomerAddressesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/wallet-topups': {
-      id: '/admin/wallet-topups'
-      path: '/admin/wallet-topups'
-      fullPath: '/admin/wallet-topups'
-      preLoaderRoute: typeof AdminWalletTopupsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/reports': {
-      id: '/admin/reports'
-      path: '/admin/reports'
-      fullPath: '/admin/reports'
-      preLoaderRoute: typeof AdminReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/payment-methods': {
-      id: '/admin/payment-methods'
-      path: '/admin/payment-methods'
-      fullPath: '/admin/payment-methods'
-      preLoaderRoute: typeof AdminPaymentMethodsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/orders': {
-      id: '/admin/orders'
-      path: '/admin/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AdminOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/finance': {
-      id: '/admin/finance'
-      path: '/admin/finance'
-      fullPath: '/admin/finance'
-      preLoaderRoute: typeof AdminFinanceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/drivers': {
-      id: '/admin/drivers'
-      path: '/admin/drivers'
-      fullPath: '/admin/drivers'
-      preLoaderRoute: typeof AdminDriversRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/driver-withdrawals': {
-      id: '/admin/driver-withdrawals'
-      path: '/admin/driver-withdrawals'
-      fullPath: '/admin/driver-withdrawals'
-      preLoaderRoute: typeof AdminDriverWithdrawalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/customers': {
-      id: '/admin/customers'
-      path: '/admin/customers'
-      fullPath: '/admin/customers'
-      preLoaderRoute: typeof AdminCustomersRouteImport
+    '/admin/cities': {
+      id: '/admin/cities'
+      path: '/admin/cities'
+      fullPath: '/admin/cities'
+      preLoaderRoute: typeof AdminCitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/commissions': {
@@ -671,18 +510,172 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCommissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/cities': {
-      id: '/admin/cities'
-      path: '/admin/cities'
-      fullPath: '/admin/cities'
-      preLoaderRoute: typeof AdminCitiesRouteImport
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/admin/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/customer/profile/complete': {
-      id: '/customer/profile/complete'
-      path: '/customer/profile/complete'
-      fullPath: '/customer/profile/complete'
-      preLoaderRoute: typeof CustomerProfileCompleteRouteImport
+    '/admin/driver-withdrawals': {
+      id: '/admin/driver-withdrawals'
+      path: '/admin/driver-withdrawals'
+      fullPath: '/admin/driver-withdrawals'
+      preLoaderRoute: typeof AdminDriverWithdrawalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/drivers': {
+      id: '/admin/drivers'
+      path: '/admin/drivers'
+      fullPath: '/admin/drivers'
+      preLoaderRoute: typeof AdminDriversRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/admin/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/payment-methods': {
+      id: '/admin/payment-methods'
+      path: '/admin/payment-methods'
+      fullPath: '/admin/payment-methods'
+      preLoaderRoute: typeof AdminPaymentMethodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/wallet-topups': {
+      id: '/admin/wallet-topups'
+      path: '/admin/wallet-topups'
+      fullPath: '/admin/wallet-topups'
+      preLoaderRoute: typeof AdminWalletTopupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/': {
+      id: '/customer/'
+      path: '/customer'
+      fullPath: '/customer/'
+      preLoaderRoute: typeof CustomerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/addresses': {
+      id: '/customer/addresses'
+      path: '/customer/addresses'
+      fullPath: '/customer/addresses'
+      preLoaderRoute: typeof CustomerAddressesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/login': {
+      id: '/customer/login'
+      path: '/customer/login'
+      fullPath: '/customer/login'
+      preLoaderRoute: typeof CustomerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/order': {
+      id: '/customer/order'
+      path: '/customer/order'
+      fullPath: '/customer/order'
+      preLoaderRoute: typeof CustomerOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/reports': {
+      id: '/customer/reports'
+      path: '/customer/reports'
+      fullPath: '/customer/reports'
+      preLoaderRoute: typeof CustomerReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/settings': {
+      id: '/customer/settings'
+      path: '/customer/settings'
+      fullPath: '/customer/settings'
+      preLoaderRoute: typeof CustomerSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/wallet': {
+      id: '/customer/wallet'
+      path: '/customer/wallet'
+      fullPath: '/customer/wallet'
+      preLoaderRoute: typeof CustomerWalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/': {
+      id: '/driver/'
+      path: '/driver'
+      fullPath: '/driver/'
+      preLoaderRoute: typeof DriverIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/earnings': {
+      id: '/driver/earnings'
+      path: '/driver/earnings'
+      fullPath: '/driver/earnings'
+      preLoaderRoute: typeof DriverEarningsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/login': {
+      id: '/driver/login'
+      path: '/driver/login'
+      fullPath: '/driver/login'
+      preLoaderRoute: typeof DriverLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/orders': {
+      id: '/driver/orders'
+      path: '/driver/orders'
+      fullPath: '/driver/orders'
+      preLoaderRoute: typeof DriverOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/register': {
+      id: '/driver/register'
+      path: '/driver/register'
+      fullPath: '/driver/register'
+      preLoaderRoute: typeof DriverRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/reports': {
+      id: '/driver/reports'
+      path: '/driver/reports'
+      fullPath: '/driver/reports'
+      preLoaderRoute: typeof DriverReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver/settings': {
+      id: '/driver/settings'
+      path: '/driver/settings'
+      fullPath: '/driver/settings'
+      preLoaderRoute: typeof DriverSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customer/orders/$id': {
@@ -690,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/customer/orders/$id'
       fullPath: '/customer/orders/$id'
       preLoaderRoute: typeof CustomerOrdersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/profile/complete': {
+      id: '/customer/profile/complete'
+      path: '/customer/profile/complete'
+      fullPath: '/customer/profile/complete'
+      preLoaderRoute: typeof CustomerProfileCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
