@@ -54,6 +54,7 @@ jobs:
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
 
       - name: Resolve patched dependency lockfile
+        # Temporary CI-only lock resolution; removed after the artifact is committed.
         run: bun install --lockfile-only
 
       - name: Upload generated dependency lockfile
