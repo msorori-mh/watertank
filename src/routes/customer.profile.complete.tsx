@@ -15,6 +15,7 @@ function CompleteProfile() {
   const [user, setUser] = useState<any>(null);
   const [cities, setCities] = useState<{ id: string; name: string }[]>([]);
   const [name, setName] = useState("");
+  const [nameInputReady, setNameInputReady] = useState(false);
   const [localPhone, setLocalPhone] = useState("");
   const [city, setCity] = useState("");
   const [addrTitle, setAddrTitle] = useState("المنزل");
@@ -118,7 +119,10 @@ function CompleteProfile() {
             <User className="h-3 w-3" /> الاسم
           </label>
           <input value={name} onChange={(e) => setName(e.target.value)}
-            autoComplete="name" placeholder="اكتب اسمك الكامل"
+            name="customer-entered-full-name" autoComplete="off" readOnly={!nameInputReady}
+            data-1p-ignore data-lpignore="true"
+            onFocus={() => { setName(""); setNameInputReady(true); }}
+            placeholder="اكتب اسمك الكامل"
             className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none" />
         </div>
 
