@@ -32,6 +32,12 @@ expect(callback.includes('select("city,phone")') && callback.includes('.from("ad
   "customer callback must require profile and address completion");
 expect(!/setName\(prof\.name/.test(customerProfile),
   "customer profile completion must not prefill the name from Google/email profile data");
+expect(/const \[name, setName\] = useState\(["']{2}\)/.test(customerProfile),
+  "customer profile completion name state must start empty");
+expect(/autoComplete=["']off["']/.test(customerProfile) && !/autoComplete=["']name["']/.test(customerProfile),
+  "customer full-name input must opt out of browser and Android autofill");
+expect(/readOnly=\{!nameInputReady\}/.test(customerProfile) && /onFocus=\{\(\) => \{ setName\(["']{2}\)/.test(customerProfile),
+  "customer full-name input must stay autofill-locked until the customer focuses it");
 expect(/placeholder="اكتب اسمك الكامل"/.test(customerProfile),
   "customer profile completion must explicitly ask for the customer's full name");
 expect(guards.includes('provider !== "google"'), "portal guards must reject non-Google sessions");
