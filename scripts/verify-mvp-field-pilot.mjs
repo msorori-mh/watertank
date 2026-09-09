@@ -6,6 +6,14 @@ const read = (p) => readFileSync(p, "utf8");
 const failures = [];
 const expect = (cond, msg) => { if (!cond) failures.push(msg); };
 
+// 0) landing page makes the customer journey primary and explicit on mobile
+const landing = read("src/routes/index.tsx");
+for (const copy of [
+  "اطلب وايت ماء إلى موقعك", "حدّد موقعك", "اعرف السعر", "تابع الطلب",
+  "المتابعة كعميل بحساب Google", "دخول السائق", "دفع نقدي عند الاستلام",
+]) expect(landing.includes(copy), `landing page must include: ${copy}`);
+expect(!landing.includes("في أقل من ساعة"), "landing page must not promise an unverified delivery time");
+
 // 1) driver registration collects plate / capacity / city and states the approval gate
 const reg = read("src/routes/driver.register.tsx");
 expect(/vehicle_plate:\s*plate/.test(reg), "driver.register must submit vehicle_plate");

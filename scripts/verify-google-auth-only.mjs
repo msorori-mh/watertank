@@ -8,6 +8,7 @@ const customer = read("src/routes/customer.login.tsx");
 const driver = read("src/routes/driver.login.tsx");
 const google = read("src/lib/google-auth.ts");
 const callback = read("src/routes/auth.callback.tsx");
+const customerProfile = read("src/routes/customer.profile.complete.tsx");
 const bridge = read("src/lib/mobile-oauth.ts");
 const manifest = read("android/app/src/main/AndroidManifest.xml");
 const guards = read("src/lib/route-guards.ts");
@@ -29,6 +30,10 @@ expect(manifest.includes('android:host="auth"'), "Android OAuth host missing");
 expect(/provider\s*!==\s*["']google["']/.test(callback), "callback must reject non-Google users");
 expect(callback.includes('select("city,phone")') && callback.includes('.from("addresses")'),
   "customer callback must require profile and address completion");
+expect(!/setName\(prof\.name/.test(customerProfile),
+  "customer profile completion must not prefill the name from Google/email profile data");
+expect(/placeholder="اكتب اسمك الكامل"/.test(customerProfile),
+  "customer profile completion must explicitly ask for the customer's full name");
 expect(guards.includes('provider !== "google"'), "portal guards must reject non-Google sessions");
 expect(restore.includes('"/customer/profile/complete"'), "session restore must gate incomplete customer profiles");
 expect(admin.includes("adminLogin") && /signInWithPassword/.test(auth), "admin password login must remain available");

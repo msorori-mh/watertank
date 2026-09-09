@@ -37,7 +37,6 @@ function CompleteProfile() {
       ]);
       setCities(c || []);
       if (prof) {
-        setName(prof.name || "");
         setLocalPhone(normalizeYemeniLocalPhone(prof.phone || ""));
         setCity(prof.city || "");
       }
@@ -119,6 +118,7 @@ function CompleteProfile() {
             <User className="h-3 w-3" /> الاسم
           </label>
           <input value={name} onChange={(e) => setName(e.target.value)}
+            autoComplete="name" placeholder="اكتب اسمك الكامل"
             className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none" />
         </div>
 
