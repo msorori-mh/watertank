@@ -16,9 +16,6 @@ jobs:
     name: Build and verify signed APK and AAB
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    env:
-      VITE_SUPABASE_URL: https://actynnctmmyysocqxwdi.supabase.co
-      VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjdHlubmN0bW15eXNvY3F4d2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTcxMzYsImV4cCI6MjA5NDI3MzEzNn0.s4x0s4pmbu5tZHtKFBYH8X9_0RccTm1trEp6nL8eJmU
 
     steps:
       - name: Checkout merged application source
@@ -41,6 +38,16 @@ jobs:
 
       - name: Install Android API 36
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+
+      - name: Load public app configuration
+        run: |
+          APP_URL="$(awk '$1 == "VITE_SUPABASE_URL:" {print $2; exit}' .github/workflows/android-build.yml)"
+          APP_KEY="$(awk '$1 == "VITE_SUPABASE_PUBLISHABLE_KEY:" {print $2; exit}' .github/workflows/android-build.yml)"
+          test -n "$APP_URL" && test -n "$APP_KEY"
+          {
+            echo "VITE_SUPABASE_URL=$APP_URL"
+            echo "VITE_SUPABASE_PUBLISHABLE_KEY=$APP_KEY"
+          } >> "$GITHUB_ENV"
 
       - name: Restore original upload key
         env:
