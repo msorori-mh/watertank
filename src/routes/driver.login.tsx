@@ -1,7 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import { PhonePasswordAuth } from "@/components/PhonePasswordAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { GoogleOnlyAuth } from "@/components/GoogleOnlyAuth";
 import { useSessionRestore } from "@/lib/session-restore";
 
 export const Route = createFileRoute("/driver/login")({
@@ -9,7 +8,6 @@ export const Route = createFileRoute("/driver/login")({
 });
 
 function DriverLogin() {
-  const nav = useNavigate();
   const restoring = useSessionRestore();
 
   if (restoring) {
@@ -26,19 +24,7 @@ function DriverLogin() {
       </header>
 
       <main className="flex-1 px-6 py-6 flex items-center max-w-md mx-auto w-full">
-        <PhonePasswordAuth
-          portal="driver"
-          onAuthenticated={async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("تعذّر التحقق من الجلسة");
-            const { data: driverRow } = await supabase
-              .from("drivers")
-              .select("id")
-              .eq("user_id", user.id)
-              .maybeSingle();
-            nav({ to: driverRow ? "/driver" : "/driver/register" });
-          }}
-        />
+        <GoogleOnlyAuth portal="driver" />
       </main>
     </div>
   );

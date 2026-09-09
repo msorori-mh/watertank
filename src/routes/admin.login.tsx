@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { adminLogin } from "@/lib/wayet-auth";
+import { adminLogin } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, Shield, Loader2 } from "lucide-react";
 

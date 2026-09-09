@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { signOut } from "@/lib/wayet-auth";
+import { signOut } from "@/lib/auth";
 import { useDriverGate, DriverLoading } from "@/components/DriverShell";
 import { driverRouteGuard } from "@/lib/route-guards";
 import { DeleteAccountCard } from "@/components/DeleteAccountCard";

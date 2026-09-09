@@ -1,4 +1,6 @@
-import { lovable } from "@/integrations/lovable/index";
+import { Browser } from "@capacitor/browser";
+import { Capacitor } from "@capacitor/core";
+import { supabase } from "@/integrations/supabase/client";
 
 export type PendingRole = "customer" | "driver";
 const KEY = "wayet_pending_role";
@@ -15,12 +17,28 @@ export const clearPendingRole = () => {
 
 export const signInWithGoogle = async (role: PendingRole) => {
   setPendingRole(role);
-  const result = await lovable.auth.signInWithOAuth("google", {
-    redirect_uri: `${window.location.origin}/auth/callback`,
+  const native = Capacitor.isNativePlatform();
+  const redirectTo = native
+    ? "app.wayetmaa.mobile://auth/callback"
+    : `${window.location.origin}/auth/callback`;
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo,
+      skipBrowserRedirect: native,
+      queryParams: { prompt: "select_account" },
+    },
   });
-  if (result.error) {
+  if (error) {
     clearPendingRole();
-    throw result.error instanceof Error ? result.error : new Error(String(result.error));
+    throw error;
   }
-  return result;
+  if (native) {
+    if (!data.url) {
+      clearPendingRole();
+      throw new Error("تعذّر فتح تسجيل الدخول عبر Google.");
+    }
+    await Browser.open({ url: data.url, presentationStyle: "popover" });
+  }
+  return data;
 };

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Loader2, User, MapPin, Crosshair } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { customerRouteGuard } from "@/lib/route-guards";
+import { isValidYemeniLocalPhone, normalizeYemeniLocalPhone, toYemeniInternationalPhone } from "@/lib/yemeni-phone";
 
 export const Route = createFileRoute("/customer/profile/complete")({
   ...customerRouteGuard,
@@ -14,11 +15,12 @@ function CompleteProfile() {
   const [user, setUser] = useState<any>(null);
   const [cities, setCities] = useState<{ id: string; name: string }[]>([]);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [localPhone, setLocalPhone] = useState("");
   const [city, setCity] = useState("");
   const [addrTitle, setAddrTitle] = useState("المنزل");
   const [description, setDescription] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [addressId, setAddressId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -28,15 +30,23 @@ function CompleteProfile() {
       const { data: s } = await supabase.auth.getSession();
       if (!s.session) { nav({ to: "/customer/login" }); return; }
       setUser(s.session.user);
-      const [{ data: prof }, { data: c }] = await Promise.all([
+      const [{ data: prof }, { data: c }, { data: address }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", s.session.user.id).maybeSingle(),
         supabase.from("cities").select("id,name").eq("is_active", true).order("name"),
+        supabase.from("addresses").select("id,title,city,description,lat,lng").eq("user_id", s.session.user.id).eq("is_default", true).maybeSingle(),
       ]);
       setCities(c || []);
       if (prof) {
         setName(prof.name || "");
-        setPhone(prof.phone || "");
+        setLocalPhone(normalizeYemeniLocalPhone(prof.phone || ""));
         setCity(prof.city || "");
+      }
+      if (address) {
+        setAddressId(address.id);
+        setAddrTitle(address.title || "المنزل");
+        setDescription(address.description || "");
+        setCity((current) => current || address.city || "");
+        setCoords({ lat: address.lat, lng: address.lng });
       }
       setLoading(false);
     })();
@@ -53,7 +63,7 @@ function CompleteProfile() {
   const save = async () => {
     setError("");
     if (!name.trim()) return setError("ادخل اسمك");
-    if (!phone.trim()) return setError("ادخل رقم الهاتف");
+    if (!isValidYemeniLocalPhone(localPhone)) return setError("ادخل رقم هاتف يمني صحيح يبدأ بالرقم 7");
     if (!city) return setError("اختر المدينة");
     if (!addrTitle.trim()) return setError("اكتب اسم العنوان");
     if (!description.trim()) return setError("اكتب وصف العنوان");
@@ -62,14 +72,14 @@ function CompleteProfile() {
     try {
       const { error: pErr } = await supabase.from("profiles").update({
         name: name.trim(),
-        phone: phone.trim(),
+        phone: toYemeniInternationalPhone(localPhone),
         city,
         lat: coords.lat,
         lng: coords.lng,
       } as any).eq("id", user.id);
       if (pErr) throw pErr;
 
-      const { error: addressError } = await supabase.from("addresses").insert({
+      const addressPayload = {
           user_id: user.id,
           title: addrTitle.trim(),
           city,
@@ -77,7 +87,11 @@ function CompleteProfile() {
           lat: coords.lat,
           lng: coords.lng,
           is_default: true,
-        });
+        };
+      const addressRequest = addressId
+        ? supabase.from("addresses").update(addressPayload).eq("id", addressId).eq("user_id", user.id)
+        : supabase.from("addresses").insert(addressPayload);
+      const { error: addressError } = await addressRequest;
       if (addressError) throw addressError;
       nav({ to: "/customer" });
     } catch (e: any) { setError(e.message); }
@@ -110,9 +124,12 @@ function CompleteProfile() {
 
         <div>
           <label className="text-xs font-semibold text-muted-foreground mb-1 block">رقم الهاتف</label>
-          <input dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)}
-            placeholder="+967 7XX XXX XXX"
-            className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none" />
+          <div dir="ltr" className="flex overflow-hidden rounded-xl border-2 border-input bg-card focus-within:border-primary">
+            <span className="flex items-center border-r border-input bg-muted/60 px-4 font-semibold">+967</span>
+            <input value={localPhone} onChange={(e) => setLocalPhone(normalizeYemeniLocalPhone(e.target.value))}
+              inputMode="numeric" maxLength={9} placeholder="7XX XXX XXX"
+              className="min-w-0 flex-1 px-4 py-3 text-left focus:outline-none" />
+          </div>
         </div>
 
         <div>
