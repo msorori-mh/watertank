@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { driverRouteGuard } from "@/lib/route-guards";
+import { driverOnboardingRouteGuard } from "@/lib/route-guards";
 import { Truck, Loader2, Crosshair, MapPin } from "lucide-react";
 import { TANK_CAPACITIES, formatCapacity } from "@/lib/capacities";
+import { isValidYemeniLocalPhone, normalizeYemeniLocalPhone, toYemeniInternationalPhone } from "@/lib/yemeni-phone";
 
 export const Route = createFileRoute("/driver/register")({
-  ...driverRouteGuard,
+  ...driverOnboardingRouteGuard,
   component: DriverRegister,
 });
 
@@ -15,7 +16,7 @@ function DriverRegister() {
   const [user, setUser] = useState<any>(null);
   const [cities, setCities] = useState<{ name: string }[]>([]);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [localPhone, setLocalPhone] = useState("");
   const [city, setCity] = useState("");
   const [plate, setPlate] = useState("");
   const [capacity, setCapacity] = useState(5000);
@@ -29,7 +30,7 @@ function DriverRegister() {
       if (!data.session) { nav({ to: "/driver/login" }); return; }
       setUser(data.session.user);
       const { data: prof } = await supabase.from("profiles").select("phone,name").eq("id", data.session.user.id).maybeSingle();
-      if (prof?.phone) setPhone(prof.phone);
+      if (prof?.phone) setLocalPhone(normalizeYemeniLocalPhone(prof.phone));
       if (prof?.name) setName(prof.name);
       const { data: c } = await supabase.from("cities").select("name").eq("is_active", true).order("name");
       setCities(c || []);
@@ -59,19 +60,20 @@ function DriverRegister() {
     setError("");
     // MVP-FIELD-PILOT-01: explicit per-field validation for the vehicle data.
     if (!name.trim()) return setError("الاسم الكامل مطلوب");
-    if (!phone.trim()) return setError("رقم الهاتف مطلوب");
+    if (!localPhone.trim()) return setError("رقم الهاتف مطلوب");
+    if (!isValidYemeniLocalPhone(localPhone)) return setError("ادخل رقم هاتف يمني صحيح يبدأ بالرقم 7");
     if (!city) return setError("اختر المدينة / منطقة العمل");
     if (!plate.trim()) return setError("رقم لوحة المركبة مطلوب");
     if (!capacity || capacity <= 0) return setError("اختر سعة الوايت باللتر");
     if (!coords) return setError("حدد موقع تمركز الوايت على الخريطة");
     setLoading(true);
     const { error: profileError } = await supabase.from("profiles").update({
-      name: name.trim(), phone: phone.trim(), city, lat: coords.lat, lng: coords.lng,
+      name: name.trim(), phone: toYemeniInternationalPhone(localPhone), city, lat: coords.lat, lng: coords.lng,
     } as any).eq("id", user.id);
     if (profileError) { setLoading(false); setError(profileError.message); return; }
     const { error: e } = await supabase.from("drivers").insert({
       user_id: user.id,
-      name, phone, city, vehicle_plate: plate, vehicle_capacity: capacity,
+      name: name.trim(), phone: toYemeniInternationalPhone(localPhone), city, vehicle_plate: plate, vehicle_capacity: capacity,
     });
     if (e) { setLoading(false); setError(e.message); return; }
     await supabase.rpc("assign_initial_role", { _role: "driver" });
@@ -98,8 +100,12 @@ function DriverRegister() {
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">رقم الهاتف</label>
-            <input dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-xl border-2 border-input px-4 py-3 focus:border-[#1a5276] focus:outline-none" />
+            <div dir="ltr" className="flex overflow-hidden rounded-xl border-2 border-input focus-within:border-[#1a5276]">
+              <span className="flex items-center border-r border-input bg-muted/60 px-4 font-semibold">+967</span>
+              <input value={localPhone} onChange={(e) => setLocalPhone(normalizeYemeniLocalPhone(e.target.value))}
+                inputMode="numeric" maxLength={9} placeholder="7XX XXX XXX"
+                className="min-w-0 flex-1 px-4 py-3 text-left focus:outline-none" />
+            </div>
           </div>
 
           {/* MVP-FIELD-PILOT-01: vehicle data section + approval gate notice */}

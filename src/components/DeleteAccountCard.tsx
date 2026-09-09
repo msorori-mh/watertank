@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { signOut } from "@/lib/wayet-auth";
+import { signOut } from "@/lib/auth";
 import { AlertTriangle, Loader2, Trash2, X } from "lucide-react";
 
 export const DELETE_CONFIRM_PHRASE = "حذف حسابي";

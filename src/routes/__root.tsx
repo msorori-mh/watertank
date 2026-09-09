@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   Outlet,
   Link,
@@ -9,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { initializeMobileOAuth } from "@/lib/mobile-oauth";
 
 function NotFoundComponent() {
   return (
@@ -32,7 +34,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
   const router = useRouter();
 
@@ -120,6 +122,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    let cleanup = () => undefined;
+    void initializeMobileOAuth().then((remove) => { cleanup = remove; });
+    return () => cleanup();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import { PhonePasswordAuth } from "@/components/PhonePasswordAuth";
+import { GoogleOnlyAuth } from "@/components/GoogleOnlyAuth";
 import { useSessionRestore } from "@/lib/session-restore";
 
 export const Route = createFileRoute("/customer/login")({
@@ -8,7 +8,6 @@ export const Route = createFileRoute("/customer/login")({
 });
 
 function CustomerLogin() {
-  const nav = useNavigate();
   const restoring = useSessionRestore();
 
   if (restoring) {
@@ -25,12 +24,7 @@ function CustomerLogin() {
       </header>
 
       <main className="flex-1 px-6 py-6 flex items-center max-w-md mx-auto w-full">
-        <PhonePasswordAuth
-          portal="customer"
-          onAuthenticated={async (mode) => {
-            nav({ to: mode === "register" ? "/customer/profile/complete" : "/customer" });
-          }}
-        />
+        <GoogleOnlyAuth portal="customer" />
       </main>
     </div>
   );

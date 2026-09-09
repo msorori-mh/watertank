@@ -13,11 +13,12 @@
     "android:verify": "node scripts/verify-android-play-readiness.mjs",
     "format": "prettier --write .",
     "build:android": "vite build --config vite.android.config.ts",
-    "auth:verify": "node scripts/verify-pilot-phone-password.mjs"
+    "auth:verify": "node scripts/verify-google-auth-only.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
     "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.3",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
     "@capacitor/geolocation": "^8.2.2",

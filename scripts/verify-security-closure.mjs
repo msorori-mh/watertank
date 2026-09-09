@@ -7,7 +7,7 @@ const file = readdirSync(dir).find((f) => f.includes("mvp01_security_closure"));
 if (!file) fail("migration file missing in " + dir);
 const sql = readFileSync(`${dir}/${file}`, "utf8");
 const login = readFileSync("src/routes/admin.login.tsx", "utf8");
-const auth = readFileSync("src/lib/wayet-auth.ts", "utf8");
+const auth = readFileSync("src/lib/auth.ts", "utf8");
 
 const failures = [];
 function expect(cond, msg) { if (!cond) failures.push(msg); }
@@ -33,12 +33,9 @@ expect(!/notifications\.user_id = o\.customer_id OR notifications\.user_id = d\.
 expect(!/DROP POLICY IF EXISTS "admin updates orders"/.test(sql), "admin updates orders policy must stay untouched");
 
 expect(!/adminSignup|setupCode|promote_to_admin/.test(login), "admin signup / setup code still present in admin.login.tsx");
-expect(!/adminSignup|promote_to_admin/.test(auth), "adminSignup / promote_to_admin still present in wayet-auth.ts");
-
-// TEMP (trial phase): demo auth is intentionally enabled in production via src/lib/demo-flag.ts.
-// Must be flipped back to false (and this check restored to dev-only) before public launch.
-const demoLine = auth.split("\n").find((l) => /const DEMO_MODE\s*=/.test(l)) ?? "";
-expect(/DEMO_AUTH_ENABLED/.test(demoLine), "DEMO_MODE must be controlled by DEMO_AUTH_ENABLED flag");
+expect(!/adminSignup|promote_to_admin/.test(auth), "adminSignup / promote_to_admin still present in auth.ts");
+expect(!/DEMO_MODE|DEMO_OTP|PHONE_PASSWORD_PILOT|signInWithOtp|verifyOtp/.test(auth),
+  "production auth must not contain demo, OTP, or phone/password pilot paths");
 
 
 if (failures.length) {

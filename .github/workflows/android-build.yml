@@ -30,7 +30,6 @@ jobs:
     env:
       VITE_SUPABASE_URL: https://actynnctmmyysocqxwdi.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjdHlubmN0bW15eXNvY3F4d2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTcxMzYsImV4cCI6MjA5NDI3MzEzNn0.s4x0s4pmbu5tZHtKFBYH8X9_0RccTm1trEp6nL8eJmU
-      VITE_PHONE_PASSWORD_PILOT: "true"
 
     steps:
       - name: Checkout source
@@ -66,7 +65,7 @@ jobs:
       - name: Verify Google Play readiness
         run: node scripts/verify-google-play-readiness.mjs
 
-      - name: Verify pilot phone/password auth
+      - name: Verify Google-only auth
         run: bun run auth:verify
 
       - name: Verify Android readiness

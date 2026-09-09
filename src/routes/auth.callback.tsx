@@ -35,7 +35,7 @@ function AuthCallback() {
       }
 
       // Driver-only account cannot use customer Google login
-      if (intended === "customer" && existing.includes("driver") && !existing.includes("customer")) {
+      if (intended === "customer" && existing.includes("driver")) {
         clearPendingRole();
         await supabase.auth.signOut();
         setError("هذا الحساب مسجل كسائق. استخدم بوابة السائق أو حساباً آخر.");
@@ -54,7 +54,7 @@ function AuthCallback() {
         .maybeSingle();
 
       if (!existingProfile) {
-        await supabase.from("profiles").insert({
+        const { error: profileError } = await supabase.from("profiles").insert({
           id: userId,
           email,
           name: fullName,
@@ -62,12 +62,14 @@ function AuthCallback() {
           phone: null,
           avatar_url: avatar,
         } as any);
+        if (profileError) throw profileError;
       } else {
         const patch: any = {};
         if (!existingProfile.name && fullName) patch.name = fullName;
         if (!existingProfile.avatar_url && avatar) patch.avatar_url = avatar;
         if (Object.keys(patch).length) {
-          await supabase.from("profiles").update(patch).eq("id", userId);
+          const { error: profileError } = await supabase.from("profiles").update(patch).eq("id", userId);
+          if (profileError) throw profileError;
         }
       }
 
@@ -92,17 +94,41 @@ function AuthCallback() {
           .maybeSingle();
         nav({ to: drv ? "/driver" : "/driver/register" });
       } else {
-        const { data: prof } = await supabase.from("profiles")
-          .select("city").eq("id", userId).maybeSingle();
-        nav({ to: prof?.city ? "/customer" : "/customer/profile/complete" });
+        const [{ data: prof }, { data: address }] = await Promise.all([
+          supabase.from("profiles").select("city,phone").eq("id", userId).maybeSingle(),
+          supabase.from("addresses").select("id").eq("user_id", userId).eq("is_default", true).maybeSingle(),
+        ]);
+        nav({ to: prof?.city && prof?.phone && address ? "/customer" : "/customer/profile/complete" });
       }
     };
 
     const run = async () => {
-      // Wait briefly for setSession from the lovable wrapper, or read it directly
+      const params = new URLSearchParams(window.location.search);
+      const callbackError = params.get("oauth_error") || params.get("error_description") || params.get("error");
+      if (callbackError) {
+        setError(callbackError);
+        return;
+      }
+
+      const code = params.get("code");
+      const current = await supabase.auth.getSession();
+      if (code && !current.data.session) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (exchangeError) {
+          setError(exchangeError.message);
+          return;
+        }
+      }
+
       for (let i = 0; i < 30 && !cancelled; i++) {
         const { data } = await supabase.auth.getSession();
         if (data.session?.user) {
+          const provider = data.session.user.app_metadata?.provider;
+          if (provider !== "google") {
+            await supabase.auth.signOut();
+            setError("الدخول للعميل والسائق متاح عبر Google فقط.");
+            return;
+          }
           await finalize(
             data.session.user.id,
             data.session.user.email ?? null,

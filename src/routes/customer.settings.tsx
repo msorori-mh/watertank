@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { signOut } from "@/lib/wayet-auth";
+import { signOut } from "@/lib/auth";
 import { ChevronRight, Loader2, LogOut, User, Bell, Info, Save, CheckCircle2, MapPin, MessageCircle, Phone, ChevronLeft, Pencil, X } from "lucide-react";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
 import { DeleteAccountCard } from "@/components/DeleteAccountCard";

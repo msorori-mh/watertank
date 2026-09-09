@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { signOut } from "@/lib/wayet-auth";
+import { signOut } from "@/lib/auth";
 import { LayoutDashboard, ClipboardList, Truck, MapPin, Users, BarChart3, LogOut, Loader2, Percent } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
