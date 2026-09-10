@@ -284,7 +284,7 @@ function AddressEditor({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center" onClick={onClose}>
-      <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto"
+      <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto safe-bottom-sheet"
         onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 bg-card border-b border-border px-5 py-3 flex items-center justify-between">
           <h2 className="font-display font-bold">{existing ? "تعديل العنوان" : "عنوان جديد"}</h2>
