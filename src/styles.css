@@ -44,6 +44,7 @@
 }
 
 :root {
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
   --radius: 1rem;
   /* Sky blue refreshing palette */
   --background: oklch(0.974 0.018 230);          /* #e0f2fe tint */
@@ -69,6 +70,13 @@
   --destructive-foreground: oklch(1 0 0);
 }
 
+/* Android 15 may draw a Capacitor WebView behind the system navigation bar
+   without exposing a non-zero CSS safe-area inset (notably on Samsung
+   three-button navigation). Keep bottom controls above that bar. */
+html.platform-android {
+  --app-safe-bottom: max(env(safe-area-inset-bottom, 0px), 3rem);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -89,7 +97,7 @@
     overscroll-behavior-y: none;
     /* safe-area على الهواتف ذات الحواف المنحنية / النوتش */
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: var(--app-safe-bottom);
   }
 
   /* أزرار وروابط بحد أدنى مريح للمس على الجوال */
@@ -104,8 +112,10 @@
 }
 
 /* أدوات مساعدة للـ safe-area داخل العناصر الثابتة */
-.safe-pb { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+.safe-pb { padding-bottom: max(var(--app-safe-bottom), 0.5rem); }
 .safe-pt { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+.safe-fixed-bottom { padding-bottom: calc(1rem + var(--app-safe-bottom)); }
+.safe-bottom-sheet { padding-bottom: max(var(--app-safe-bottom), 1rem); }
 
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
