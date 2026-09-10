@@ -223,7 +223,7 @@ function TopupModal({ userId, onClose, onDone }: { userId: string; onClose: () =
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-0 md:p-4" onClick={onClose}>
-      <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-y-auto safe-bottom-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="p-5 border-b border-border flex items-center justify-between sticky top-0 bg-white">
           <h2 className="font-display font-bold">تعبئة الرصيد</h2>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-muted"><X className="h-4 w-4" /></button>
