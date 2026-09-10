@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { Capacitor } from "@capacitor/core";
 import {
   Outlet,
   Link,
@@ -124,9 +125,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    const isAndroid = Capacitor.getPlatform() === "android";
+    if (isAndroid) document.documentElement.classList.add("platform-android");
     let cleanup = () => undefined;
     void initializeMobileOAuth().then((remove) => { cleanup = remove; });
-    return () => cleanup();
+    return () => {
+      cleanup();
+      if (isAndroid) document.documentElement.classList.remove("platform-android");
+    };
   }, []);
 
   return (
