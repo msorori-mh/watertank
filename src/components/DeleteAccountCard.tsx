@@ -62,7 +62,7 @@ export function DeleteAccountCard() {
 
       {open && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm" onClick={close}>
-          <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} dir="rtl">
+          <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 safe-bottom-sheet max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} dir="rtl">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display font-bold text-base text-destructive">تأكيد حذف الحساب</h3>
               <button onClick={close} className="p-1.5 rounded-lg hover:bg-muted" aria-label="إغلاق">

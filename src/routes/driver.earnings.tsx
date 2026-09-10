@@ -121,7 +121,7 @@ function DriverEarnings() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowForm(false)}>
-          <div className="bg-white rounded-2xl p-5 w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl p-5 safe-bottom-sheet w-full max-w-md" onClick={e => e.stopPropagation()}>
             <h3 className="font-display font-bold text-lg mb-2">طلب سحب</h3>
             <p className="text-sm text-muted-foreground mb-3">سيتم طلب سحب {availableTotal.toLocaleString("ar-EG")} ر.ي (كامل المتاح).</p>
             <textarea

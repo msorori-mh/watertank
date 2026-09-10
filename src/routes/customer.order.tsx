@@ -249,7 +249,7 @@ function NewOrder() {
         {error && <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{error}</p>}
       </main>
 
-      <div className="fixed bottom-0 inset-x-0 bg-card border-t border-border p-4">
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border px-4 pt-4 safe-fixed-bottom">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <div className="flex-1">
             <p className="text-xs text-muted-foreground">الإجمالي • نقداً عند الاستلام</p>
