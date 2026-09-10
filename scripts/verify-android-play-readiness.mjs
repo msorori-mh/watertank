@@ -22,6 +22,11 @@ const appGradle = read("android/app/build.gradle");
 const manifest = read("android/app/src/main/AndroidManifest.xml");
 const strings = read("android/app/src/main/res/values/strings.xml");
 const cap = read("capacitor.config.ts");
+const rootRoute = read("src/routes/__root.tsx");
+const styles = read("src/styles.css");
+const orderRoute = read("src/routes/customer.order.tsx");
+const customerNav = read("src/components/CustomerBottomNav.tsx");
+const driverShell = read("src/components/DriverShell.tsx");
 
 // 1) package id + app name
 expect(/applicationId ["']app\.wayetmaa\.mobile["']/.test(appGradle), "applicationId must be app.wayetmaa.mobile");
@@ -107,6 +112,19 @@ expect(
   pkg.scripts["android:sync"].startsWith("bun run build:android"),
   "android:sync must build the official SPA shell first",
 );
+
+// 8) Android system navigation must not cover fixed bottom actions.
+expect(rootRoute.includes('Capacitor.getPlatform() === "android"') && rootRoute.includes('classList.add("platform-android")'),
+  "root route must mark the native Android platform for safe-area fallback");
+expect(/html\.platform-android[\s\S]*--app-safe-bottom:[^;]*3rem/.test(styles),
+  "Android must reserve a navigation-bar fallback when CSS safe-area is zero");
+expect(styles.includes(".safe-fixed-bottom") && styles.includes(".safe-bottom-sheet"),
+  "fixed actions and bottom sheets must have reusable safe-bottom utilities");
+expect(/fixed bottom-0[\s\S]{0,160}safe-fixed-bottom/.test(orderRoute),
+  "customer order confirmation bar must stay above Android navigation");
+expect(customerNav.includes("safe-pb"), "customer bottom navigation must use the safe bottom inset");
+expect(/fixed bottom-0[\s\S]{0,160}safe-pb/.test(driverShell),
+  "driver bottom navigation must use the safe bottom inset");
 
 const viteConfig = read("vite.android.config.ts");
 const assetPrep = read("scripts/prepare-android-web-assets.mjs");
