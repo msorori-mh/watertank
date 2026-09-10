@@ -198,7 +198,7 @@ function CustomerSettings() {
       {/* Edit sheet */}
       {editOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setEditOpen(false)}>
-          <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto animate-slide-up" onClick={(e) => e.stopPropagation()} dir="rtl">
+          <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 safe-bottom-sheet max-h-[90vh] overflow-y-auto animate-slide-up" onClick={(e) => e.stopPropagation()} dir="rtl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display font-bold text-lg">تعديل الحساب</h2>
               <button onClick={() => setEditOpen(false)} className="p-1.5 rounded-lg hover:bg-muted">
