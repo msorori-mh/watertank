@@ -40,7 +40,7 @@ export function DriverShell({
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <header className="bg-[#1a5276] text-white px-5 pt-6 pb-8 rounded-b-3xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -66,7 +66,7 @@ export function DriverShell({
         {children}
       </main>
 
-      <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-border">
+      <nav className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-border safe-pb">
         <div className="max-w-md mx-auto flex">
           {tabs.map(t => {
             const Icon = t.icon;
