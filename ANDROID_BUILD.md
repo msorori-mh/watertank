@@ -12,7 +12,7 @@
 | اسم التطبيق | وايت ماء |
 | compileSdk / targetSdk | 36 |
 | minSdk | 24 (الحد المدعوم مع Capacitor 8) |
-| versionCode / versionName | 1 / 1.0.0 |
+| versionCode / versionName | 2 / 1.0.0 |
 | الصلاحيات | `INTERNET`, `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION` فقط |
 
 الصلاحيات غير المطلوبة (وممنوعة): `ACCESS_BACKGROUND_LOCATION` وأي صلاحيات تخزين/وسائط.
