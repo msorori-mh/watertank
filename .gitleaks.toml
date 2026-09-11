@@ -1,7 +1,7 @@
 [extend]
 useDefault = true
 
-[[allowlists]]
+[allowlist]
 description = "Supabase anon JWT deliberately embedded in the public client"
 regexTarget = "match"
 regexes = [

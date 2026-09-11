@@ -23,7 +23,7 @@
 - التطبيق React 19 + TanStack Start + Capacitor 8.
 - حزمة Android: `app.wayetmaa.mobile`.
 - `minSdk 24` و`targetSdk 36`.
-- الإصدار الحالي: `versionName 1.0.0` و`versionCode 1`.
+- الإصدار الحالي: `versionName 1.0.0` و`versionCode 2`.
 - التطبيق يحزم الواجهة داخله؛ لا توجد `server.url` ولا واجهة تحميل حي من موقع خارجي.
 - تسجيل العميل والسائق عبر Google فقط. دخول الإدارة يبقى بكلمة مرور.
 - OAuth في Android يعود عبر `app.wayetmaa.mobile://auth/callback`.
@@ -131,7 +131,7 @@
 
 - شغّل: تثبيت Bun مقفل، عقود المشروع، Security Scan، بناء الويب، مزامنة Capacitor، Release AAB وAPK اختبار.
 - تحقق من محتوى الحزمة نفسها، لا من ملفات المصدر فقط.
-- استخدم `versionCode 1` لأول رفع فقط. إذا سبق إنشاء إصدار بهذا الرقم في Play Console فارفعه إلى 2.
+- `versionCode 1` مستهلك سابقًا في Play Console، لذا الرقم الحالي هو 2. ارفعه مجددًا إن كان 2 مستهلكًا أيضًا.
 - وثّق SHA-256 للحزمة، SHA الخاص بالمصدر، وبيانات شهادة التوقيع.
 
 ### G5 — إعداد Google Play Console

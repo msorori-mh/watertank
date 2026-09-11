@@ -39,7 +39,8 @@ expect(/compileSdkVersion = 36/.test(vars), "compileSdk must be 36");
 expect(/targetSdkVersion = 36/.test(vars), "targetSdk must be 36");
 const min = Number((vars.match(/minSdkVersion = (\d+)/) || [])[1]);
 expect(min >= 23, `minSdk must stay at Capacitor's supported floor (got ${min})`);
-expect(/versionCode 1\b/.test(appGradle), "versionCode must be 1");
+// versionCode 1 was already consumed by an earlier Play Console upload.
+expect(/versionCode 2\b/.test(appGradle), "versionCode must be 2");
 expect(/versionName "1\.0\.0"/.test(appGradle), 'versionName must be "1.0.0"');
 
 // 3) permissions
