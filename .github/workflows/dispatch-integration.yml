@@ -1,0 +1,28 @@
+name: Dispatch integration
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'db/**'
+      - 'tests/dispatch/**'
+      - 'scripts/test-dispatch-candidate.mjs'
+      - '.github/workflows/dispatch-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install locked test dependencies
+        run: npm ci --prefix tests/dispatch --ignore-scripts --no-audit --no-fund
+      - name: Start isolated local PostgreSQL
+        run: |
+          sudo systemctl start postgresql
+          sudo -u postgres createdb watertank_dispatch_test
+      - name: Run integration and concurrent acceptance tests
+        run: sudo -u postgres env "PATH=$PATH" node tests/dispatch/integration.mjs --postgres
+      - name: Run matching and timeout tests
+        run: node scripts/test-dispatch-candidate.mjs ../tests/dispatch/node_modules/@electric-sql/pglite/dist/index.js

@@ -110,11 +110,13 @@ BEGIN
  IF auth.uid() IS NULL OR _accept IS NULL THEN RAISE EXCEPTION 'unauthorized'; END IF;
  IF NOT (SELECT enabled FROM dispatch_private.config WHERE singleton) THEN RAISE EXCEPTION 'dispatch disabled'; END IF;
  PERFORM pg_advisory_xact_lock(764521);
- SELECT * INTO f FROM dispatch_private.offers WHERE id=_offer_id FOR UPDATE;
+ SELECT * INTO f FROM dispatch_private.offers WHERE id=_offer_id;
  IF NOT FOUND THEN RAISE EXCEPTION 'offer unavailable'; END IF;
+ -- Match manual updates/cancellation: lock order before offer to avoid a cycle.
+ SELECT * INTO o FROM public.orders WHERE id=f.order_id FOR UPDATE;
+ SELECT * INTO f FROM dispatch_private.offers WHERE id=_offer_id FOR UPDATE;
  SELECT * INTO d FROM public.drivers WHERE id=f.driver_id FOR UPDATE;
  IF d.user_id IS DISTINCT FROM auth.uid() OR d.license_status<>'approved' OR d.status<>'active' THEN RAISE EXCEPTION 'forbidden'; END IF;
- SELECT * INTO o FROM public.orders WHERE id=f.order_id FOR UPDATE;
  IF f.state<>'offered' OR f.expires_at<=clock_timestamp() OR o.status<>'pending' OR o.driver_id IS NOT NULL
    OR o.payment_method<>'cash' OR o.quantity<>1 OR o.scheduled_at IS NOT NULL THEN RAISE EXCEPTION 'offer expired or order changed'; END IF;
  IF NOT _accept THEN UPDATE dispatch_private.offers SET state='rejected' WHERE id=f.id; RETURN NULL; END IF;
