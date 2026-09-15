@@ -6,7 +6,7 @@ import { PGlite } from '@electric-sql/pglite';
 // No arbitrary connection URL: only an isolated local test database is supported.
 const real = process.argv.includes('--postgres');
 const connect = async () => {
-  const client = new pg.Client({host:'/var/run/postgresql', database:'watertank_dispatch_test', user:'postgres', statement_timeout:10000});
+  const client = new pg.Client({host:'/var/run/postgresql', database:'watertank_dispatch_test', user:process.env.USER, statement_timeout:10000});
   await client.connect(); return client;
 };
 const db = real ? await connect() : new PGlite();
