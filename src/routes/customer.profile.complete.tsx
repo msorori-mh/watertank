@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Loader2, User, MapPin, Crosshair } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { customerRouteGuard } from "@/lib/route-guards";
+import { currentLocation } from "@/lib/current-location";
+import { LocationPicker } from "@/components/LocationPicker";
 import { isValidYemeniLocalPhone, normalizeYemeniLocalPhone, toYemeniInternationalPhone } from "@/lib/yemeni-phone";
 
 export const Route = createFileRoute("/customer/profile/complete")({
@@ -25,6 +27,8 @@ function CompleteProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [locating, setLocating] = useState(false);
+  const [manualMap, setManualMap] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -52,12 +56,12 @@ function CompleteProfile() {
     })();
   }, [nav]);
 
-  const useGeo = () => {
-    if (!navigator.geolocation) return setError("المتصفح لا يدعم تحديد الموقع");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => setError("تعذّر تحديد الموقع. تأكد من السماح بالوصول."),
-    );
+  const useGeo = async () => {
+    if (locating) return;
+    setError(""); setLocating(true);
+    try { setCoords(await currentLocation()); setManualMap(false); }
+    catch { setError("تعذّر تحديد الموقع. فعّل الموقع واسمح للتطبيق بالوصول، أو اختره يدويًا من الخريطة."); setManualMap(true); }
+    finally { setLocating(false); }
   };
 
   const save = async () => {
@@ -156,11 +160,13 @@ function CompleteProfile() {
             placeholder="الحي، الشارع، وأقرب علامة مميزة"
             rows={3}
             className="w-full rounded-xl border-2 border-input bg-card px-4 py-3 focus:border-primary focus:outline-none resize-none" />
-          <button type="button" onClick={useGeo}
+          <button type="button" onClick={useGeo} disabled={locating}
             className="w-full rounded-xl bg-muted px-4 py-3 text-sm font-semibold flex items-center justify-center gap-2">
             <Crosshair className="h-4 w-4" />
-            {coords ? `تم التحديد (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})` : "حدد موقعي الحالي على الخريطة"}
+            {locating ? "جارٍ تحديد الموقع…" : coords ? `تم التحديد (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})` : "حدد موقعي الحالي على الخريطة"}
           </button>
+          <button type="button" onClick={() => setManualMap(v => !v)} className="w-full rounded-xl border border-primary px-4 py-3 text-sm text-primary">اختيار الموقع يدويًا من الخريطة</button>
+          {manualMap && <LocationPicker value={coords} onChange={point => { setCoords(point); setError(""); }} />}
         </div>
 
         {error && <p className="text-sm text-destructive">{error}</p>}

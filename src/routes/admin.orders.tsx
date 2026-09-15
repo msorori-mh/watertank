@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { adminRouteGuard } from "@/lib/route-guards";
+import { DispatchManualQueue } from "@/components/DispatchStatus";
 
 export const Route = createFileRoute("/admin/orders")({
   ...adminRouteGuard,
@@ -61,6 +62,7 @@ function AdminOrders() {
 
   return (
     <AdminShell title="إدارة الطلبات">
+      <DispatchManualQueue />
       <div className="flex flex-wrap gap-2 mb-4">
         <button onClick={() => setFilter("all")} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${filter === "all" ? "bg-primary text-primary-foreground" : "bg-white border border-border"}`}>
           الكل ({orders.length})

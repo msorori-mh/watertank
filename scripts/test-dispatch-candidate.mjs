@@ -1,0 +1,76 @@
+import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+// Install @electric-sql/pglite separately; pass its module path as argv[2].
+const { PGlite } = await import(process.argv[2] || '@electric-sql/pglite');
+const db = new PGlite();
+await db.exec(`CREATE ROLE authenticated; CREATE SCHEMA auth;
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT nullif(current_setting('test.uid',true),'')::uuid $$;
+CREATE FUNCTION public.has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$ SELECT false $$;
+CREATE TABLE drivers(id uuid PRIMARY KEY,user_id uuid,license_status text,status text,availability text,city text,vehicle_capacity int);
+CREATE TABLE addresses(id uuid PRIMARY KEY,user_id uuid,lat double precision,lng double precision);
+CREATE TABLE orders(id uuid PRIMARY KEY,customer_id uuid,address_id uuid,driver_id uuid,status text,payment_method text,city text,capacity int,water_type text,price numeric,updated_at timestamptz);
+ALTER TABLE orders ADD quantity int DEFAULT 1, ADD scheduled_at timestamptz,
+ ADD app_commission numeric, ADD commission_rule_snapshot jsonb, ADD commission_status text,
+ ADD driver_payout_amount numeric, ADD driver_payout_status text;
+CREATE FUNCTION public.calculate_app_commission(text,int,numeric,OUT amount numeric,OUT snapshot jsonb,OUT is_free boolean)
+ LANGUAGE sql AS $$ SELECT 500::numeric,'{"fixture":true}'::jsonb,false $$;
+`);
+await db.exec(readFileSync(new URL('../db/auto_dispatch_candidate.sql', import.meta.url),'utf8'));
+const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
+const scalar = async sql => Object.values((await db.query(sql)).rows[0])[0];
+let checks = 0;
+const equal = (a,b) => { assert.equal(a,b); checks++; };
+const fail = async sql => { await assert.rejects(db.exec(sql)); checks++; };
+await db.exec(`INSERT INTO addresses VALUES('${id(50)}','${id(60)}',15,45);`);
+for(let n=1;n<=4;n++) {
+ await db.exec(`INSERT INTO drivers VALUES('${id(n)}','${id(n+10)}','approved','active','available','Marib',5000);
+ SELECT set_config('test.uid','${id(n+10)}',false);
+ SELECT dispatch_heartbeat(${15+n/100},45,'normal');`);
+}
+const order = async n => db.exec(`INSERT INTO orders(id,customer_id,address_id,driver_id,status,payment_method,city,capacity,water_type,price,updated_at) VALUES('${id(n)}','${id(60)}','${id(50)}',null,'pending','cash','Marib',5000,'normal',14000,now());`);
+await order(100);
+equal(await scalar('SELECT count(*) FROM dispatch_private.jobs'),0);
+await db.exec('UPDATE dispatch_private.config SET enabled=true');
+await order(101);
+await db.exec('SELECT dispatch_private.tick()');
+equal(await scalar(`SELECT driver_id FROM dispatch_private.offers WHERE order_id='${id(101)}'`),id(1));
+await db.exec(`SELECT set_config('test.uid','${id(12)}',false)`);
+const offer1 = await scalar(`SELECT id FROM dispatch_private.offers WHERE order_id='${id(101)}'`);
+await fail(`SELECT dispatch_respond('${offer1}',true)`);
+await db.exec(`SELECT set_config('test.uid','${id(11)}',false); SELECT dispatch_respond('${offer1}',false); SELECT dispatch_private.tick()`);
+equal(await scalar(`SELECT driver_id FROM dispatch_private.offers WHERE order_id='${id(101)}' AND state='offered'`),id(2));
+await db.exec(`UPDATE dispatch_private.offers SET expires_at=now()-interval '1 second' WHERE state='offered'; SELECT dispatch_private.tick()`);
+equal(await scalar(`SELECT driver_id FROM dispatch_private.offers WHERE order_id='${id(101)}' AND state='offered'`),id(3));
+await db.exec(`UPDATE dispatch_private.offers SET expires_at=now()-interval '1 second' WHERE state='offered'; SELECT dispatch_private.tick()`);
+equal(await scalar(`SELECT state FROM dispatch_private.jobs WHERE order_id='${id(101)}'`),'manual');
+await order(102);
+await db.exec(`UPDATE dispatch_private.positions SET seen_at=now()-interval '2 minutes' WHERE driver_id='${id(1)}';
+UPDATE dispatch_private.positions SET water_type='kawthar' WHERE driver_id='${id(2)}';
+UPDATE drivers SET availability='busy' WHERE id='${id(3)}'; SELECT dispatch_private.tick()`);
+equal(await scalar(`SELECT driver_id FROM dispatch_private.offers WHERE order_id='${id(102)}'`),id(4));
+const offer2 = await scalar(`SELECT id FROM dispatch_private.offers WHERE order_id='${id(102)}'`);
+await db.exec(`SELECT set_config('test.uid','${id(14)}',false); SELECT dispatch_respond('${offer2}',true)`);
+equal(await scalar(`SELECT status FROM orders WHERE id='${id(102)}'`),'accepted');
+equal(Number(await scalar(`SELECT app_commission FROM orders WHERE id='${id(102)}'`)),500);
+equal(await scalar(`SELECT commission_status FROM orders WHERE id='${id(102)}'`),'unpaid');
+equal(await scalar(`SELECT driver_payout_status FROM orders WHERE id='${id(102)}'`),'none');
+await fail(`UPDATE orders SET driver_id='${id(4)}',status='assigned' WHERE id='${id(100)}'`);
+await fail(`SELECT dispatch_respond('${offer2}',true)`);
+await db.exec(`SELECT set_config('test.uid','${id(11)}',false); SELECT dispatch_heartbeat(15.01,45,'normal')`);
+await order(103); await order(104);
+await db.exec('SELECT dispatch_private.tick()');
+equal(await scalar(`SELECT count(*) FROM dispatch_private.offers WHERE driver_id='${id(1)}' AND state='offered'`),1);
+await db.exec(`UPDATE orders SET status='cancelled' WHERE id='${id(103)}'; SELECT dispatch_private.tick()`);
+equal(await scalar(`SELECT state FROM dispatch_private.jobs WHERE order_id='${id(103)}'`),'closed');
+await db.exec(`UPDATE dispatch_private.config SET enabled=false; SELECT dispatch_private.tick()`);
+equal(await scalar(`SELECT count(*) FROM dispatch_private.offers WHERE state='offered'`),0);
+await fail(`SELECT dispatch_respond('${offer2}',true)`);
+await db.exec(`SELECT set_config('test.uid','',false)`);
+await fail(`SELECT dispatch_heartbeat(15,45,'normal')`);
+equal(await scalar(`SELECT dispatch_status('${id(102)}')`),null);
+equal(await scalar(`SELECT has_function_privilege('authenticated','dispatch_private.tick()','EXECUTE')`),false);
+await db.exec(`UPDATE dispatch_private.config SET enabled=true;
+ INSERT INTO orders(id,status,payment_method,quantity,scheduled_at) VALUES('${id(200)}','pending','cash',1,now()+interval '1 day'),('${id(201)}','pending','cash',2,null);`);
+equal(await scalar(`SELECT count(*) FROM dispatch_private.jobs WHERE order_id IN ('${id(200)}','${id(201)}')`),0);
+console.log(`PASS: ${checks} candidate SQL assertions. Isolated fixtures only; not production/concurrency validation.`);
+await db.close();

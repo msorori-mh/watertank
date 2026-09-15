@@ -5,6 +5,7 @@ import { customerRouteGuard } from "@/lib/route-guards";
 import { ChevronRight, MapPin, Truck, CheckCircle2, Clock, X, Loader2, Phone } from "lucide-react";
 import { notifyUser, ORDER_EVENT_MESSAGES, shortId } from "@/lib/notifications";
 import { CustomerBottomNav } from "@/components/CustomerBottomNav";
+import { DispatchStatus } from "@/components/DispatchStatus";
 import { ORDER_TIMELINE, orderStatusLabel, orderTimelineIndex } from "@/lib/order-status";
 
 export const Route = createFileRoute("/customer/orders/$id")({
@@ -82,6 +83,7 @@ function OrderDetail() {
       </header>
 
       <main className="px-5 py-6 space-y-5 max-w-md mx-auto">
+        <DispatchStatus orderId={id} />
         <div className="rounded-2xl bg-card shadow-[var(--shadow-soft)] p-5">
           <p className="text-xs text-muted-foreground">رقم الطلب</p>
           <p className="font-mono text-sm font-bold">#{order.id.slice(0, 8).toUpperCase()}</p>
