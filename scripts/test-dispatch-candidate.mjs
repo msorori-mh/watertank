@@ -9,6 +9,11 @@ CREATE FUNCTION public.has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$ SE
 CREATE TABLE drivers(id uuid PRIMARY KEY,user_id uuid,license_status text,status text,availability text,city text,vehicle_capacity int);
 CREATE TABLE addresses(id uuid PRIMARY KEY,user_id uuid,lat double precision,lng double precision);
 CREATE TABLE orders(id uuid PRIMARY KEY,customer_id uuid,address_id uuid,driver_id uuid,status text,payment_method text,city text,capacity int,water_type text,price numeric,updated_at timestamptz);
+ALTER TABLE orders ADD quantity int DEFAULT 1, ADD scheduled_at timestamptz,
+ ADD app_commission numeric, ADD commission_rule_snapshot jsonb, ADD commission_status text,
+ ADD driver_payout_amount numeric, ADD driver_payout_status text;
+CREATE FUNCTION public.calculate_app_commission(text,int,numeric,OUT amount numeric,OUT snapshot jsonb,OUT is_free boolean)
+ LANGUAGE sql AS $$ SELECT 500::numeric,'{"fixture":true}'::jsonb,false $$;
 `);
 await db.exec(readFileSync(new URL('../db/auto_dispatch_candidate.sql', import.meta.url),'utf8'));
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
@@ -22,7 +27,7 @@ for(let n=1;n<=4;n++) {
  SELECT set_config('test.uid','${id(n+10)}',false);
  SELECT dispatch_heartbeat(${15+n/100},45,'normal');`);
 }
-const order = async n => db.exec(`INSERT INTO orders VALUES('${id(n)}','${id(60)}','${id(50)}',null,'pending','cash','Marib',5000,'normal',14000,now());`);
+const order = async n => db.exec(`INSERT INTO orders(id,customer_id,address_id,driver_id,status,payment_method,city,capacity,water_type,price,updated_at) VALUES('${id(n)}','${id(60)}','${id(50)}',null,'pending','cash','Marib',5000,'normal',14000,now());`);
 await order(100);
 equal(await scalar('SELECT count(*) FROM dispatch_private.jobs'),0);
 await db.exec('UPDATE dispatch_private.config SET enabled=true');
@@ -46,6 +51,9 @@ equal(await scalar(`SELECT driver_id FROM dispatch_private.offers WHERE order_id
 const offer2 = await scalar(`SELECT id FROM dispatch_private.offers WHERE order_id='${id(102)}'`);
 await db.exec(`SELECT set_config('test.uid','${id(14)}',false); SELECT dispatch_respond('${offer2}',true)`);
 equal(await scalar(`SELECT status FROM orders WHERE id='${id(102)}'`),'accepted');
+equal(Number(await scalar(`SELECT app_commission FROM orders WHERE id='${id(102)}'`)),500);
+equal(await scalar(`SELECT commission_status FROM orders WHERE id='${id(102)}'`),'unpaid');
+equal(await scalar(`SELECT driver_payout_status FROM orders WHERE id='${id(102)}'`),'none');
 await fail(`UPDATE orders SET driver_id='${id(4)}',status='assigned' WHERE id='${id(100)}'`);
 await fail(`SELECT dispatch_respond('${offer2}',true)`);
 await db.exec(`SELECT set_config('test.uid','${id(11)}',false); SELECT dispatch_heartbeat(15.01,45,'normal')`);
@@ -61,5 +69,8 @@ await db.exec(`SELECT set_config('test.uid','',false)`);
 await fail(`SELECT dispatch_heartbeat(15,45,'normal')`);
 equal(await scalar(`SELECT dispatch_status('${id(102)}')`),null);
 equal(await scalar(`SELECT has_function_privilege('authenticated','dispatch_private.tick()','EXECUTE')`),false);
+await db.exec(`UPDATE dispatch_private.config SET enabled=true;
+ INSERT INTO orders(id,status,payment_method,quantity,scheduled_at) VALUES('${id(200)}','pending','cash',1,now()+interval '1 day'),('${id(201)}','pending','cash',2,null);`);
+equal(await scalar(`SELECT count(*) FROM dispatch_private.jobs WHERE order_id IN ('${id(200)}','${id(201)}')`),0);
 console.log(`PASS: ${checks} candidate SQL assertions. Isolated fixtures only; not production/concurrency validation.`);
 await db.close();

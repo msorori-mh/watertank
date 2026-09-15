@@ -48,7 +48,8 @@ END $$;
 
 CREATE FUNCTION dispatch_private.enqueue() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 BEGIN
- IF (SELECT enabled FROM dispatch_private.config WHERE singleton) AND NEW.status='pending' AND NEW.payment_method='cash' THEN
+ IF (SELECT enabled FROM dispatch_private.config WHERE singleton) AND NEW.status='pending' AND NEW.payment_method='cash'
+    AND NEW.quantity=1 AND NEW.scheduled_at IS NULL THEN
   INSERT INTO dispatch_private.jobs(order_id) VALUES(NEW.id);
  END IF;
  RETURN NEW;
@@ -62,7 +63,7 @@ BEGIN
  PERFORM pg_advisory_xact_lock(764521);
  FOR j IN SELECT * FROM dispatch_private.jobs WHERE state='searching' ORDER BY started_at LIMIT 100 LOOP
   SELECT * INTO o FROM public.orders WHERE id=j.order_id FOR UPDATE;
-  IF o.status <> 'pending' OR o.driver_id IS NOT NULL THEN
+  IF o.status <> 'pending' OR o.driver_id IS NOT NULL OR o.payment_method<>'cash' OR o.quantity<>1 OR o.scheduled_at IS NOT NULL THEN
    UPDATE dispatch_private.jobs SET state='closed' WHERE order_id=j.order_id;
    UPDATE dispatch_private.offers SET state='closed' WHERE order_id=j.order_id AND state='offered';
    CONTINUE;
@@ -104,7 +105,7 @@ CREATE FUNCTION public.dispatch_offer() RETURNS jsonb LANGUAGE sql SECURITY DEFI
 $$;
 
 CREATE FUNCTION public.dispatch_respond(_offer_id uuid,_accept boolean) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE f dispatch_private.offers; o public.orders; d public.drivers;
+DECLARE f dispatch_private.offers; o public.orders; d public.drivers; commission record;
 BEGIN
  IF auth.uid() IS NULL OR _accept IS NULL THEN RAISE EXCEPTION 'unauthorized'; END IF;
  IF NOT (SELECT enabled FROM dispatch_private.config WHERE singleton) THEN RAISE EXCEPTION 'dispatch disabled'; END IF;
@@ -114,14 +115,21 @@ BEGIN
  SELECT * INTO d FROM public.drivers WHERE id=f.driver_id FOR UPDATE;
  IF d.user_id IS DISTINCT FROM auth.uid() OR d.license_status<>'approved' OR d.status<>'active' THEN RAISE EXCEPTION 'forbidden'; END IF;
  SELECT * INTO o FROM public.orders WHERE id=f.order_id FOR UPDATE;
- IF f.state<>'offered' OR f.expires_at<=clock_timestamp() OR o.status<>'pending' OR o.driver_id IS NOT NULL THEN RAISE EXCEPTION 'offer expired or order changed'; END IF;
+ IF f.state<>'offered' OR f.expires_at<=clock_timestamp() OR o.status<>'pending' OR o.driver_id IS NOT NULL
+   OR o.payment_method<>'cash' OR o.quantity<>1 OR o.scheduled_at IS NOT NULL THEN RAISE EXCEPTION 'offer expired or order changed'; END IF;
  IF NOT _accept THEN UPDATE dispatch_private.offers SET state='rejected' WHERE id=f.id; RETURN NULL; END IF;
  IF d.availability<>'available' OR d.city IS DISTINCT FROM o.city OR d.vehicle_capacity<>o.capacity
   OR NOT EXISTS(SELECT 1 FROM dispatch_private.positions WHERE driver_id=d.id AND water_type=o.water_type::text AND seen_at>clock_timestamp()-interval '90 seconds')
   OR EXISTS(SELECT 1 FROM public.orders WHERE driver_id=d.id AND status IN ('assigned','accepted','on_the_way','arrived','delivering','payment_collected')) THEN RAISE EXCEPTION 'driver unavailable'; END IF;
  UPDATE dispatch_private.offers SET state='accepted' WHERE id=f.id;
  UPDATE dispatch_private.jobs SET state='accepted' WHERE order_id=o.id;
- UPDATE public.orders SET driver_id=d.id,status='accepted',updated_at=clock_timestamp() WHERE id=o.id;
+ -- Production computes commission only on 'approved'. Automatic acceptance must
+ -- use the same calculator without publishing an intermediate approved order.
+ SELECT * INTO commission FROM public.calculate_app_commission(o.city,o.capacity,o.price);
+ UPDATE public.orders SET driver_id=d.id,status='accepted',updated_at=clock_timestamp(),
+   app_commission=coalesce(commission.amount,0),commission_rule_snapshot=commission.snapshot,
+   commission_status=CASE WHEN coalesce(commission.amount,0)=0 THEN 'free' ELSE 'unpaid' END,
+   driver_payout_amount=0,driver_payout_status='none' WHERE id=o.id;
  RETURN o.id;
 END $$;
 
