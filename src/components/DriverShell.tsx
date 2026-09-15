@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/auth";
 import { LayoutDashboard, ListOrdered, LogOut, Loader2, Truck, BarChart3, Settings } from "lucide-react";
 import { NotificationsCenter } from "@/components/NotificationsCenter";
+import { DispatchPanel } from "@/components/DispatchPanel";
 
 export type DriverInfo = {
   id: string;
@@ -63,6 +64,7 @@ export function DriverShell({
       </header>
 
       <main className="px-5 -mt-4 max-w-md mx-auto">
+        <DispatchPanel available={driver.availability === "available" && driver.license_status === "approved"} />
         {children}
       </main>
 
