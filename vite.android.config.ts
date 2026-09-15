@@ -11,6 +11,8 @@ import tsConfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [
     tanstackStart({
+      // Restricted build hosts may report zero CPUs; always render the SPA shell.
+      prerender: { concurrency: 1 },
       spa: {
         enabled: true,
       },
